@@ -3,6 +3,8 @@
     "name":       "CodeMirror",
     "mime":       ["^text", "inode\\/x\\-empty", "application\\/x\\-python", "application\\/javascript"],
     "icon":       "./icon.png",
+    "enabled":    true,
+    "splash":     true,
     "preload":    [
       {"src": "vendor/CodeMirror/lib/codemirror.js", "type": "javascript"},
       {"src": "vendor/CodeMirror/lib/codemirror.css", "type": "stylesheet"},
