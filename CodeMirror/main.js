@@ -339,20 +339,6 @@
         w.setCode(null, null, null);
       };
       var _open = function() {
-        if ( arg2.mime ) {
-          var t = self.acceptMime;
-          var f = false;
-          for ( var i = 0; i < t.length; i++ ) {
-            if ( (new RegExp(t[i])).test(arg2.mime) ) {
-              f = true;
-              break;
-            }
-          }
-
-          if ( !f ) {
-            throw "Invalid file type: " + arg2.mime;
-          }
-        }
         w.setCode(arg2.path, arg2.mime, arg1);
       };
 
