@@ -33,11 +33,13 @@
   // WINDOWS
   /////////////////////////////////////////////////////////////////////////////
 
+  var DefaultApplicationWindow = OSjs.Helpers.DefaultApplicationWindow;
+
   /**
    * Main Window Constructor
    */
   var ApplicationCodeMirrorWindow = function(app, metadata) {
-    Window.apply(this, ['ApplicationCodeMirrorWindow', {width: 800, height: 400}, app]);
+    DefaultApplicationWindow.apply(this, ['ApplicationCodeMirrorWindow', {width: 800, height: 400}, app]);
 
     this.textarea     = null;
     this.container    = null;
@@ -53,14 +55,14 @@
     this._properties.allow_drop = true;
   };
 
-  ApplicationCodeMirrorWindow.prototype = Object.create(Window.prototype);
+  ApplicationCodeMirrorWindow.prototype = Object.create(DefaultApplicationWindow.prototype);
 
   //
   // Window methods
   //
 
   ApplicationCodeMirrorWindow.prototype.init = function(wmRef, app) {
-    var root = Window.prototype.init.apply(this, arguments);
+    var root = DefaultApplicationWindow.prototype.init.apply(this, arguments);
     var self = this;
 
     // Create window contents (GUI) here
@@ -109,7 +111,7 @@
   };
 
   ApplicationCodeMirrorWindow.prototype._inited = function() {
-    Window.prototype._inited.apply(this, arguments);
+    DefaultApplicationWindow.prototype._inited.apply(this, arguments);
 
     var self = this;
     if ( this.textarea ) {
@@ -140,19 +142,8 @@
     this.setCode(null, null, null);
   };
 
-  ApplicationCodeMirrorWindow.prototype._onDndEvent = function(ev, type, item, args) {
-    if ( !Window.prototype._onDndEvent.apply(this, arguments) ) return;
-
-    if ( type === 'itemDrop' && item ) {
-      var data = item.data;
-      if ( data && data.type === 'file' && data.mime ) {
-        this._appRef.defaultAction('open', data.path, data.mime);
-      }
-    }
-  };
-
   ApplicationCodeMirrorWindow.prototype._focus = function () {
-    if (!Window.prototype._focus.apply(this, arguments)) { return false; }
+    if (!DefaultApplicationWindow.prototype._focus.apply(this, arguments)) { return false; }
 
     if ( this.editor ) {
       this.editor.getInputField().focus();
@@ -162,25 +153,13 @@
   };
 
   ApplicationCodeMirrorWindow.prototype._blur = function () {
-    if (!Window.prototype._blur.apply(this, arguments)) { return false; }
+    if (!DefaultApplicationWindow.prototype._blur.apply(this, arguments)) { return false; }
 
     if ( this.editor ) {
       this.editor.getInputField().blur();
     }
 
     return true;
-  };
-
-  ApplicationCodeMirrorWindow.prototype._close = function() {
-    var self = this;
-    var callback = function() {
-      self._close();
-    };
-
-    if ( this.checkChanged(callback) !== false ) {
-      return false;
-    }
-    return Window.prototype._close.apply(this, arguments);
   };
 
   ApplicationCodeMirrorWindow.prototype.destroy = function() {
@@ -201,7 +180,7 @@
       this.editor = null;
     }
 
-    Window.prototype.destroy.apply(this, arguments);
+    DefaultApplicationWindow.prototype.destroy.apply(this, arguments);
   };
 
   //
@@ -317,7 +296,7 @@
     this.defaultActionWindow  = 'ApplicationCodeMirrorWindow';
     this.defaultFilename      = "New code.txt";
     this.defaultMime          = 'text/plain';
-    this.acceptMime           = ['text\\/plain', 'text\\/html', 'text\\/xml', 'application\\/javascript', 'application\\/x\-python'];
+    this.acceptMime           = metadata.mime || null;
     this.getSaveData          = function() {
       var w = self._getWindow('ApplicationCodeMirrorWindow');
       return w ? w.getCode() : null;
