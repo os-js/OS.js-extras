@@ -1,0 +1,16 @@
+{
+  "ApplicationCodeMirror":  {
+    "name":       "CodeMirror",
+    "mime":       ["^text", "inode\\/x\\-empty", "application\\/x\\-python", "application\\/javascript"],
+    "icon":       "./icon.png",
+    "preload":    [
+      {"src": "vendor/CodeMirror/lib/codemirror.js", "type": "javascript"},
+      {"src": "vendor/CodeMirror/lib/codemirror.css", "type": "stylesheet"},
+      {"src": "vendor/CodeMirror/mode/javascript/javascript.js", "type": "javascript"},
+      {"src": "vendor/CodeMirror/mode/xml/xml.js", "type": "javascript"},
+      {"src": "vendor/CodeMirror/mode/python/python.js", "type": "javascript"},
+      {"src": "main.js", "type": "javascript"},
+      {"src": "main.css", "type": "stylesheet"}
+    ]
+  }
+}
