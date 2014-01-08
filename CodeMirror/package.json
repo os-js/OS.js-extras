@@ -3,6 +3,7 @@
     "name":       "CodeMirror",
     "mime":       ["^text", "inode\\/x\\-empty", "application\\/x\\-python", "application\\/javascript"],
     "icon":       "./icon.png",
+    "category":   "development",
     "enabled":    true,
     "splash":     true,
     "preload":    [
