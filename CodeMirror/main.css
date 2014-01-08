@@ -31,6 +31,14 @@
 .Window_ApplicationCodeMirrorWindow .WindowWrapper {
 }
 
+.Window_ApplicationCodeMirrorWindow .WindowWrapper .GUITabs {
+  position : absolute;
+  top : 26px;
+  bottom : 0px;
+  right : 0px;
+  left : 0px;
+}
+
 .Window_ApplicationCodeMirrorWindow .WindowWrapper textarea {
   width : 1px;
   height : 1px;
@@ -42,7 +50,7 @@
 }
 .Window_ApplicationCodeMirrorWindow .WindowWrapper .CodeContainer {
   position : absolute;
-  top : 26px;
+  top : 0px;
   bottom : 0px;
   right : 0px;
   left : 0px;
