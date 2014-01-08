@@ -35,11 +35,12 @@
     this.editor       = null;
     this.currentFile  = null;
     this.currentType  = null;
+    this.currentMime  = null;
     this.hasChanged   = false;
     this.tab          = null;
   };
 
-  EditorTab.prototype.init = function(root, tab) {
+  EditorTab.prototype.init = function(tab) {
     this.tab = tab;
 
     this.container = document.createElement('div');
@@ -48,7 +49,8 @@
     this.textarea = document.createElement('textarea');
     this.textarea.innerHTML = '';
     this.container.appendChild(this.textarea);
-    root.appendChild(this.container);
+
+    tab.appendChild(this.container);
 
     this.editor = CodeMirror.fromTextArea(this.textarea, {
       lineNumbers:      true,
@@ -64,6 +66,10 @@
     this.editor.on('change', function() {
       self.setChanged(true);
     });
+
+    setTimeout(function() {
+      self.refresh();
+    }, 100);
   };
 
   EditorTab.prototype.refresh = function() {
@@ -89,11 +95,9 @@
       this.editor = null;
     }
     if ( this.tab && guiTab ) {
-      var idx = OSjs.Utils.$index(this.tab, this.tab.parentNode);
-      if ( idx >= 0 ) {
-        guiTab.removeTab(idx);
-      }
+      guiTab.removeTab(this.tab);
     }
+    this.tab = null;
   };
 
   EditorTab.prototype.update = function(path, mime, save) {
@@ -139,8 +143,9 @@
       break;
     }
 
-    this.currentType = type;
-    this.currentFile = path || null;
+    if ( type ) { this.currentType = type; }
+    if ( path ) { this.currentFile = path; }
+    if ( mime ) { this.currentMime = mime; }
     this.hasChanged  = false;
 
     if ( this.editor ) {
@@ -156,7 +161,7 @@
     }
 
     if ( this.tab ) {
-      this.tab.firstChild.innerHTML = this.getTitle(true) || 'New File';
+      this.tab.setTitle(this.getTitle(true) || 'New File');
     }
   };
 
@@ -186,13 +191,14 @@
   EditorTab.prototype.setChanged = function(c) {
     if ( this.tab ) {
       if ( c != this.hasChanged ) {
+        var t = this.tab.getTitle();
         if ( c ) {
-          if ( !this.tab.firstChild.innerHTML.match(/ \*$/) ) {
-            this.tab.firstChild.innerHTML += ' *';
+          if ( !t.match(/ \*$/) ) {
+            this.tab.setTitle(t + ' *');
           }
         } else {
-          if ( this.tab.firstChild.innerHTML.match(/ \*$/) ) {
-            this.tab.firstChild.innerHTML = this.tab.firstChild.innerHTML.replace(/ \*$/, '');
+          if ( t.match(/ \*$/) ) {
+            this.tab.setTitle(t.replace(/ \*$/, ''));
           }
         }
       }
@@ -213,8 +219,7 @@
     DefaultApplicationWindow.apply(this, ['ApplicationCodeMirrorWindow', {width: 800, height: 400}, app]);
 
     this.title        = metadata.name;
-    this.tabs         = [/*
-                        */];
+    this.tabs         = [];
     this.currentTab   = null;
 
     // Set window properties and other stuff here
@@ -328,44 +333,50 @@
     }
   };
 
-  ApplicationCodeMirrorWindow.prototype.createTab = function(filename, mime, content) {
-    var t = new EditorTab();
-    var g = this._getGUIElement('ApplicationCodeMirrorTabs');
+  ApplicationCodeMirrorWindow.prototype.createTab = (function() {
+    var _id = 0;
 
-    var self = this;
-    if ( g ) {
-      var _onClose = function(ev, $t, $c, $close, idx) {
-        if ( t.hasChanged ) {
-          var msg = 'Close tab without saving changes?';
+    return function(filename, mime, content) {
+      var t = new EditorTab();
+      var g = this._getGUIElement('ApplicationCodeMirrorTabs');
 
-          self._toggleDisabled(true);
-          self._appRef._createDialog('Confirm', [msg, function(btn) {
-            self._toggleDisabled(false);
-            if ( btn == "ok" ) {
-              self.removeTab(t);
-            }
-          }]);
-        } else {
-          self.removeTab(t);
-        }
-      };
+      var self = this;
+      if ( g ) {
+        var _onClose = function(ev, tab) {
+          if ( t.hasChanged ) {
+            var msg = 'Close tab without saving changes?';
 
-      var tab = g.addTab('New tab', {closeable: true, onClose: _onClose}, function() {
-        self.currentTab = t;
-        self.updateTab();
-      });
+            self._toggleDisabled(true);
+            self._appRef._createDialog('Confirm', [msg, function(btn) {
+              self._toggleDisabled(false);
+              if ( btn == "ok" ) {
+                self.removeTab(t);
+              }
+            }]);
+          } else {
+            self.removeTab(t);
+          }
 
-      t.init(tab.content, tab.tab);
-      t.setCode((filename || null), (mime || null), (content || null));
+          return false;
+        };
 
-      var idx = OSjs.Utils.$index(tab.tab);
-      if ( idx > 0 ) {
-        g.setTab(idx);
+        var tab = g.addTab('tab' + _id, {title: 'New tab', closeable: true, onClose: _onClose, onSelect: function() {
+          self._appRef.currentFile = {'path': t.currentFile, 'mime': t.currentMime};
+          self.currentTab = t;
+
+          setTimeout(function() {
+            self.updateTab();
+          }, 0); // Or else title does not update for some reason
+        }});
+
+        t.init(tab);
+        t.setCode((filename || null), (mime || null), (content || null));
       }
-    }
 
-    this.tabs.push(t);
-  };
+      this.tabs.push(t);
+      _id++;
+    };
+  })();
 
   ApplicationCodeMirrorWindow.prototype.removeTab = function(i) {
     var g = this._getGUIElement('ApplicationCodeMirrorTabs');
@@ -394,7 +405,6 @@
   };
 
   ApplicationCodeMirrorWindow.prototype.updateTab = function(path, mime, save) {
-    console.warn(this.currentTab, path, mime, save);
     if ( this.currentTab ) {
       if ( path && mime ) {
         this.currentTab.update(path, mime, save);
@@ -458,6 +468,14 @@
     Application.apply(this, ['ApplicationCodeMirror', args, metadata]);
     var self = this;
 
+    var _updateSessionData = function() {
+      /* TODO
+      var files = [];
+      var w = this._getWindow('ApplicationCodeMirrorWindow');
+      this._setArgument('files', files);
+      */
+    };
+
     this.defaultActionWindow  = 'ApplicationCodeMirrorWindow';
     this.defaultFilename      = "New code.txt";
     this.defaultMime          = 'text/plain';
@@ -488,6 +506,8 @@
           w.updateTab(arg1.path, arg1.mime, true);
         }
         w._focus();
+
+        _updateSessionData.call(self);
       }
     };
   };
@@ -497,6 +517,19 @@
   ApplicationCodeMirror.prototype.init = function(core, session, metadata) {
     this._addWindow(new ApplicationCodeMirrorWindow(this, metadata));
     Application.prototype.init.apply(this, arguments);
+
+    /* TODO: Load last open files
+    var files = this._getArgument('files');
+    if ( files && files.length ) {
+    }
+    */
+  };
+
+  ApplicationCodeMirror.prototype.setCurrentFile = function(filename, mime) {
+    this._setArgument('file', null);
+    this._setArgument('mime', null);
+    this.currentFile.path = filename || null;
+    this.currentFile.mime = mime     || null;
   };
 
   //
