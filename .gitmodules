@@ -1,3 +1,6 @@
 [submodule "CodeMirror/vendor/CodeMirror"]
 	path = CodeMirror/vendor/CodeMirror
 	url = https://github.com/marijnh/CodeMirror.git
+[submodule "Threejs/vendor/three.js"]
+	path = Threejs/vendor/three.js
+	url = https://github.com/mrdoob/three.js.git

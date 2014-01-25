@@ -1,0 +1,21 @@
+{
+  "ApplicationThreejs":  {
+    "name":       "Threejs",
+    "mime":       null,
+    "icon":       "apps/kscreensaver.png",
+    "category":   "graphics",
+    "enabled":    true,
+    "splash":     true,
+    "preload":    [
+      {"src": "vendor/three.js/build/three.min.js", "type": "javascript"},
+      {"src": "vendor/three.js/examples/js/libs/tween.min.js", "type": "javascript"},
+      {"src": "vendor/three.js/examples/js/libs/stats.min.js", "type": "javascript"},
+
+      {"src": "main.js", "type": "javascript"},
+      {"src": "main.css", "type": "stylesheet"}
+    ]
+  }
+}
+
+
+
