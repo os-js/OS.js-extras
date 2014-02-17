@@ -121,24 +121,33 @@
 
     var type = null;
     switch ( mime ) {
+      case 'text/python' :
       case 'application/x-python' :
         type = 'python';
       break;
+
       case 'text/html' :
+      case 'text/xhtml' :
         type = 'html';
       break;
+
       case 'text/xml' :
         type = 'xml';
       break;
+
+      case 'inode/x-empty' :
       case 'text/plain' :
         type = 'text';
       break;
+
+      case 'text/javascript' :
       case 'application/javascript' :
         type = 'javascript';
       break;
+
       default :
         if ( mime !== null ) {
-          throw "Invalid file type";
+          throw "Invalid file type: " + mime;
         }
       break;
     }
@@ -223,9 +232,8 @@
     this.currentTab   = null;
 
     // Set window properties and other stuff here
-    this._title                 = this.title;
-    this._icon                  = metadata.icon;
-    this._properties.allow_drop = true;
+    this._title       = this.title;
+    this._icon        = metadata.icon;
   };
 
   ApplicationCodeMirrorWindow.prototype = Object.create(DefaultApplicationWindow.prototype);

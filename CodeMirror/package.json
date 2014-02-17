@@ -4,7 +4,7 @@
     "mime":       ["^text", "inode\\/x\\-empty", "application\\/x\\-python", "application\\/javascript"],
     "icon":       "./icon.png",
     "category":   "development",
-    "enabled":    true,
+    "enabled":    false,
     "splash":     true,
     "preload":    [
       {"src": "vendor/CodeMirror/lib/codemirror.js", "type": "javascript"},
