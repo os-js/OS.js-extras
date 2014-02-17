@@ -140,6 +140,10 @@
         type = 'text';
       break;
 
+      case 'text/x-php' :
+        type = 'php';
+      break;
+
       case 'text/javascript' :
       case 'application/javascript' :
         type = 'javascript';
@@ -147,7 +151,9 @@
 
       default :
         if ( mime !== null ) {
-          throw "Invalid file type: " + mime;
+          if ( !mime.match(/^text\//) ) {
+            throw "Invalid file type: " + mime;
+          }
         }
       break;
     }
