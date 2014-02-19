@@ -76,16 +76,18 @@
 .Window_ApplicationTesterWindow .WindowWrapper .GUI .GUICanvas {
   background : #000;
 }
-.Window_ApplicationTesterWindow .WindowWrapper .GUI .GUISelect {
-  width : 100%;
-}
-.Window_ApplicationTesterWindow .WindowWrapper .GUI .GUISelect > select {
-  width : 100%;
-}
 .Window_ApplicationTesterWindow .TesterPanedView {
   position : relative;
   height : 200px;
 }
 .Window_ApplicationTesterWindow .TesterPanedView .View.View1 {
   width : 140px;
+}
+.Window_ApplicationTesterWindow .DnDContainer {
+  padding : 10px;
+  white-space: -moz-pre-wrap;
+  white-space:   -o-pre-wrap;
+  white-space:     -pre-wrap;
+  white-space:      pre-wrap;
+  word-wrap: break-word;
 }

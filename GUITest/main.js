@@ -42,6 +42,10 @@
     // Set window properties here
     this._title = metadata.name;
     this._icon  = metadata.icon;
+
+    this._properties.allow_drop = true;
+    this.$dnd_container = null;
+    this.tabs = null;
   };
 
   ApplicationTesterWindow.prototype = Object.create(Window.prototype);
@@ -50,12 +54,13 @@
     var root = Window.prototype.init.apply(this, arguments);
     var self = this;
     // Create window contents here
-    var tabs = this._addGUIElement(new OSjs.GUI.Tabs('TesterTabs'), root);
+    this.tabs = this._addGUIElement(new OSjs.GUI.Tabs('TesterTabs'), root);
 
-    //this.createApplicationTab(tabs);
-    //this.createCoreTab(tabs);
-    this.createDialogTab(tabs);
-    this.createGUITab(tabs);
+    //this.createApplicationTab(this.tabs);
+    //this.createCoreTab(this.tabs);
+    this.createDialogTab(this.tabs);
+    this.createGUITab(this.tabs);
+    this.createDnDTab(this.tabs);
 
     return root;
   };
@@ -64,6 +69,26 @@
     // Destroy custom objects etc. here
 
     Window.prototype.destroy.apply(this, arguments);
+  };
+
+  ApplicationTesterWindow.prototype._onDndEvent = function(ev, type, item, args) {
+    if ( !Window.prototype._onDndEvent.apply(this, arguments) ) return;
+
+    if ( type === 'itemDrop' && item ) {
+      if ( this.tabs ) {
+        this.tabs.setTab('DnD');
+        this.$dnd_container.appendChild(document.createTextNode(JSON.stringify({type: type, item: item, args: args}) + "\n\n"));
+      }
+    }
+  };
+
+  ApplicationTesterWindow.prototype.createDnDTab = function(tabs) {
+    var self = this;
+    var el = tabs.addTab("DnD", {title: "DnD"});
+    this.$dnd_container = document.createElement('div');
+    this.$dnd_container.className = 'DnDContainer';
+    this.$dnd_container.appendChild(document.createTextNode("Drag and drop and element into this window to view results.\n\n"));
+    el.appendChild(this.$dnd_container);
   };
 
   ApplicationTesterWindow.prototype.createApplicationTab = function(tabs) {
