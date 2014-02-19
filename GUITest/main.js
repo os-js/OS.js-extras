@@ -252,9 +252,15 @@
     var statusBar = _createElement(new OSjs.GUI.StatusBar('TesterStatusBar'));
     statusBar.setText('This is a status bar');
 
-    var sliderHorizontal = _createElement(new OSjs.GUI.Slider('TesterSliderHorizontal', {min: 0, max: 100, val: 0}));
+    var sliderHorizontal = _createElement(new OSjs.GUI.Slider('TesterSliderHorizontal', {min: 0, max: 100, val: 0, onChange: function(value, percentage, evt) {
+      if ( !evt || evt === 'mouseup' || evt === 'click' ) {
+        alert("Slider value: " + value + " " + percentage + "%");
+      }
+    }}));
 
-    var sliderVertical = _createElement(new OSjs.GUI.Slider('TesterSliderVertical', {min: 0, max: 100, val: 0, orientation: 'vertical'}));
+    var sliderVertical = _createElement(new OSjs.GUI.Slider('TesterSliderVertical', {min: 0, max: 100, val: 0, orientation: 'vertical', onChange: function(value, percentage) {
+      alert("Slider value: " + value + " " + percentage + "%");
+    }}));
 
     var toolBar = _createElement(new OSjs.GUI.ToolBar('TesterToolBar'));
     toolBar.addItem("Button1", {title: 'Toolbar Button 1'});
