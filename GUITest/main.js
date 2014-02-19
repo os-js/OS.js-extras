@@ -260,8 +260,10 @@
       }
     }}));
 
-    var sliderVertical = _createElement(new OSjs.GUI.Slider('TesterSliderVertical', {min: 0, max: 100, val: 0, orientation: 'vertical', onChange: function(value, percentage) {
-      alert("Slider value: " + value + " " + percentage + "%");
+    var sliderVertical = _createElement(new OSjs.GUI.Slider('TesterSliderVertical', {min: 0, max: 100, val: 0, orientation: 'vertical', onChange: function(value, percentage, evt) {
+      if ( !evt || evt === 'mouseup' || evt === 'click' ) {
+        alert("Slider value: " + value + " " + percentage + "%");
+      }
     }}));
 
     var toolBar = _createElement(new OSjs.GUI.ToolBar('TesterToolBar'));
