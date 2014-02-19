@@ -257,9 +257,9 @@
     var sliderVertical = _createElement(new OSjs.GUI.Slider('TesterSliderVertical', {min: 0, max: 100, val: 0, orientation: 'vertical'}));
 
     var toolBar = _createElement(new OSjs.GUI.ToolBar('TesterToolBar'));
-    toolBar.addItem("Button1", {title: 'Button 1'});
-    toolBar.addItem("Button2", {title: 'Button 2'});
-    toolBar.addItem("Button3", {title: 'Button 3'});
+    toolBar.addItem("Button1", {title: 'Toolbar Button 1'});
+    toolBar.addItem("Button2", {title: 'Toolbar Button 2'});
+    toolBar.addItem("Button3", {title: 'Toolbar Button 3'});
     toolBar.render();
 
     var panedView = _createElement(new OSjs.GUI.PanedView('TesterPanedView'));
@@ -297,13 +297,17 @@
       }
     }));
 
-    var select = _createElement(new OSjs.GUI.Select('TesterSelect'));
+    var select = _createElement(new OSjs.GUI.Select('TesterSelect', {onChange: function() {
+      alert("GUISelect item: " + JSON.stringify(this.getValue()));
+    }}));
     select.addItems({
       'yes':  'Selection box Yes',
       'no':   'Selection box No'
     });
 
-    var select = _createElement(new OSjs.GUI.SelectList('TesterSelectList'));
+    var select = _createElement(new OSjs.GUI.SelectList('TesterSelectList', {onChange: function() {
+      alert("GUISelectList items: " + JSON.stringify(this.getValue()));
+    }}));
     select.addItems({
       'item1' : 'Item 1',
       'item2' : 'Item 2',
