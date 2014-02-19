@@ -303,6 +303,15 @@
       'no':   'Selection box No'
     });
 
+    var select = _createElement(new OSjs.GUI.SelectList('TesterSelectList'));
+    select.addItems({
+      'item1' : 'Item 1',
+      'item2' : 'Item 2',
+      'item3' : 'Item 3',
+      'item4' : 'Item 4',
+      'item5' : 'Item 5'
+    });
+
     var text = _createElement(new OSjs.GUI.Text('TesterTextbox'));
     text.setValue("Text input");
 
