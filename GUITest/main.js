@@ -247,7 +247,9 @@
     var textArea = _createElement(new OSjs.GUI.Textarea('TesterTextarea'));
     textArea.setText("Text Area");
 
-    var colorSwatch = _createElement(new OSjs.GUI.ColorSwatch('TesterColorSwatch'));
+    var colorSwatch = _createElement(new OSjs.GUI.ColorSwatch('TesterColorSwatch', 100, 100, function() {
+      alert("Color select: " + JSON.stringify(arguments));
+    }));
 
     var statusBar = _createElement(new OSjs.GUI.StatusBar('TesterStatusBar'));
     statusBar.setText('This is a status bar');
