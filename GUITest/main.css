@@ -91,3 +91,14 @@
   white-space:      pre-wrap;
   word-wrap: break-word;
 }
+.Window_ApplicationTesterWindow .ApplicationAPI {
+  padding : 10px;
+}
+.Window_ApplicationTesterWindow .ApplicationAPI > div{
+  margin-top : 10px;
+  white-space: -moz-pre-wrap;
+  white-space:   -o-pre-wrap;
+  white-space:     -pre-wrap;
+  white-space:      pre-wrap;
+  word-wrap: break-word;
+}

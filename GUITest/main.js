@@ -56,7 +56,7 @@
     // Create window contents here
     this.tabs = this._addGUIElement(new OSjs.GUI.Tabs('TesterTabs'), root);
 
-    //this.createApplicationTab(this.tabs);
+    this.createApplicationTab(this.tabs);
     //this.createCoreTab(this.tabs);
     this.createDialogTab(this.tabs);
     this.createGUITab(this.tabs);
@@ -94,6 +94,26 @@
   ApplicationTesterWindow.prototype.createApplicationTab = function(tabs) {
     var self = this;
     var el = tabs.addTab("Application", {title: "Application"});
+
+    var container = document.createElement('div');
+    container.className = 'ApplicationAPI';
+
+    var output = document.createElement('div');
+
+    this._addGUIElement(new OSjs.GUI.Button('TesterAPI', {label: 'Test Application API', onClick: function() {
+      self._appRef._call('TestMethod', {'Argument': 'Some Value'}, function(response) {
+        var txt;
+        if ( response.result ) {
+          txt = JSON.stringify(response.result) + "\n\n";
+        } else {
+          txt = "Error occured: " + (response.error || 'Unknown error') + "\n\n";
+        }
+        output.appendChild(document.createTextNode(txt));
+      });
+    }}), container);
+
+    container.appendChild(output);
+    el.appendChild(container);
   };
 
   ApplicationTesterWindow.prototype.createCoreTab = function(tabs) {
