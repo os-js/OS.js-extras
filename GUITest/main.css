@@ -39,13 +39,8 @@
   bottom : 5px;
 }
 
-.Window_ApplicationTesterWindow .WindowWrapper .TesterTabs .Dialogs button {
-  display : block;
+.Window_ApplicationTesterWindow .WindowWrapper .TesterTabs .Dialogs .GUIButton {
   margin : 5px;
-  width : 100%;
-  -webkit-box-sizing: border-box;
-  -moz-box-sizing: border-box;
-  box-sizing: border-box;
 }
 
 .Window_ApplicationTesterWindow .WindowWrapper .GUI {
@@ -78,7 +73,7 @@
 }
 .Window_ApplicationTesterWindow .TesterPanedView {
   position : relative;
-  height : 200px;
+  height : 158px;
 }
 .Window_ApplicationTesterWindow .TesterPanedView .View.View1 {
   width : 140px;

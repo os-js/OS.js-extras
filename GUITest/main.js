@@ -301,6 +301,7 @@
     ]);
     iconView.render();
 
+    // FIXME: On tab select() refresh content!
     var richText = _createElement(new OSjs.GUI.RichText('TesterRichText', {
       onInited: function() {
         this.setContent('<h1>Rich Text</h1>');
