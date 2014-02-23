@@ -74,11 +74,9 @@
   ApplicationTesterWindow.prototype._onDndEvent = function(ev, type, item, args) {
     if ( !Window.prototype._onDndEvent.apply(this, arguments) ) return;
 
-    if ( type === 'itemDrop' && item ) {
-      if ( this.tabs ) {
-        this.tabs.setTab('DnD');
-        this.$dnd_container.appendChild(document.createTextNode(JSON.stringify({type: type, item: item, args: args}) + "\n\n"));
-      }
+    if ( this.tabs ) {
+      this.tabs.setTab('DnD');
+      this.$dnd_container.appendChild(document.createTextNode(JSON.stringify({type: type, item: item, args: args}) + "\n\n"));
     }
   };
 
