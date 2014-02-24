@@ -409,10 +409,13 @@
         this.meeting.leave();
       }
       if ( this.mainWindow ) {
+        /*
         var win = this.mainWindow._getChild('UserMediaWindow');
         if ( win ) {
           this.mainWindow._removeChild(win);
         }
+        */
+        this.mainWindow._removeChildren();
 
         this.mainWindow.updateStatus("Create a new room or join from list");
       }
