@@ -205,11 +205,11 @@
   ApplicationWebRTCWindow.prototype.onCreateSelect = function() {
     var self = this;
 
-    if ( this._appRef.isCreatedRoom() ) {
+    if ( this._appRef.hasCreatedRoom() ) {
       alert("Cannot create a room, you have already created one!");
       return;
     }
-    if ( this._appRef.isJoinedRoom() ) {
+    if ( this._appRef.hasJoinedRoom() ) {
       alert("Cannot create a room, you are currently joined in another!");
       return;
     }
@@ -232,7 +232,7 @@
     }
 
     if ( this.menuBar ) {
-      if ( this._appRef.isCreatedRoom() || this._appRef.isJoinedRoom() ) {
+      if ( this._appRef.hasCreatedRoom() || this._appRef.hasJoinedRoom() ) {
         this.menuBar.getItem('create').element.setAttribute('disabled', 'disabled');
         this.menuBar.getItem('leave').element.removeAttribute('disabled');
       } else {
@@ -385,10 +385,15 @@
 
     this.meeting.meet(room);
     this.roomJoined = true;
+
     this.mainWindow.updateStatus(OSjs.Utils.format("Joined room '{0}'", room.roomid));
   };
 
   ApplicationWebRTC.prototype.createRoom = function(name) {
+    if ( !this.meeting ) { return; }
+    if ( this.roomCreated ) { return; }
+    if ( this.roomJoined ) { return; }
+
     name = name || 'Anonymous';
     console.warn(">>>", "ApplicationWebRTC::createRoom()", name);
 
@@ -399,7 +404,7 @@
   };
 
   ApplicationWebRTC.prototype.disconnect = function() {
-    if ( this.roomCreated || this.roomJoined ) {
+    //if ( this.roomCreated || this.roomJoined ) {
       console.warn(">>>", "ApplicationWebRTC::disconnect()");
 
       this.roomCreated = false;
@@ -419,18 +424,18 @@
 
         this.mainWindow.updateStatus("Create a new room or join from list");
       }
-    }
+    //}
   };
 
   //
   // Misc
   //
 
-  ApplicationWebRTC.prototype.isJoinedRoom = function() {
+  ApplicationWebRTC.prototype.hasJoinedRoom = function() {
     return this.roomJoined;
   };
 
-  ApplicationWebRTC.prototype.isCreatedRoom = function() {
+  ApplicationWebRTC.prototype.hasCreatedRoom = function() {
     return this.roomCreated;
   };
 
