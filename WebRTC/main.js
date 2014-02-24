@@ -29,7 +29,9 @@
  */
 (function(Application, Window, GUI, Dialogs) {
 
-  // https://github.com/muaz-khan/WebRTC-Experiment/blob/master/video-conferencing/index.html
+  // https://www.webrtc-experiment.com/meeting/
+  // https://github.com/muaz-khan/WebRTC-Experiment/tree/master/video-conferencing
+  // TODO: Update room list periodicaly
 
   /////////////////////////////////////////////////////////////////////////////
   // USER MEDIA WINDOW
@@ -378,34 +380,17 @@
     };
 
     // Input dialog
-    _create();
+    this._appRef._createDialog('Input', ["Room name", ("Room_" + (new Date()).getTime()), function(btn, value) {
+      self._focus();
+      if ( btn !== 'ok' || !value ) return;
+      _create(value);
+    }], this);
   };
 
   ApplicationWebRTCWindow.prototype.onDestroySelect = function() {
     this._leaveSession();
     this._destroySession();
   };
-
-  /*
-  ApplicationWebRTCWindow.prototype.onRoomClosed = function(room) {
-    console.warn("WebRTC", "onRoomClosed", room);
-
-    for ( var i = 0; i < this.rooms.length; i++ ) {
-      if ( this.rooms[i].token == room.token ) {
-        this.rooms.splice(i, 1);
-        break;
-      }
-    }
-
-    var gel = this._getGUIElement('WebRTCRoomList');
-    if ( gel ) {
-      gel.setRows(this.rooms);
-      gel.render();
-    }
-  };
-  */
-
-
 
   /////////////////////////////////////////////////////////////////////////////
   // APPLICATION
