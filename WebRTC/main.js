@@ -170,7 +170,7 @@
       if ( typeof item === 'string' ) { return; } // Backward compability
       if ( item.name == 'create' ) {
         self.onCreateSelect();
-      } else if ( item.name == 'join' ) {
+      } else if ( item.name == 'leave' ) {
         self.onDestroySelect();
       }
     };
