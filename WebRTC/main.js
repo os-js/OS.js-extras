@@ -401,6 +401,10 @@
   ApplicationWebRTC.prototype.disconnect = function() {
     if ( this.roomCreated || this.roomJoined ) {
       console.warn(">>>", "ApplicationWebRTC::disconnect()");
+
+      this.roomCreated = false;
+      this.roomJoined = false;
+
       if ( this.meeting ) {
         this.meeting.leave();
       }
@@ -413,8 +417,6 @@
         this.mainWindow.updateStatus("Create a new room or join from list");
       }
     }
-    this.roomCreated = false;
-    this.roomJoined = false;
   };
 
   //
