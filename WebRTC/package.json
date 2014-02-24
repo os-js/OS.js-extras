@@ -1,0 +1,18 @@
+{
+  "ApplicationWebRTC":  {
+    "name":       "WebRTC",
+    "mime":       null,
+    "icon":       "status/user-available.png",
+    "category":   "network",
+    "splash":     true,
+    "preload":    [
+      {"src": "./vendor/meeting.js", "type": "javascript"},
+
+      {"src": "main.js", "type": "javascript"},
+      {"src": "main.css", "type": "stylesheet"}
+    ]
+  }
+}
+
+
+
