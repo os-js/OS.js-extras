@@ -145,11 +145,7 @@
     this._title = metadata.name + " (WIP)";
     this._icon  = metadata.icon;
 
-    this.roomCreated  = false;
-    this.roomJoined   = false;
-    this.rooms        = [];
-    this.users        = [];
-    this.meeting      = null;
+    this.menuBar      = null;
     this.listView     = null;
     this.statusBar    = null;
   };
@@ -161,19 +157,20 @@
     var self = this;
 
     // Create window contents (GUI) here
-    var menuBar = this._addGUIElement(new GUI.MenuBar('WebRTCMenuBar'), root);
-    menuBar.addItem(OSjs._("File"), [
+    this.menuBar = this._addGUIElement(new GUI.MenuBar('WebRTCMenuBar'), root);
+    this.menuBar.addItem({name: 'file', title: OSjs._("File")}, [
       {title: OSjs._('Close'), onClick: function() {
         self._close();
       }}
     ]);
-    menuBar.addItem(OSjs._("Create Room"));
-    menuBar.addItem(OSjs._("Leave Room"));
+    this.menuBar.addItem({name: 'create', title: OSjs._("Create Room")});
+    this.menuBar.addItem({name: 'leave', title: OSjs._("Leave Room")});
 
-    menuBar.onMenuOpen = function(menu, pos, title) {
-      if ( title == OSjs._("Create Room") ) {
+    this.menuBar.onMenuOpen = function(menu, pos, item) {
+      if ( typeof item === 'string' ) { return; } // Backward compability
+      if ( item.name == 'create' ) {
         self.onCreateSelect();
-      } else if ( title == OSjs._("Leave Room") ) {
+      } else if ( item.name == 'join' ) {
         self.onDestroySelect();
       }
     };
@@ -187,7 +184,7 @@
     this.listView.render();
 
     this.statusBar = this._addGUIElement(new GUI.StatusBar('WebRTCStatus'), root);
-    this.statusBar.setText("Create a new room or join from list");
+    this.statusBar.setText();
 
     return root;
   };
@@ -197,22 +194,128 @@
 
     // Window has been successfully created and displayed.
     // You can start communications, handle files etc. here
+  };
 
+  ApplicationWebRTCWindow.prototype.destroy = function() {
+    // Destroy custom objects etc. here
+
+    Window.prototype.destroy.apply(this, arguments);
+  };
+
+  ApplicationWebRTCWindow.prototype.onCreateSelect = function() {
     var self = this;
 
+    if ( this._appRef.isCreatedRoom() ) {
+      alert("Cannot create a room, you have already created one!");
+      return;
+    }
+    if ( this._appRef.isJoinedRoom() ) {
+      alert("Cannot create a room, you are currently joined in another!");
+      return;
+    }
+
+    // Input dialog
+    this._appRef._createDialog('Input', ["Room name", ("Room_" + (new Date()).getTime()), function(btn, value) {
+      self._focus();
+      if ( btn !== 'ok' || !value ) return;
+      self._appRef.createRoom(value);
+    }], this);
+  };
+
+  ApplicationWebRTCWindow.prototype.onDestroySelect = function() {
+    this._appRef.disconnect();
+  };
+
+  ApplicationWebRTCWindow.prototype.updateStatus = function(txt) {
+    if ( this.statusBar ) {
+      this.statusBar.setText(txt);
+    }
+
+    if ( this.menuBar ) {
+      if ( this._appRef.isCreatedRoom() || this._appRef.isJoinedRoom() ) {
+        this.menuBar.getItem('create').element.setAttribute('disabled', 'disabled');
+        this.menuBar.getItem('leave').element.removeAttribute('disabled');
+      } else {
+        this.menuBar.getItem('leave').element.setAttribute('disabled', 'disabled');
+        this.menuBar.getItem('create').element.removeAttribute('disabled');
+      }
+    }
+  };
+
+  ApplicationWebRTCWindow.prototype.updateRooms = function(list, evRef) {
+    if ( this.listView ) {
+      var rows = [];
+      for ( var i = 0; i < list.length; i++ ) {
+        rows.push({
+          roomid: list[i].roomid,
+          join: 'Join',
+          customEvent: (function(room) { // For button
+            return function() {
+              evRef(room);
+            };
+          })(list[i])
+        });
+      }
+
+      this.listView.setRows(rows);
+      this.listView.render();
+    }
+  };
+
+  /////////////////////////////////////////////////////////////////////////////
+  // APPLICATION
+  /////////////////////////////////////////////////////////////////////////////
+
+  /**
+   * Application constructor
+   */
+  var ApplicationWebRTC = function(args, metadata) {
+    Application.apply(this, ['ApplicationWebRTC', args, metadata]);
+
+    // You can set application variables here
+    this.mainWindow = null;
+
+    this.roomCreated  = false;
+    this.roomJoined   = false;
+    this.rooms        = [];
+    this.users        = [];
+    this.meeting      = null;
+  };
+
+  ApplicationWebRTC.prototype = Object.create(Application.prototype);
+
+  ApplicationWebRTC.prototype.destroy = function() {
+    // Destroy communication, timers, objects etc. here
+    if ( this.meeting ) {
+      this.disconnect();
+      this.meeting = null;
+    }
+
+    return Application.prototype.destroy.apply(this, arguments);
+  };
+
+  ApplicationWebRTC.prototype.init = function(core, session, metadata) {
+    var self = this;
+
+    Application.prototype.init.apply(this, arguments);
+
+    // Create your main window
+    this.mainWindow = this._addWindow(new ApplicationWebRTCWindow(this, metadata));
+
+    // Do other stuff here
+    // See 'DefaultApplication' sample in 'helpers.js' for more code
     this.meeting = new Meeting();
 
     this.meeting.onmeeting = function(room) {
-      self._updateRooms(room);
+      self.onUpdateRooms(room);
     };
 
     this.meeting.onaddstream = function (e) {
       if (e.type == 'local') {
-        self._createLocalStream(e.video);
+        self.onAddStreamLocal(e.video);
       }
-
       if (e.type == 'remote') {
-        self._createRemoteStream(e.video);
+        self.onAddStreamRemote(e.video);
       }
     };
 
@@ -245,185 +348,11 @@
     };
 
     this.meeting.onuserleft = function(userid) {
-      self._removeRemoteStream(userid);
+      self.onUserLeft(userid);
     };
 
     this.meeting.check();
-  };
-
-  ApplicationWebRTCWindow.prototype.destroy = function() {
-    // Destroy custom objects etc. here
-    this._leaveSession();
-    this._destroySession();
-
-    this.meeting = null;
-
-    Window.prototype.destroy.apply(this, arguments);
-  };
-
-  ApplicationWebRTCWindow.prototype._removeRemoteStream = function(id) {
-    console.warn(">>>", "ApplicationWebRTCWindow::_removeRemoteStream()", id);
-
-    var win = this._getChild('ConferenceWindow_' + id);
-    if ( win ) {
-      this._removeChild(win);
-    }
-
-    if ( this.roomJoined ) {
-      this.roomJoined = false;
-    }
-  };
-
-  ApplicationWebRTCWindow.prototype._createRemoteStream = function(video) {
-    console.warn(">>>", "ApplicationWebRTCWindow::_createRemoteStream()", video);
-
-    var win = new ConferenceWindow(this._appRef, null, video.id);
-    this._addChild(win, true);
-    win.setup(video);
-  };
-
-  ApplicationWebRTCWindow.prototype._createLocalStream = function(video) {
-    console.warn(">>>", "ApplicationWebRTCWindow::_createLocalStream()", video);
-
-    var win = this._getChild('UserMediaWindow');
-    if ( !win ) {
-      win = new UserMediaWindow(this._appRef, null);
-      this._addChild(win, true);
-      win.setup(video);
-    }
-  };
-
-  ApplicationWebRTCWindow.prototype._leave = function() {
-    if ( this.meeting ) {
-      this.meeting.leave();
-      this.statusBar.setText("Create a new room or join from list");
-    }
-
-    var win = this._getChild('UserMediaWindow');
-    if ( win ) {
-      this._removeChild(win);
-    }
-  };
-
-  ApplicationWebRTCWindow.prototype._leaveSession = function() {
-    if ( this.roomJoined ) {
-      console.warn(">>>", "ApplicationWebRTCWindow::_leaveSession()");
-      this._leave();
-      this.roomJoined = false;
-    }
-  };
-
-  ApplicationWebRTCWindow.prototype._destroySession = function() {
-    if ( this.roomCreated ) {
-      console.warn(">>>", "ApplicationWebRTCWindow::_destroySession()");
-      this._leave();
-      this.roomCreated = false;
-    }
-  };
-
-  ApplicationWebRTCWindow.prototype._updateRooms = function(room) {
-    console.warn(">>>", "ApplicationWebRTCWindow::_updateRooms()", room);
-
-    var self = this;
-
-    for ( var i = 0; i < this.rooms.length; i++ ) {
-      if ( this.rooms[i].roomid == room.roomid ) {
-        return;
-      }
-    }
-
-    this.rooms.push({
-      roomid: room.roomid,
-      join: 'Join',
-      customEvent: function() { // For button
-        if ( self.roomJoined ) {
-          alert("Cannot join a room, you are already in one!");
-          return;
-        }
-        if ( self.roomCreated ) {
-          alert("Cannot join a room, you created one!");
-          return;
-        }
-
-        self.meeting.meet(room);
-        self.statusBar.setText("Joined room: " + room.roomid);
-        self.roomJoined = true;
-      }
-    });
-
-    if ( this.listView ) {
-      this.listView.setRows(this.rooms);
-      this.listView.render();
-    }
-  };
-
-  ApplicationWebRTCWindow.prototype.onCreateSelect = function() {
-    if ( this.roomCreated ) {
-      alert("Cannot create a room, you have already created one!");
-      return;
-    }
-    if ( this.roomJoined ) {
-      alert("Cannot create a room, you are currently joined in another!");
-      return;
-    }
-
-    var self = this;
-    var _create = function(name) {
-      name = name || 'Anonymous';
-
-      console.warn("WebRTC", "Create new", name);
-
-      self.meeting.setup(name);
-
-      self.roomCreated = true;
-      self.statusBar.setText("Room created: " + name + ", waiting for users...");
-    };
-
-    // Input dialog
-    this._appRef._createDialog('Input', ["Room name", ("Room_" + (new Date()).getTime()), function(btn, value) {
-      self._focus();
-      if ( btn !== 'ok' || !value ) return;
-      _create(value);
-    }], this);
-  };
-
-  ApplicationWebRTCWindow.prototype.onDestroySelect = function() {
-    this._leaveSession();
-    this._destroySession();
-  };
-
-  /////////////////////////////////////////////////////////////////////////////
-  // APPLICATION
-  /////////////////////////////////////////////////////////////////////////////
-
-  /**
-   * Application constructor
-   */
-  var ApplicationWebRTC = function(args, metadata) {
-    Application.apply(this, ['ApplicationWebRTC', args, metadata]);
-
-    // You can set application variables here
-    this.mainWindow = null;
-  };
-
-  ApplicationWebRTC.prototype = Object.create(Application.prototype);
-
-  ApplicationWebRTC.prototype.destroy = function() {
-    // Destroy communication, timers, objects etc. here
-
-    return Application.prototype.destroy.apply(this, arguments);
-  };
-
-  ApplicationWebRTC.prototype.init = function(core, session, metadata) {
-    var self = this;
-
-    Application.prototype.init.apply(this, arguments);
-
-    // Create your main window
-    this.mainWindow = this._addWindow(new ApplicationWebRTCWindow(this, metadata));
-
-    // Do other stuff here
-    // See 'DefaultApplication' sample in 'helpers.js' for more code
+    this.mainWindow.updateStatus("Create a new room or join from list");
   };
 
   ApplicationWebRTC.prototype._onMessage = function(obj, msg, args) {
@@ -433,6 +362,130 @@
     if ( msg == 'destroyWindow' && obj._name === 'ApplicationWebRTCWindow' ) {
       this.mainWindow = null;
       this.destroy();
+    }
+  };
+
+  //
+  // Actions
+  //
+
+  ApplicationWebRTC.prototype.joinRoom = function(room) {
+    if ( !this.meeting ) {
+      alert("Cannot join a room, WebRTC is not initialized");
+      return;
+    }
+    if ( this.roomJoined ) {
+      alert("Cannot join a room, you are already in one!");
+      return;
+    }
+    if ( this.roomCreated ) {
+      alert("Cannot join a room, you created one!");
+      return;
+    }
+
+    this.meeting.meet(room);
+    this.roomJoined = true;
+    this.mainWindow.updateStatus(OSjs.Utils.format("Joined room '{0}'", room.roomid));
+  };
+
+  ApplicationWebRTC.prototype.createRoom = function(name) {
+    name = name || 'Anonymous';
+    console.warn(">>>", "ApplicationWebRTC::createRoom()", name);
+
+    this.meeting.setup(name);
+    this.roomCreated = true;
+
+    this.mainWindow.updateStatus(OSjs.Utils.format("Created room '{0}', waiting for users", name));
+  };
+
+  ApplicationWebRTC.prototype.disconnect = function() {
+    if ( this.roomCreated || this.roomJoined ) {
+      console.warn(">>>", "ApplicationWebRTC::disconnect()");
+      if ( this.meeting ) {
+        this.meeting.leave();
+      }
+      if ( this.mainWindow ) {
+        var win = this.mainWindow._getChild('UserMediaWindow');
+        if ( win ) {
+          this.mainWindow._removeChild(win);
+        }
+
+        this.mainWindow.updateStatus("Create a new room or join from list");
+      }
+    }
+    this.roomCreated = false;
+    this.roomJoined = false;
+  };
+
+  //
+  // Misc
+  //
+
+  ApplicationWebRTC.prototype.isJoinedRoom = function() {
+    return this.roomJoined;
+  };
+
+  ApplicationWebRTC.prototype.isCreatedRoom = function() {
+    return this.roomCreated;
+  };
+
+  //
+  // Events
+  //
+
+  ApplicationWebRTC.prototype.onUserLeft = function(id) {
+    console.warn(">>>", "ApplicationWebRTC::onUserLeft()", id);
+
+    if ( this.mainWindow ) {
+      var win = this.mainWindow._getChild('ConferenceWindow_' + id);
+      if ( win ) {
+        this.mainWindow._removeChild(win);
+      }
+    }
+
+    if ( this.roomJoined ) {
+      this.roomJoined = false;
+    }
+  };
+
+  ApplicationWebRTC.prototype.onAddStreamRemote = function(video) {
+    console.warn(">>>", "ApplicationWebRTC::onAddStreamRemote()", video);
+
+    if ( this.mainWindow ) {
+      var win = new ConferenceWindow(this, null, video.id);
+      this.mainWindow._addChild(win, true);
+      win.setup(video);
+    }
+  };
+
+  ApplicationWebRTC.prototype.onAddStreamLocal = function(video) {
+    console.warn(">>>", "ApplicationWebRTC::onAddStreamLocal()", video);
+
+    if ( this.mainWindow ) {
+      var win = this.mainWindow._getChild('UserMediaWindow');
+      if ( !win ) {
+        win = new UserMediaWindow(this, null);
+        this.mainWindow._addChild(win, true);
+        win.setup(video);
+      }
+    }
+  };
+
+  ApplicationWebRTC.prototype.onUpdateRooms = function(room) {
+
+    for ( var i = 0; i < this.rooms.length; i++ ) {
+      if ( this.rooms[i].roomid == room.roomid ) {
+        return;
+      }
+    }
+    console.warn(">>>", "ApplicationWebRTC::onUpdateRooms()", room);
+    this.rooms.push(room);
+
+    if ( this.mainWindow ) {
+      var self = this;
+      this.mainWindow.updateRooms(this.rooms, function(room) {
+        self.joinRoom(room);
+      });
     }
   };
 
