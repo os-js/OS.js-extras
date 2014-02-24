@@ -1,6 +1,6 @@
 {
   "ApplicationWebRTC":  {
-    "name":       "WebRTC",
+    "name":       "WebRTC - Video Conference",
     "mime":       null,
     "icon":       "status/user-available.png",
     "category":   "network",

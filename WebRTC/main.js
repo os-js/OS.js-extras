@@ -44,7 +44,7 @@
     Window.apply(this, ['UserMediaWindow', {width: 500, height: 300}, app]);
 
     // Set window properties and other stuff here
-    this._title = 'WebRTC - Local Video';
+    this._title = OSjs.Utils.format('{0} - {1}', metadata.name, 'Local Video');
     this._icon  = 'status/user-available.png';
 
     this.inited = false;
@@ -96,7 +96,7 @@
     Window.apply(this, ['ConferenceWindow_' + id, {width: 500, height: 300}, app]);
 
     // Set window properties and other stuff here
-    this._title = OSjs.Utils.format('WebRTC - Remote Video ({0})', id);
+    this._title = OSjs.Utils.format('{0} - {1} ({2})', metadata.name, 'Remote Video', id);
     this._icon  = 'status/user-available.png';
     this._properties.allow_close = false;
     this._properties.allow_maximize = false;
@@ -454,7 +454,7 @@
     console.warn(">>>", "ApplicationWebRTC::onAddStreamRemote()", video);
 
     if ( this.mainWindow ) {
-      var win = new ConferenceWindow(this, null, video.id);
+      var win = new ConferenceWindow(this, this.__metadata, video.id);
       this.mainWindow._addChild(win, true);
       win.setup(video);
     }
@@ -466,7 +466,7 @@
     if ( this.mainWindow ) {
       var win = this.mainWindow._getChild('UserMediaWindow');
       if ( !win ) {
-        win = new UserMediaWindow(this, null);
+        win = new UserMediaWindow(this, this.__metadata);
         this.mainWindow._addChild(win, true);
         win.setup(video);
       }
