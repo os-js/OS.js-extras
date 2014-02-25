@@ -28,10 +28,10 @@
  * @licence Simplified BSD License
  */
 
-.Window_ApplicationWebRTCWindow .WindowWrapper {
+.Window_ApplicationRTCGroupVideoWindow .WindowWrapper {
 }
 
-.Window_ApplicationWebRTCWindow .GUIListView {
+.Window_ApplicationRTCGroupVideoWindow .GUIListView {
   position : absolute;
   top : 35px;
   left : 5px;

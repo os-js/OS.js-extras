@@ -1,6 +1,6 @@
 {
-  "ApplicationWebRTC":  {
-    "name":       "WebRTC - Video Conference",
+  "ApplicationRTCGroupVideo":  {
+    "name":       "WebRTC Experiment - Group Video",
     "mime":       null,
     "icon":       "status/user-available.png",
     "category":   "network",

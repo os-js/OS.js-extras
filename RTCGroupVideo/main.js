@@ -30,7 +30,6 @@
 (function(Application, Window, GUI, Dialogs) {
 
   // https://www.webrtc-experiment.com/meeting/
-  // https://github.com/muaz-khan/WebRTC-Experiment/tree/master/video-conferencing
   // TODO: Update room list periodicaly
 
   /////////////////////////////////////////////////////////////////////////////
@@ -138,8 +137,8 @@
   /**
    * Main Window Constructor
    */
-  var ApplicationWebRTCWindow = function(app, metadata) {
-    Window.apply(this, ['ApplicationWebRTCWindow', {width: 500, height: 300}, app]);
+  var ApplicationRTCGroupVideoWindow = function(app, metadata) {
+    Window.apply(this, ['ApplicationRTCGroupVideoWindow', {width: 500, height: 300}, app]);
 
     // Set window properties and other stuff here
     this._title = metadata.name + " (WIP)";
@@ -150,14 +149,14 @@
     this.statusBar    = null;
   };
 
-  ApplicationWebRTCWindow.prototype = Object.create(Window.prototype);
+  ApplicationRTCGroupVideoWindow.prototype = Object.create(Window.prototype);
 
-  ApplicationWebRTCWindow.prototype.init = function(wmRef, app) {
+  ApplicationRTCGroupVideoWindow.prototype.init = function(wmRef, app) {
     var root = Window.prototype.init.apply(this, arguments);
     var self = this;
 
     // Create window contents (GUI) here
-    this.menuBar = this._addGUIElement(new GUI.MenuBar('WebRTCMenuBar'), root);
+    this.menuBar = this._addGUIElement(new GUI.MenuBar('RTCGroupVideoMenuBar'), root);
     this.menuBar.addItem({name: 'file', title: OSjs._("File")}, [
       {title: OSjs._('Close'), onClick: function() {
         self._close();
@@ -175,7 +174,7 @@
       }
     };
 
-    this.listView = this._addGUIElement(new GUI.ListView('WebRTCRoomList'), root);
+    this.listView = this._addGUIElement(new GUI.ListView('RTCGroupVideoRoomList'), root);
     this.listView.setColumns([
       {key: 'roomid',       title: OSjs._('Room ID')},
       {key: 'join',         title: '', type: 'button', domProperties: {width: "40"}}
@@ -183,26 +182,26 @@
 
     this.listView.render();
 
-    this.statusBar = this._addGUIElement(new GUI.StatusBar('WebRTCStatus'), root);
+    this.statusBar = this._addGUIElement(new GUI.StatusBar('RTCGroupVideoStatus'), root);
     this.statusBar.setText();
 
     return root;
   };
 
-  ApplicationWebRTCWindow.prototype._inited = function() {
+  ApplicationRTCGroupVideoWindow.prototype._inited = function() {
     Window.prototype._inited.apply(this, arguments);
 
     // Window has been successfully created and displayed.
     // You can start communications, handle files etc. here
   };
 
-  ApplicationWebRTCWindow.prototype.destroy = function() {
+  ApplicationRTCGroupVideoWindow.prototype.destroy = function() {
     // Destroy custom objects etc. here
 
     Window.prototype.destroy.apply(this, arguments);
   };
 
-  ApplicationWebRTCWindow.prototype.onCreateSelect = function() {
+  ApplicationRTCGroupVideoWindow.prototype.onCreateSelect = function() {
     var self = this;
 
     if ( this._appRef.hasCreatedRoom() ) {
@@ -222,11 +221,11 @@
     }], this);
   };
 
-  ApplicationWebRTCWindow.prototype.onDestroySelect = function() {
+  ApplicationRTCGroupVideoWindow.prototype.onDestroySelect = function() {
     this._appRef.disconnect();
   };
 
-  ApplicationWebRTCWindow.prototype.updateStatus = function(txt) {
+  ApplicationRTCGroupVideoWindow.prototype.updateStatus = function(txt) {
     if ( this.statusBar ) {
       this.statusBar.setText(txt);
     }
@@ -242,7 +241,7 @@
     }
   };
 
-  ApplicationWebRTCWindow.prototype.updateRooms = function(list, evRef) {
+  ApplicationRTCGroupVideoWindow.prototype.updateRooms = function(list, evRef) {
     if ( this.listView ) {
       var rows = [];
       for ( var i = 0; i < list.length; i++ ) {
@@ -269,8 +268,8 @@
   /**
    * Application constructor
    */
-  var ApplicationWebRTC = function(args, metadata) {
-    Application.apply(this, ['ApplicationWebRTC', args, metadata]);
+  var ApplicationRTCGroupVideo = function(args, metadata) {
+    Application.apply(this, ['ApplicationRTCGroupVideo', args, metadata]);
 
     // You can set application variables here
     this.mainWindow = null;
@@ -282,9 +281,9 @@
     this.meeting      = null;
   };
 
-  ApplicationWebRTC.prototype = Object.create(Application.prototype);
+  ApplicationRTCGroupVideo.prototype = Object.create(Application.prototype);
 
-  ApplicationWebRTC.prototype.destroy = function() {
+  ApplicationRTCGroupVideo.prototype.destroy = function() {
     // Destroy communication, timers, objects etc. here
     if ( this.meeting ) {
       this.disconnect();
@@ -294,13 +293,13 @@
     return Application.prototype.destroy.apply(this, arguments);
   };
 
-  ApplicationWebRTC.prototype.init = function(core, session, metadata) {
+  ApplicationRTCGroupVideo.prototype.init = function(core, session, metadata) {
     var self = this;
 
     Application.prototype.init.apply(this, arguments);
 
     // Create your main window
-    this.mainWindow = this._addWindow(new ApplicationWebRTCWindow(this, metadata));
+    this.mainWindow = this._addWindow(new ApplicationRTCGroupVideoWindow(this, metadata));
 
     // Do other stuff here
     // See 'DefaultApplication' sample in 'helpers.js' for more code
@@ -355,11 +354,11 @@
     this.mainWindow.updateStatus("Create a new room or join from list");
   };
 
-  ApplicationWebRTC.prototype._onMessage = function(obj, msg, args) {
+  ApplicationRTCGroupVideo.prototype._onMessage = function(obj, msg, args) {
     Application.prototype._onMessage.apply(this, arguments);
 
     // Make sure we kill our application if main window was closed
-    if ( msg == 'destroyWindow' && obj._name === 'ApplicationWebRTCWindow' ) {
+    if ( msg == 'destroyWindow' && obj._name === 'ApplicationRTCGroupVideoWindow' ) {
       this.mainWindow = null;
       this.destroy();
     }
@@ -369,9 +368,9 @@
   // Actions
   //
 
-  ApplicationWebRTC.prototype.joinRoom = function(room) {
+  ApplicationRTCGroupVideo.prototype.joinRoom = function(room) {
     if ( !this.meeting ) {
-      alert("Cannot join a room, WebRTC is not initialized");
+      alert("Cannot join a room, RTCGroupVideo is not initialized");
       return;
     }
     if ( this.roomJoined ) {
@@ -389,13 +388,13 @@
     this.mainWindow.updateStatus(OSjs.Utils.format("Joined room '{0}'", room.roomid));
   };
 
-  ApplicationWebRTC.prototype.createRoom = function(name) {
+  ApplicationRTCGroupVideo.prototype.createRoom = function(name) {
     if ( !this.meeting ) { return; }
     if ( this.roomCreated ) { return; }
     if ( this.roomJoined ) { return; }
 
     name = name || 'Anonymous';
-    console.warn(">>>", "ApplicationWebRTC::createRoom()", name);
+    console.warn(">>>", "ApplicationRTCGroupVideo::createRoom()", name);
 
     this.meeting.setup(name);
     this.roomCreated = true;
@@ -403,9 +402,9 @@
     this.mainWindow.updateStatus(OSjs.Utils.format("Created room '{0}', waiting for users", name));
   };
 
-  ApplicationWebRTC.prototype.disconnect = function() {
+  ApplicationRTCGroupVideo.prototype.disconnect = function() {
     //if ( this.roomCreated || this.roomJoined ) {
-      console.warn(">>>", "ApplicationWebRTC::disconnect()");
+      console.warn(">>>", "ApplicationRTCGroupVideo::disconnect()");
 
       this.roomCreated = false;
       this.roomJoined = false;
@@ -431,11 +430,11 @@
   // Misc
   //
 
-  ApplicationWebRTC.prototype.hasJoinedRoom = function() {
+  ApplicationRTCGroupVideo.prototype.hasJoinedRoom = function() {
     return this.roomJoined;
   };
 
-  ApplicationWebRTC.prototype.hasCreatedRoom = function() {
+  ApplicationRTCGroupVideo.prototype.hasCreatedRoom = function() {
     return this.roomCreated;
   };
 
@@ -443,8 +442,8 @@
   // Events
   //
 
-  ApplicationWebRTC.prototype.onUserLeft = function(id) {
-    console.warn(">>>", "ApplicationWebRTC::onUserLeft()", id);
+  ApplicationRTCGroupVideo.prototype.onUserLeft = function(id) {
+    console.warn(">>>", "ApplicationRTCGroupVideo::onUserLeft()", id);
 
     if ( this.mainWindow ) {
       var win = this.mainWindow._getChild('ConferenceWindow_' + id);
@@ -458,8 +457,8 @@
     }
   };
 
-  ApplicationWebRTC.prototype.onAddStreamRemote = function(video) {
-    console.warn(">>>", "ApplicationWebRTC::onAddStreamRemote()", video);
+  ApplicationRTCGroupVideo.prototype.onAddStreamRemote = function(video) {
+    console.warn(">>>", "ApplicationRTCGroupVideo::onAddStreamRemote()", video);
 
     if ( this.mainWindow ) {
       var win = new ConferenceWindow(this, this.__metadata, video.id);
@@ -468,8 +467,8 @@
     }
   };
 
-  ApplicationWebRTC.prototype.onAddStreamLocal = function(video) {
-    console.warn(">>>", "ApplicationWebRTC::onAddStreamLocal()", video);
+  ApplicationRTCGroupVideo.prototype.onAddStreamLocal = function(video) {
+    console.warn(">>>", "ApplicationRTCGroupVideo::onAddStreamLocal()", video);
 
     if ( this.mainWindow ) {
       var win = this.mainWindow._getChild('UserMediaWindow');
@@ -481,14 +480,14 @@
     }
   };
 
-  ApplicationWebRTC.prototype.onUpdateRooms = function(room) {
+  ApplicationRTCGroupVideo.prototype.onUpdateRooms = function(room) {
 
     for ( var i = 0; i < this.rooms.length; i++ ) {
       if ( this.rooms[i].roomid == room.roomid ) {
         return;
       }
     }
-    console.warn(">>>", "ApplicationWebRTC::onUpdateRooms()", room);
+    console.warn(">>>", "ApplicationRTCGroupVideo::onUpdateRooms()", room);
     this.rooms.push(room);
 
     if ( this.mainWindow ) {
@@ -503,6 +502,6 @@
   // EXPORTS
   //
   OSjs.Applications = OSjs.Applications || {};
-  OSjs.Applications.ApplicationWebRTC = ApplicationWebRTC;
+  OSjs.Applications.ApplicationRTCGroupVideo = ApplicationRTCGroupVideo;
 
 })(OSjs.Core.Application, OSjs.Core.Window, OSjs.GUI, OSjs.Dialogs);
