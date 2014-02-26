@@ -98,6 +98,15 @@
 
     var output = document.createElement('div');
 
+    this._addGUIElement(new OSjs.GUI.Button('TesterNotification', {label: 'Test Desktop Notification', onClick: function() {
+      self._appRef._call('TestMethod', {'Argument': 'Some Value'}, function(response) {
+        var wm = OSjs.API.getWMInstance();
+        if ( wm ) {
+          wm.notification({icon: "categories/applications-system.png", title: "GUITest", message: "Notification"});
+        }
+      });
+    }}), container);
+
     this._addGUIElement(new OSjs.GUI.Button('TesterAPI', {label: 'Test Application API', onClick: function() {
       self._appRef._call('TestMethod', {'Argument': 'Some Value'}, function(response) {
         var txt;
