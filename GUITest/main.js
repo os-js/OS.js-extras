@@ -247,9 +247,24 @@
     menuBar.addItem("Menu Item", [
       {title: 'Sub Item 1', onClick: function() {
       }, menu: subMenu},
+      {title: 'Sub Item 2', disabled: true, onClick: function() {
+      }}
+    ]);
+    menuBar.addItem({name: 'testitem', disabled: true, title: "Disabled Menu Item"}, [
+      {title: 'Sub Item 1', onClick: function() {
+      }, menu: subMenu},
       {title: 'Sub Item 2', onClick: function() {
       }}
     ]);
+
+    var buttonContainer = document.createElement('div');
+
+    _createElement(new OSjs.GUI.Button('ButtonTest1', {label: 'Normal Button'}), buttonContainer);
+    _createElement(new OSjs.GUI.Button('ButtonTest2', {label: 'Disabled Button', disabled: true}), buttonContainer);
+    _createElement(new OSjs.GUI.Button('ButtonTest3', {label: 'Image Button', icon: OSjs.API.getThemeResource('apps/xfwm4.png', 'icon')}), buttonContainer);
+
+    container.appendChild(buttonContainer);
+
 
     var textArea = _createElement(new OSjs.GUI.Textarea('TesterTextarea'));
     textArea.setText("Text Area");
