@@ -379,7 +379,7 @@
     return Application.prototype.destroy.apply(this, []);
   };
 
-  ApplicationTester.prototype.init = function(core, session, metadata) {
+  ApplicationTester.prototype.init = function(core, settings, metadata) {
     Application.prototype.init.apply(this, arguments);
     var self = this;
 
