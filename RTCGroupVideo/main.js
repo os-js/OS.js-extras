@@ -279,6 +279,10 @@
     this.rooms        = [];
     this.users        = [];
     this.meeting      = null;
+
+    if ( !navigator || !navigator.getUserMedia ) {
+      throw "Sorry, but your browser does not seem to support WebRTC (getUserMedia())";
+    }
   };
 
   ApplicationRTCGroupVideo.prototype = Object.create(Application.prototype);
