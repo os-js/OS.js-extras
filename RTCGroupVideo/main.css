@@ -42,7 +42,7 @@
   overflow : auto;
 }
 
-.ConferenceWindow,
+.Window_ConferenceWindow .WindowWrapper,
 .Window_UserMediaWindow .WindowWrapper {
   background : #000;
 }

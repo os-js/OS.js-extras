@@ -92,7 +92,7 @@
    * Conference Window Constructor
    */
   var ConferenceWindow = function(app, metadata, id) {
-    Window.apply(this, ['ConferenceWindow_' + id, {width: 500, height: 300}, app]);
+    Window.apply(this, ['ConferenceWindow_' + id, {width: 500, height: 300, tag: 'Window_ConferenceWindow'}, app]);
 
     // Set window properties and other stuff here
     this._title = OSjs.Utils.format('{0} - {1} ({2})', metadata.name, 'Remote Video', id);
@@ -107,7 +107,6 @@
 
   ConferenceWindow.prototype.init = function(wmRef, app) {
     var root = Window.prototype.init.apply(this, arguments);
-    root.className += ' ConferenceWindow';
     return root;
   };
 
