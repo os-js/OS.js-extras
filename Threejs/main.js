@@ -29,6 +29,8 @@
  */
 (function(Application, Window, GUI, Dialogs) {
 
+  // view-source:http://threejs.org/examples/canvas_particles_sprites.html
+
   if (!window.requestAnimationFrame) {
     window.requestAnimationFrame = (function() {
       return window.webkitRequestAnimationFrame ||

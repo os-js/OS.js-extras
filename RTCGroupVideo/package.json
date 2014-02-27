@@ -1,8 +1,9 @@
 {
   "ApplicationRTCGroupVideo":  {
     "name":       "WebRTC Experiment - Group Video",
+    "description":"Group calls using webcam and microphone",
     "mime":       null,
-    "icon":       "status/user-available.png",
+    "icon":       "devices/camera-web.png",
     "category":   "network",
     "splash":     true,
     "preload":    [
