@@ -418,7 +418,7 @@
       }
       if ( this.mainWindow ) {
         /*
-        var win = this.mainWindow._getChild('UserMediaWindow');
+        var win = this.mainWindow._getChildByName('UserMediaWindow');
         if ( win ) {
           this.mainWindow._removeChild(win);
         }
@@ -450,7 +450,7 @@
     console.warn(">>>", "ApplicationRTCGroupVideo::onUserLeft()", id);
 
     if ( this.mainWindow ) {
-      var win = this.mainWindow._getChild('ConferenceWindow_' + id);
+      var win = this.mainWindow._getChildByName('ConferenceWindow_' + id);
       if ( win ) {
         this.mainWindow._removeChild(win);
       }
@@ -475,7 +475,7 @@
     console.warn(">>>", "ApplicationRTCGroupVideo::onAddStreamLocal()", video);
 
     if ( this.mainWindow ) {
-      var win = this.mainWindow._getChild('UserMediaWindow');
+      var win = this.mainWindow._getChildByName('UserMediaWindow');
       if ( !win ) {
         win = new UserMediaWindow(this, this.__metadata);
         this.mainWindow._addChild(win, true);
