@@ -422,7 +422,7 @@
       this.openSettingsWindow();
     } else {
       setTimeout(function() {
-        //self.connect();
+        self.connect();
       }, 200);
     }
   };
