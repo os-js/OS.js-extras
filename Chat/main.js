@@ -276,7 +276,7 @@
       {key: 'state',        title: OSjs._('Status'), domProperties: {width: "50"}},
       {key: 'id',           title: '', visible: false},
     ]);
-    this.contactList.onSelect = function(ev, el, item) {
+    this.contactList.onActivate = function(ev, el, item) {
       if ( item )  {
         self.onContactOpened(item);
       }
