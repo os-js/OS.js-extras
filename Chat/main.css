@@ -1,0 +1,125 @@
+/*!
+ * OS.js - JavaScript Operating System
+ *
+ * Copyright (c) 2011-2013, Anders Evenrud <andersevenrud@gmail.com>
+ * All rights reserved.
+ * 
+ * Redistribution and use in source and binary forms, with or without
+ * modification, are permitted provided that the following conditions are met: 
+ * 
+ * 1. Redistributions of source code must retain the above copyright notice, this
+ *    list of conditions and the following disclaimer. 
+ * 2. Redistributions in binary form must reproduce the above copyright notice,
+ *    this list of conditions and the following disclaimer in the documentation
+ *    and/or other materials provided with the distribution. 
+ * 
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
+ * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
+ * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+ * DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR
+ * ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
+ * (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
+ * LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
+ * ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+ * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
+ * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ *
+ * @author  Anders Evenrud <andersevenrud@gmail.com>
+ * @licence Simplified BSD License
+ */
+
+.Window_ApplicationChatMainWindow .WindowWrapper {
+}
+
+.Window_ApplicationChatMainWindow .GUIListView {
+  position : absolute;
+  top : 26px;
+  left : 0px;
+  bottom : 26px;
+  right : 0px;
+  margin : 0;
+  padding : 0;
+  overflow : auto;
+
+  border : 0 none;
+}
+.Window_ApplicationChatMainWindow .GUIListView > .Header {
+  display : none;
+}
+.Window_ApplicationChatMainWindow .GUIListView > .Scroll {
+  top : 0;
+}
+
+.Window_ApplicationChatSettingsWindow .WindowWrapper .Label {
+  font-weight : bold;
+}
+.Window_ApplicationChatSettingsWindow .WindowWrapper .Setting {
+  margin : 5px;
+}
+.Window_ApplicationChatSettingsWindow .WindowWrapper .Buttons {
+  position : absolute;
+  bottom : 0px;
+  right : 0px;
+  width : 120px;
+}
+.Window_ApplicationChatSettingsWindow .WindowWrapper .Buttons .GUIButton {
+  display : inline-block;
+  width : 50px;
+  margin : 5px;
+}
+
+.ApplicationChatWindow .ChatMessages {
+  position : absolute;
+  top : 0px;
+  left : 0px;
+  bottom : 28px;
+  right : 0px;
+  overflow : auto;
+
+  background : #fff;
+  color : #000;
+}
+
+.ApplicationChatWindow .ChatInput {
+  position : absolute;
+  left : 0px;
+  bottom : 0px;
+  right : 0px;
+  height : 24px;
+}
+.ApplicationChatWindow .ChatInput .GUIText {
+  display : inline-block;
+  width : 100%;
+}
+.ApplicationChatWindow .ChatInput .GUIText > input {
+  background : #fff;
+  border : 0 none;
+}
+
+.ApplicationChatWindow .ChatMessages > div {
+  padding : 5px;
+}
+.ApplicationChatWindow .ChatMessages > div.Remote {
+  text-align : right;
+  background : #f8f8f8;
+}
+.ApplicationChatWindow .ChatMessages h1 {
+  margin : 0;
+  padding : 1px;
+  font-size : 100%;
+}
+.ApplicationChatWindow .ChatMessages > div.Local > h1{
+  color : #00B347;
+}
+.ApplicationChatWindow .ChatMessages h2 {
+  margin : 0;
+  padding : 1px;
+  font-size : 100%;
+  font-weight : normal;
+  font-style : italic;
+}
+.ApplicationChatWindow .ChatMessages p {
+  margin : 0;
+  padding : 1px;
+  word-break: break-all;
+}

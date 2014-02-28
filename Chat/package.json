@@ -1,0 +1,19 @@
+{
+  "ApplicationChat":  {
+    "name":       "Chat",
+    "description":"Chat with your buddies",
+    "mime":       null,
+    "icon":       "status/user-available.png",
+    "category":   "network",
+    "singular":   true,
+    "splash":     true,
+    "preload":    [
+      {"src": "vendor/strophejs/strophe.js", "type": "javascript"},
+      {"src": "main.js", "type": "javascript"},
+      {"src": "main.css", "type": "stylesheet"}
+    ]
+  }
+}
+
+
+

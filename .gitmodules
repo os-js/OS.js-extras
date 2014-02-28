@@ -4,3 +4,9 @@
 [submodule "Threejs/vendor/three.js"]
 	path = Threejs/vendor/three.js
 	url = https://github.com/mrdoob/three.js.git
+[submodule "Chat/vendor/punjab"]
+	path = Chat/vendor/punjab
+	url = https://github.com/twonds/punjab.git
+[submodule "Chat/vendor/strophejs"]
+	path = Chat/vendor/strophejs
+	url = https://github.com/strophe/strophejs.git
