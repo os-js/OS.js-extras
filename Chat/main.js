@@ -77,7 +77,7 @@
     root.appendChild(container);
 
     container = _createContainer('Account Username');
-    var username = this._addGUIElement(new OSjs.GUI.Text('SettingsUsername', {value: settings.username}), container);
+    var username = this._addGUIElement(new OSjs.GUI.Text('SettingsUsername', {placeholder: 'username@gmail.com', value: settings.username}), container);
     root.appendChild(container);
 
     container = _createContainer('Account Password');
@@ -86,13 +86,20 @@
 
 
     this._addGUIElement(new OSjs.GUI.Button('Save', {label: OSjs._('Save'), onClick: function(el, ev) {
-      app.setAccountSettings({
-        configured: true,
+      var opts = {
         name : name.getValue(),
         type : accountType.getValue(),
         username: username.getValue(),
         password: password.getValue()
-      });
+      };
+
+      if ( opts.username && opts.password ) {
+        opts.configured = true;
+      } else {
+        opts.configured = false;
+      }
+
+      app.setAccountSettings(opts);
 
       self._close();
     }}), buttonContainer);
@@ -237,13 +244,13 @@
 
     this.menuBar.addItem({name: 'status', title: OSjs._("Status")}, [
       {title: OSjs._('Online'), onClick: function() {
-        self.onSetStatus('online');
+        self.onSetStatus('chat');
       }},
       {title: OSjs._('Away'), onClick: function() {
         self.onSetStatus('away');
       }},
       {title: OSjs._('Busy'), onClick: function() {
-        self.onSetStatus('busy');
+        self.onSetStatus('dnd');
       }}
     ]);
 
@@ -330,13 +337,16 @@
           case 'chat' :
             icon = OSjs.API.getThemeResource('status/user-available.png', 'icon', '16x16');
             break;
+
           case 'xa' :
           case 'away' :
             icon = OSjs.API.getThemeResource('status/user-away.png', 'icon', '16x16');
             break;
+
           case 'dnd' :
             icon = OSjs.API.getThemeResource('status/user-busy.png', 'icon', '16x16');
             break;
+
           default :
             icon = OSjs.API.getThemeResource('status/user-offline.png', 'icon', '16x16');
             break;
@@ -373,10 +383,10 @@
     var settings = {
       account : {
         configured: false,
-        name: 'Anonymous',
-        type: 'default',
-        username: '',
-        password: ''
+        name:       'Anonymous',
+        type:       'default',
+        username:   '',
+        password:   ''
       }
     };
 
@@ -438,24 +448,21 @@
   };
 
   ApplicationChat.prototype.connect = function() {
-    var self = this;
-    if ( this.connected ) { return; }
-    var settings = this._getSetting('account') || {};
-    if ( !settings.name || !settings.username || !settings.password ) { throw "Cannot connect, you need to configure your account!"; }
     this.disconnect();
 
+    var self = this;
+    var settings = this._getSetting('account') || {};
+    if ( !settings.name || !settings.username || !settings.password ) {
+      throw "Cannot connect, you need to configure your account!";
+    }
+
     this.connection = new Strophe.Connection('/http-bind-jabber/');
-    /*
     this.connection.rawInput = function(data) {
-      console.warn("<<< rawInput", data);
+      self.onRawInput(data);
     };
     this.connection.rawOutput = function(data) {
-      console.warn(">>> rawOutput", data);
+      self.onRawOutput(data);
     };
-    */
-
-    console.warn("ApplicationChat::connect()", 'username', settings.username.length, settings.username);
-    console.warn("ApplicationChat::connect()", 'password', settings.password.length, settings.password);
 
     this.connection.connect(settings.username, settings.password, function(stat) {
       switch ( stat << 0 ) {
@@ -534,6 +541,13 @@
     alert("Authentication failed for Chat"); // FIXME
   };
 
+  ApplicationChat.prototype.onRawInput = function(data) {
+    // NOTE: Debugging
+  };
+
+  ApplicationChat.prototype.onRawOutput = function(data) {
+    // NOTE: Debugging
+  };
 
   ApplicationChat.prototype.onConnecting = function() {
     console.debug("ApplicationChat::onConnecting()");
@@ -746,6 +760,12 @@
   ApplicationChat.prototype.setOnlineStatus = function(s) {
     if ( !this.connected || !this.connection ) { return; }
     console.debug("ApplicationChat::setOnlineStatus()", s);
+
+    this.connection.send($pres({
+      show: s/*,
+      status: 'text'
+      */
+    }).tree());
   };
 
   ApplicationChat.prototype.setAccountSettings = function(s) {
