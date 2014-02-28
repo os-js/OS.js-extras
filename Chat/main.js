@@ -372,11 +372,7 @@
         type: 'default',
         username: '',
         password: ''
-      },
-      contacts : [
-        {username: 'Anders Evenrud'},
-        {username: 'Kalle Klovn'}
-      ]
+      }
     };
 
     Application.apply(this, ['ApplicationChat', args, metadata, settings]);
@@ -451,6 +447,9 @@
       console.warn(">>> rawOutput", data);
     };
     */
+
+    console.warn("ApplicationChat::connect()", 'username', settings.username.length, settings.username);
+    console.warn("ApplicationChat::connect()", 'password', settings.password.length, settings.password);
 
     this.connection.connect(settings.username, settings.password, function(stat) {
       switch ( stat << 0 ) {

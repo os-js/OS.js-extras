@@ -1,0 +1,24 @@
+# Setup
+
+In repository root:
+`git submodule init && git submodule update`
+
+Then:
+```
+# Install system deps
+sudo apt-get install python-twisted python-openssl make openjdk-6-jre
+
+# Install YUI compressor somewhere and make strophejs
+cd Chat/vendor/strophejs
+YUI_COMPRESSOR=/path/to/yui.jar make
+
+# Build and install deps
+cd Chat/vendor/punjab
+python setup.py build
+sudo python setup.py install
+
+# Start service
+sudo a2enmod proxy_http
+sudo service apache2 restart
+sudo twistd punjab
+```
