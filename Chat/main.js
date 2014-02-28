@@ -127,7 +127,8 @@
     Window.apply(this, [name + '_' + id, {width: 450, height: 300, tag: name}, app]);
 
     // Set window properties and other stuff here
-    this._title = metadata.name + ' - Conversation - ' + id;
+    this.title  = metadata.name;
+    this._title = this.title + ' - Conversation - ' + id;
     this._icon  = metadata.icon;
 
     this.id = id;
@@ -172,6 +173,8 @@
 
   ChatWindow.prototype.insert = function(msg, remote, contact) {
     if ( !this.$textContainer ) { return; }
+
+    this._setTitle(this.title + ' - Conversation - ' + contact.name);
 
     var el = document.createElement('div');
     el.className = remote ? 'Remote' : 'Local';
@@ -504,6 +507,11 @@
     this.connected = false;
     this.userid = null;
     this.started = false;
+
+    var wins = this._getWindowsByTag('ApplicationChatWindow');
+    for ( var i = 0; i < wins.length; i++ ) {
+      this._removeWindow(wins[i]);
+    }
 
     if ( this.mainWindow ) {
       this.mainWindow.setContacts({});
