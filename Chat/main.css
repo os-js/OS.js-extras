@@ -67,6 +67,10 @@
   width : 50px;
   margin : 5px;
 }
+.Window_ApplicationChatSettingsWindow .WindowWrapper .Notice {
+  padding : 10px;
+  font-style : italic;
+}
 
 .ApplicationChatWindow .ChatMessages {
   position : absolute;

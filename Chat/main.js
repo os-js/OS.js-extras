@@ -103,6 +103,11 @@
 
     root.appendChild(buttonContainer);
 
+    var notice = document.createElement('div');
+    notice.className = 'Notice';
+    notice.appendChild(document.createTextNode('If authentication fails you\'ll have to manually allow access via OS.js (Google will notify you by message automatically)'));
+    root.appendChild(notice);
+
     return root;
   };
 
@@ -384,6 +389,7 @@
     this.connection = null;
     this.contacts   = {};
     this.userid     = null;
+    this.started    = false;
   };
 
   ApplicationChat.prototype = Object.create(Application.prototype);
@@ -416,7 +422,7 @@
       this.openSettingsWindow();
     } else {
       setTimeout(function() {
-        self.connect();
+        //self.connect();
       }, 200);
     }
   };
@@ -465,6 +471,10 @@
           self.onDisconnected();
           break;
 
+        case Strophe.Status.AUTHFAIL :
+          self.onAuthFailed();
+          break;
+
         case Strophe.Status.CONNECTED :
           self.onConnected();
           break;
@@ -486,6 +496,7 @@
 
     this.connected = false;
     this.userid = null;
+    this.started = false;
 
     if ( this.mainWindow ) {
       this.mainWindow.setContacts({});
@@ -519,8 +530,14 @@
     win._focus();
   };
 
+  ApplicationChat.prototype.onAuthFailed = function() {
+    alert("Authentication failed for Chat"); // FIXME
+  };
+
+
   ApplicationChat.prototype.onConnecting = function() {
     console.debug("ApplicationChat::onConnecting()");
+    this.started = true;
     this.connected = false;
     if ( this.mainWindow ) {
       this.mainWindow.setStatus("Connecting...");
@@ -536,11 +553,12 @@
 
   ApplicationChat.prototype.onDisconnected = function() {
     console.debug("ApplicationChat::onDisconnected()");
-    if ( !this.connected ) {
-      alert("Failed to connect to Chat server. For now see the Developer Console log, sorry!");
+    if ( this.started && !this.connected ) {
+      alert("Failed to connect to Chat server. For now see the Developer Console log, sorry!"); // FIXME
     }
 
     this.connected = false;
+    //this.started = false;
     if ( this.mainWindow ) {
       this.mainWindow.setStatus("Disconnected!");
       this.mainWindow.setConnectionState(false);
