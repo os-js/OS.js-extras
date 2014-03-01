@@ -53,6 +53,14 @@
     return icon;
   };
 
+  var StatusDescriptions = {
+    'offline' : 'Offline',
+    'away'    : 'Away',
+    'chat'    : 'Online',
+    'dnd'     : 'Do not disturb',
+    'xa'      : 'Away'
+  };
+
   /////////////////////////////////////////////////////////////////////////////
   // SETTINGS WINDOW
   /////////////////////////////////////////////////////////////////////////////
@@ -247,7 +255,6 @@
     this.contactList      = null;
     this.statusBar        = null;
     this.connectionState  = false;
-    this.selectedContact  = null;
   };
 
   MainWindow.prototype = Object.create(Window.prototype);
@@ -306,7 +313,7 @@
       }
     };
 
-    this.contactList = this._addGUIElement(new GUI.ListView('ChatContactList'), root);
+    this.contactList = this._addGUIElement(new GUI.ListView('ChatContactList', {indexKey: 'id'}), root);
     this.contactList.setColumns([
       {key: 'image',        title: '', type: 'image', domProperties: {width: "16"}},
       {key: 'name',         title: OSjs._('Contact')},
@@ -317,9 +324,6 @@
       if ( item )  {
         self.onContactOpened(item);
       }
-    };
-    this.contactList.onSelect = function(ev, el, item) {
-      self.selectedContact = item || null;
     };
 
     this.contactList.render();
@@ -381,19 +385,13 @@
           contacts.push({
             id:    i,
             name:  iter.name,
-            state: iter.show,
+            state: StatusDescriptions[iter.show],
             image: _getStatusIcon(iter.show)
           });
         }
       }
       this.contactList.setRows(contacts);
       this.contactList.render();
-
-      if ( this.selectedContact ) {
-        if ( !this.contactList.setSelected(this.selectedContact.id, 'id') ) {
-          this.selectedContact = null;
-        }
-      }
     }
   };
 
