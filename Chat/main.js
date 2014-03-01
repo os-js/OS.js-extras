@@ -72,6 +72,40 @@
   };
 
   /////////////////////////////////////////////////////////////////////////////
+  // ABOUT WINDOW
+  /////////////////////////////////////////////////////////////////////////////
+
+  var AboutWindow = function(app, metadata) {
+    Window.apply(this, ['ApplicationChatAboutWindow', {width: 350, height: 150, min_height: 150}, app]);
+
+    // Set window properties and other stuff here
+    this._title = metadata.name + ' - About';
+    this._icon  = metadata.icon;
+    this._properties.allow_resize = false;
+    this._properties.allow_maximize = false;
+  };
+
+  AboutWindow.prototype = Object.create(Window.prototype);
+
+  AboutWindow.prototype.init = function(wmRef, app) {
+    var root = Window.prototype.init.apply(this, arguments);
+    var self = this;
+
+    var header = document.createElement('h1');
+    header.innerHTML = 'About Chat';
+
+    var textarea = document.createElement('div');
+    textarea.innerHTML = '<span>Created by Anders Evenrud</span><br />';
+    textarea.innerHTML += '<br />';
+    textarea.innerHTML += '<a href="https://github.com/strophe/strophejs" target="_blank">Using strophejs</a>';
+
+    root.appendChild(header);
+    root.appendChild(textarea);
+
+    return root;
+  };
+
+  /////////////////////////////////////////////////////////////////////////////
   // SETTINGS WINDOW
   /////////////////////////////////////////////////////////////////////////////
 
@@ -332,6 +366,12 @@
       }}
     ]);
 
+    this.menuBar.addItem({name: 'help', title: OSjs._("Help")}, [
+      {title: OSjs._('About'), onClick: function() {
+        self.onOpenAbout();
+      }}
+    ]);
+
     this.menuBar.onMenuOpen = function(menu, mpos, mitem, menuBar) {
       if ( mitem.name == 'account' ) {
         if ( self.connectionState ) {
@@ -382,6 +422,10 @@
     this.setConnectionState(false);
     this.setStatus('Set up your account and connect');
     return root;
+  };
+
+  MainWindow.prototype.onOpenAbout = function() {
+    this._appRef.openAboutWindow();
   };
 
   MainWindow.prototype.onOpenSettings = function() {
@@ -686,6 +730,17 @@
   ApplicationChat.prototype.openGroupChatWindow = function(id) {
     if ( !this.connected || !this.connection ) { return; }
     // TODO
+  };
+
+  ApplicationChat.prototype.openAboutWindow = function() {
+    var win = this._getWindowByName('ApplicationChatAboutWindow');
+    if ( win ) {
+      win._restore();
+      return;
+    }
+
+    win = this._addWindow(new AboutWindow(this, this.__metadata));
+    win._focus();
   };
 
   ApplicationChat.prototype.openSettingsWindow = function() {

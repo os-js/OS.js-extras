@@ -46,3 +46,25 @@
 .Window_UserMediaWindow .WindowWrapper {
   background : #000;
 }
+.Window_ApplicationRTCGroupVideoAboutWindow .WindowWrapper {
+  background : #fff;
+  text-align : center;
+  padding : 10px;
+}
+.Window_ApplicationRTCGroupVideoAboutWindow .WindowWrapper h1 {
+  padding : 0;
+  margin : 0;
+  font-size : 24px;
+}
+.Window_ApplicationRTCGroupVideoAboutWindow .WindowWrapper span {
+  font-size : 16px;
+}
+.Window_ApplicationRTCGroupVideoAboutWindow .WindowWrapper a {
+  text-decoration : none;
+  color : #0000ff;
+}
+.Window_ApplicationRTCGroupVideoAboutWindow .WindowWrapper > div {
+  font-size : 12px;
+  line-height : 24px;
+}
+

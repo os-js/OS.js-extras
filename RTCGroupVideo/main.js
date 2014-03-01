@@ -33,6 +33,40 @@
   // TODO: Update room list periodicaly
 
   /////////////////////////////////////////////////////////////////////////////
+  // ABOUT WINDOW
+  /////////////////////////////////////////////////////////////////////////////
+
+  var AboutWindow = function(app, metadata) {
+    Window.apply(this, ['ApplicationRTCGroupVideoAboutWindow', {width: 350, height: 150, min_height: 150}, app]);
+
+    // Set window properties and other stuff here
+    this._title = metadata.name + ' - About';
+    this._icon  = metadata.icon;
+    this._properties.allow_resize = false;
+    this._properties.allow_maximize = false;
+  };
+
+  AboutWindow.prototype = Object.create(Window.prototype);
+
+  AboutWindow.prototype.init = function(wmRef, app) {
+    var root = Window.prototype.init.apply(this, arguments);
+    var self = this;
+
+    var header = document.createElement('h1');
+    header.innerHTML = 'About WebRTC Group Video';
+
+    var textarea = document.createElement('div');
+    textarea.innerHTML = '<span>Created by Anders Evenrud</span><br />';
+    textarea.innerHTML += '<br />';
+    textarea.innerHTML += '<a href="https://github.com/muaz-khan/WebRTC-Experiment" target="_blank">Using WebRTC-Experiment code</a>';
+
+    root.appendChild(header);
+    root.appendChild(textarea);
+
+    return root;
+  };
+
+  /////////////////////////////////////////////////////////////////////////////
   // USER MEDIA WINDOW
   /////////////////////////////////////////////////////////////////////////////
 
@@ -163,6 +197,11 @@
     ]);
     this.menuBar.addItem({name: 'create', title: OSjs._("Create Room")});
     this.menuBar.addItem({name: 'leave', title: OSjs._("Leave Room")});
+    this.menuBar.addItem({name: 'help', title: OSjs._("Help")}, [
+      {title: OSjs._('About'), onClick: function() {
+        self.onOpenAbout();
+      }}
+    ]);
 
     this.menuBar.onMenuOpen = function(menu, pos, item) {
       if ( typeof item === 'string' ) { return; } // Backward compability
@@ -198,6 +237,10 @@
     // Destroy custom objects etc. here
 
     Window.prototype.destroy.apply(this, arguments);
+  };
+
+  ApplicationRTCGroupVideoWindow.prototype.onOpenAbout = function() {
+    this._appRef.openAboutWindow();
   };
 
   ApplicationRTCGroupVideoWindow.prototype.onCreateSelect = function() {
@@ -370,6 +413,17 @@
   //
   // Actions
   //
+
+  ApplicationRTCGroupVideo.prototype.openAboutWindow = function() {
+    var win = this._getWindowByName('ApplicationRTCGroupVideoAboutWindow');
+    if ( win ) {
+      win._restore();
+      return;
+    }
+
+    win = this._addWindow(new AboutWindow(this, this.__metadata));
+    win._focus();
+  };
 
   ApplicationRTCGroupVideo.prototype.joinRoom = function(room) {
     if ( !this.meeting ) {

@@ -161,4 +161,28 @@
   position : absolute;
   bottom : 6px;
   right : 6px;
+
 }
+
+.Window_ApplicationChatAboutWindow .WindowWrapper {
+  background : #fff;
+  text-align : center;
+  padding : 10px;
+}
+.Window_ApplicationChatAboutWindow .WindowWrapper h1 {
+  padding : 0;
+  margin : 0;
+  font-size : 24px;
+}
+.Window_ApplicationChatAboutWindow .WindowWrapper span {
+  font-size : 16px;
+}
+.Window_ApplicationChatAboutWindow .WindowWrapper a {
+  text-decoration : none;
+  color : #0000ff;
+}
+.Window_ApplicationChatAboutWindow .WindowWrapper > div {
+  font-size : 12px;
+  line-height : 24px;
+}
+
