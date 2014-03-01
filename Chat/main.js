@@ -247,6 +247,7 @@
     this.contactList      = null;
     this.statusBar        = null;
     this.connectionState  = false;
+    this.selectedContact  = null;
   };
 
   MainWindow.prototype = Object.create(Window.prototype);
@@ -317,6 +318,9 @@
         self.onContactOpened(item);
       }
     };
+    this.contactList.onSelect = function(ev, el, item) {
+      self.selectedContact = item || null;
+    };
 
     this.contactList.render();
 
@@ -384,6 +388,10 @@
       }
       this.contactList.setRows(contacts);
       this.contactList.render();
+
+      if ( this.selectedContact ) {
+        this.contactList.setSelected(this.selectedContact.id, 'id');
+      }
     }
   };
 
@@ -462,6 +470,10 @@
     }
   };
 
+  //
+  // Actions
+  //
+
   ApplicationChat.prototype.connect = function() {
     this.disconnect();
 
@@ -530,8 +542,39 @@
     }
   };
 
-  ApplicationChat.prototype._getChatWindow = function(id) {
-    return this._getWindowByName('ApplicationChatWindow_' + id);
+  ApplicationChat.prototype.sendMessage = function(message, userid, win) {
+    if ( !this.connected || !this.connection ) { return false; }
+
+
+    win = win || this.openChatWindow(userid);
+    if ( win ) {
+      win.insert(message, true, this.getAccountContact());
+    }
+
+    var reply = $msg({to: userid, from: this.userid, type: 'chat'})
+                  .cnode(Strophe.xmlElement('body', message)).up()
+                  .c('active', {xmlns: "http://jabber.org/protocol/chatstates"});
+
+    console.debug("ApplicationChat::sendMessage()", reply);
+
+    this.connection.send(reply.tree());
+
+    return true;
+  };
+
+  ApplicationChat.prototype.openGroupChatWindow = function(id) {
+    // TODO
+  };
+
+  ApplicationChat.prototype.openSettingsWindow = function() {
+    var win = this._getWindowByName('ApplicationChatSettingsWindow');
+    if ( win ) {
+      win._restore();
+      return;
+    }
+
+    win = this._addWindow(new SettingsWindow(this, this.__metadata));
+    win._focus();
   };
 
   ApplicationChat.prototype.openChatWindow = function(id) {
@@ -547,19 +590,9 @@
     return win;
   };
 
-  ApplicationChat.prototype.openGroupChatWindow = function(id) {
-  };
-
-  ApplicationChat.prototype.openSettingsWindow = function() {
-    var win = this._getWindowByName('ApplicationChatSettingsWindow');
-    if ( win ) {
-      win._restore();
-      return;
-    }
-
-    win = this._addWindow(new SettingsWindow(this, this.__metadata));
-    win._focus();
-  };
+  //
+  // Events
+  //
 
   ApplicationChat.prototype.onAuthFailed = function() {
     alert("Authentication failed for Chat"); // FIXME
@@ -751,24 +784,12 @@
     }
   };
 
-  ApplicationChat.prototype.sendMessage = function(message, userid, win) {
-    if ( !this.connected || !this.connection ) { return false; }
+  //
+  // Getters
+  //
 
-
-    win = win || this.openChatWindow(userid);
-    if ( win ) {
-      win.insert(message, true, this.getAccountContact());
-    }
-
-    var reply = $msg({to: userid, from: this.userid, type: 'chat'})
-                  .cnode(Strophe.xmlElement('body', message)).up()
-                  .c('active', {xmlns: "http://jabber.org/protocol/chatstates"});
-
-    console.debug("ApplicationChat::sendMessage()", reply);
-
-    this.connection.send(reply.tree());
-
-    return true;
+  ApplicationChat.prototype._getChatWindow = function(id) {
+    return this._getWindowByName('ApplicationChatWindow_' + id);
   };
 
   ApplicationChat.prototype.getContact = function(jid) {
