@@ -294,6 +294,10 @@
     this.$textContainer.scrollTop = this.$textContainer.scrollHeight;
 
     this.update(contact);
+
+    if ( remote ) {
+      OSjs.API.playSound('message');
+    }
   };
 
   ChatWindow.prototype.update = function(contact) {
@@ -727,7 +731,7 @@
 
     win = win || this.openChatWindow(userid);
     if ( win ) {
-      win.insert(message, true, this.getAccountContact());
+      win.insert(message, false, this.getAccountContact());
     }
 
     var reply = $msg({to: userid, from: this.userid, type: 'chat'})
@@ -1098,7 +1102,7 @@
       var win     = this.openChatWindow(jid);
 
       if ( type == "chat" ) {
-        win.insert(message, false, this.getContact(jid));
+        win.insert(message, true, this.getContact(jid));
       } else if ( type == "error" ) {
         var error = msg.getElementsByTagName('error')[0];
         console.error("ApplicationChat::onMessage()", 'error', error, msg);
