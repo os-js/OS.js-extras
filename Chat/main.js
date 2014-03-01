@@ -390,7 +390,9 @@
       this.contactList.render();
 
       if ( this.selectedContact ) {
-        this.contactList.setSelected(this.selectedContact.id, 'id');
+        if ( !this.contactList.setSelected(this.selectedContact.id, 'id') ) {
+          this.selectedContact = null;
+        }
       }
     }
   };
