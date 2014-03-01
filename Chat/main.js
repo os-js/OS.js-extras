@@ -209,6 +209,7 @@
 
     this.id             = id;
     this.$textContainer = null;
+    this.$notifications = null;
     this.contact        = contact;
   };
 
@@ -222,7 +223,8 @@
     this.$textContainer = document.createElement('div');
     this.$textContainer.className = 'ChatMessages';
 
-    root.appendChild(this.$textContainer);
+    this.$notifications = document.createElement('div');
+    this.$notifications.className = 'ChatNotifications';
 
     var inputContainer = document.createElement('div');
     inputContainer.className = 'ChatInput';
@@ -243,7 +245,10 @@
       }
     });
 
+
+    root.appendChild(this.$textContainer);
     root.appendChild(inputContainer);
+    root.appendChild(this.$notifications);
 
     if ( this.contact ) {
       this.update(this.contact);
@@ -307,6 +312,19 @@
       this._setTitle(this.title + ' - Conversation - ' + contact.name);
     }
     this._setIcon(_getStatusIcon(contact.show));
+  };
+
+  ChatWindow.prototype.updateComposing = function(c) {
+    var n = this.$notifications;
+    if ( n  ) {
+      if ( c ) {
+        n.style.display = 'block';
+        n.innerHTML = 'User is typing...';
+      } else {
+        n.style.display = 'none';
+        n.innerHTML = '';
+      }
+    }
   };
 
   /////////////////////////////////////////////////////////////////////////////
@@ -1087,20 +1105,31 @@
     };
   })();
 
+  ApplicationChat.prototype.onCompose = function(user, composing) {
+    var win = this._getChatWindow(user);
+    if ( win ) {
+      console.debug("ApplicationChat::onCompose()", user, composing);
+      win.updateComposing(composing);
+    }
+  };
+
   ApplicationChat.prototype.onMessage = function(msg) {
+    if ( !msg ) { return; }
+
     var elems = msg.getElementsByTagName('body');
+    var to    = msg.getAttribute('to');
+    var from  = msg.getAttribute('from');
+    var type  = msg.getAttribute('type');
+    var jid   = from.split('/')[0];
 
     console.debug("ApplicationChat::onMessage()", msg);
 
+    this.onCompose(jid, false);
+
     if ( elems.length > 0 ) {
-      var to      = msg.getAttribute('to');
-      var from    = msg.getAttribute('from');
-      var type    = msg.getAttribute('type');
       var message = Strophe.getText(elems[0]);
 
-      var jid     = from.split('/')[0];
-      var win     = this.openChatWindow(jid);
-
+      var win = this.openChatWindow(jid);
       if ( type == "chat" ) {
         win.insert(message, true, this.getContact(jid));
       } else if ( type == "error" ) {
@@ -1109,6 +1138,18 @@
         win.insert(OSjs.Utils.format("Error sending message ({0}): {1}", 
                                      error.getAttribute('code'),
                                      message), true, this.getAccountContact());
+      }
+    } else {
+      for ( var i in msg.childNodes ) {
+        if ( msg.childNodes.hasOwnProperty(i) ) {
+          if ( msg.childNodes[i].tagName == 'cha:composing' ) {
+            this.onCompose(jid, true);
+            break;
+          } else if ( msg.childNodes[i].tagName == 'cha:paused' ) {
+            this.onCompose(jid, false);
+            break;
+          }
+        }
       }
     }
   };

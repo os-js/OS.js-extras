@@ -79,6 +79,7 @@
   bottom : 28px;
   right : 0px;
   overflow : auto;
+  z-index : 1;
 
   background : #fff;
   color : #000;
@@ -90,6 +91,7 @@
   bottom : 0px;
   right : 0px;
   height : 24px;
+  z-index : 1;
 }
 .ApplicationChatWindow .ChatInput .GUIText {
   display : inline-block;
@@ -147,6 +149,20 @@
   margin : 0;
   padding : 1px;
   word-break: break-all;
+}
+.ApplicationChatWindow .ChatNotifications {
+  position : absolute;
+  top : 0px;
+  left : 0px;
+  right : 0px;
+  z-index : 100;
+
+  background : #fff;
+  color : #000;
+  text-align : center;
+  padding : 5px;
+  display : none;
+  border : 1px solid #000;
 }
 
 .Window_ApplicationChatUserInfoWindow .GUITextarea {
