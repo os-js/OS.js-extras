@@ -29,6 +29,16 @@
  */
 (function(Application, Window, GUI, Dialogs) {
 
+  var _getTimestamp = function(d) {
+    d = d ||new Date();
+
+    var day   = d.getUTCDate();
+    var month = d.getUTCMonth();
+    var year  = d.getUTCFullYear();
+    var time  = OSjs.Utils.format("{0}:{1}:{2}", d.getUTCHours(), d.getUTCMinutes(), d.getUTCSeconds());
+    return OSjs.Utils.format("{0}/{1}/{2} {3}", month, day, year, time);
+  };
+
   var _getStatusIcon = function(s) {
     var icon = 'about:blank';
 
@@ -271,21 +281,19 @@
     }
 
     var inner = document.createElement('div');
+    inner.className = 'triangle-border ' + (remote ? 'right' : 'left');
 
     var el = document.createElement('div');
     el.className = remote ? 'Remote' : 'Local';
 
+    var h1 = OSjs.Utils.format("{0} - {1}", contact.name, _getTimestamp());
     var header = document.createElement('h1');
-    header.appendChild(document.createTextNode(contact.name));
-
-    var timestamp = document.createElement('h2');
-    timestamp.appendChild(document.createTextNode((new Date())));
+    header.appendChild(document.createTextNode(h1));
 
     var message = document.createElement('p');
     message.appendChild(document.createTextNode(msg));
 
     inner.appendChild(header);
-    inner.appendChild(timestamp);
     inner.appendChild(message);
 
     if ( img ) {
