@@ -53,6 +53,16 @@
     return icon;
   };
 
+  var _getVcardImage = function(vcard) {
+    vcard = vcard || {};
+    if ( vcard.photo && vcard.photo.type && vcard.photo.data ) {
+      return OSjs.Utils.format("data:{0};base64,{1}", 
+                               vcard.photo.type,
+                               vcard.photo.data);
+    }
+    return null;
+  };
+
   var StatusDescriptions = {
     'offline' : 'Offline',
     'away'    : 'Away',
@@ -163,9 +173,9 @@
     this._title = this.title + ' - Conversation - ' + id;
     this._icon  = metadata.icon;
 
-    this.id = id;
+    this.id             = id;
     this.$textContainer = null;
-    this.contact = contact;
+    this.contact        = contact;
   };
 
   ChatWindow.prototype = Object.create(Window.prototype);
@@ -205,11 +215,23 @@
       this.update(this.contact);
     }
 
+    this._appRef.requestVcard(this.id);
+
     return root;
   };
 
   ChatWindow.prototype.insert = function(msg, remote, contact) {
     if ( !this.$textContainer ) { return; }
+
+    var src = _getVcardImage(contact.vcard);
+    var img = null;
+    if ( src ) {
+      img = document.createElement('img');
+      img.src = src;
+      img.alt = "";
+    }
+
+    var inner = document.createElement('div');
 
     var el = document.createElement('div');
     el.className = remote ? 'Remote' : 'Local';
@@ -223,9 +245,16 @@
     var message = document.createElement('p');
     message.appendChild(document.createTextNode(msg));
 
-    el.appendChild(header);
-    el.appendChild(timestamp);
-    el.appendChild(message);
+    inner.appendChild(header);
+    inner.appendChild(timestamp);
+    inner.appendChild(message);
+
+    if ( img ) {
+      el.className += ' HasAvatar';
+      el.appendChild(img);
+    }
+
+    el.appendChild(inner);
 
     this.$textContainer.appendChild(el);
     this.$textContainer.scrollTop = this.$textContainer.scrollHeight;
@@ -234,6 +263,8 @@
   };
 
   ChatWindow.prototype.update = function(contact) {
+    this.contact = contact;
+
     if ( contact.name ) {
       this._setTitle(this.title + ' - Conversation - ' + contact.name);
     }
@@ -325,6 +356,24 @@
         self.onContactOpened(item);
       }
     };
+    this.contactList.onCreateRow = function(row, iter, colref) {
+      row.title = OSjs.Utils.format("{0}\nGroup: {1}\nStatus: {2}", iter.name, iter.group || '<no group>', iter.state);
+    };
+    this.contactList.onContextMenu = function(ev, row, iter) {
+      var list = [
+        {name: 'Chat', title: OSjs._('Chat'), onClick: function() {
+          self.onContactOpened(iter);
+        }},
+        {name: 'Delete', title: OSjs._('Delete'), disabled: true, onClick: function() {
+          // TODO
+        }},
+        {name: 'Information', title: OSjs._('Information'), onClick: function() {
+          self.onContactInfo(iter);
+        }}
+      ];
+
+      OSjs.GUI.createMenu(list, {x: ev.clientX, y: ev.clientY});
+    };
 
     this.contactList.render();
 
@@ -341,6 +390,10 @@
 
   MainWindow.prototype.onSetStatus = function(s) {
     this._appRef.setOnlineStatus(s);
+  };
+
+  MainWindow.prototype.onContactInfo = function(item) {
+    this._appRef.openUserInfoWindow(item.id);
   };
 
   MainWindow.prototype.onAddContact = function() {
@@ -385,6 +438,7 @@
           contacts.push({
             id:    i,
             name:  iter.name,
+            group: iter.group,
             state: StatusDescriptions[iter.show],
             image: _getStatusIcon(iter.show)
           });
@@ -393,6 +447,57 @@
       this.contactList.setRows(contacts);
       this.contactList.render();
     }
+  };
+
+  /////////////////////////////////////////////////////////////////////////////
+  // USER INFO WINDOW
+  /////////////////////////////////////////////////////////////////////////////
+
+  var UserInfoWindow = function(jid, contact, app, metadata) {
+    Window.apply(this, ['ApplicationChatUserInfoWindow', {width: 400, height: 300}, app]);
+
+    this.jid = jid;
+    this.contact = contact;
+
+    // Set window properties and other stuff here
+    this._title = metadata.name + ' - vCard - ' + contact.name;
+    this._icon  = metadata.icon;
+    this._properties.allow_resize   = false;
+    this._properties.allow_maximize = false;
+    this._properties.allow_minimize = false;
+  };
+
+  UserInfoWindow.prototype = Object.create(Window.prototype);
+
+  UserInfoWindow.prototype.init = function(wmRef, app) {
+    var root = Window.prototype.init.apply(this, arguments);
+    var self = this;
+
+    var textarea = this._addGUIElement(new GUI.Textarea('TextpadTextarea', {disabled: true}), root);
+
+    var _setInfo = function(desc) {
+      if ( !textarea ) { return; }
+
+      var metadata = [];
+      for ( var i in self.contact ) {
+        if ( self.contact.hasOwnProperty(i) ) {
+          if ( typeof self.contact[i] === 'object' ) {
+            metadata.push(i + ": " + JSON.stringify(self.contact[i]));
+          } else {
+            metadata.push(i + ": " + self.contact[i]);
+          }
+        }
+      }
+      textarea.setValue(desc + ":\n\n" + metadata.join("\n"));
+    };
+
+    _setInfo("Requesting information for contact");
+
+    this._appRef.requestVcard(this.jid, function(response) {
+      _setInfo("Full user information");
+    });
+
+    return root;
   };
 
   /////////////////////////////////////////////////////////////////////////////
@@ -423,6 +528,7 @@
     this.contacts   = {};
     this.userid     = null;
     this.started    = false;
+    this.vcard      = null;
   };
 
   ApplicationChat.prototype = Object.create(Application.prototype);
@@ -563,6 +669,7 @@
   };
 
   ApplicationChat.prototype.openGroupChatWindow = function(id) {
+    if ( !this.connected || !this.connection ) { return; }
     // TODO
   };
 
@@ -578,6 +685,8 @@
   };
 
   ApplicationChat.prototype.openChatWindow = function(id) {
+    if ( !this.connected || !this.connection ) { return; }
+
     var win = this._getChatWindow(id);
     var contact = this.getContact(id);
     if ( win ) {
@@ -588,6 +697,81 @@
     win = this._addWindow(new ChatWindow(id, this.contacts[id], this, this.__metadata));
     win._focus();
     return win;
+  };
+
+  ApplicationChat.prototype.openUserInfoWindow = function(id) {
+    if ( !this.connected || !this.connection ) { return; }
+
+    var win = this._addWindow(new UserInfoWindow(id, this.contacts[id], this, this.__metadata));
+    win._focus();
+    return win;
+  };
+
+  ApplicationChat.prototype.sendVcard = function() {
+    if ( !this.connected || !this.connection ) { return; }
+
+    /*
+     * TODO
+    var avatar = '';
+    var iq = $iq({ type: 'set', to: this.userid }).c('vCard', { xmlns:'vcard-temp' }).c('PHOTO').c('EXTVAL', avatar);
+    this.connection.sendIQ(iq);
+    */
+  };
+
+  ApplicationChat.prototype._requestVcard = function(jid, callback) {
+    callback = callback || function() {};
+
+    var self = this;
+    var iq = $iq({type: 'get', to: jid, id: this.connection.getUniqueId('vCard')})
+                .c('vCard', {xmlns: 'vcard-temp'}).tree();
+
+    this.connection.sendIQ(iq, function (response) {
+      var elem = response.getElementsByTagName("vCard");
+      var item = null;
+      if ( elem.length ) {
+        var fn    = Strophe.getText(elem[0].getElementsByTagName('FN')[0]);
+        var url   = Strophe.getText(elem[0].getElementsByTagName('URL')[0]);
+        var photo = null;
+
+        try {
+          var pel = elem[0].getElementsByTagName('PHOTO')[0];
+          photo = {
+            type: Strophe.getText(pel.getElementsByTagName('TYPE')[0]),
+            data: Strophe.getText(pel.getElementsByTagName('BINVAL')[0])
+          };
+        } catch ( e ) {
+          console.warn("vCard photo parse error", e);
+        }
+
+        item = {
+          name:   fn,
+          url:    url,
+          photo:  photo
+        };
+      }
+
+      callback.call(self, item);
+    });
+  };
+
+  ApplicationChat.prototype.requestVcard = function(jid, callback) {
+    if ( !this.connected || !this.connection ) { return; }
+    console.debug("ApplicationChat::requestVcard()", jid);
+    callback = callback || function() {};
+
+    if ( this.contacts[jid] ) {
+      if ( this.contacts[jid].vcard ) {
+        callback.call(this, this.contacts[jid].vcard);
+        return;
+      }
+    }
+
+    this._requestVcard(jid, function(item) {
+      if ( item ) {
+        this.contacts[jid].vcard = item;
+      }
+      callback.call(this, item);
+    });
   };
 
   //
@@ -674,6 +858,10 @@
     }, "jabber:iq:roster", "iq", "set");
 
     this.connection.send($pres().tree());
+
+    this._requestVcard(this.userid, function(item) {
+      self.vcard = item || null;
+    });
   };
 
   ApplicationChat.prototype.onIQ = function(iq) {
@@ -681,16 +869,25 @@
 
     var items = iq.getElementsByTagName('item');
     if ( items.length ) {
-      var jid, name, win;
+      var jid, name, win, groups;
       for ( var i = 0; i < items.length; i++ ) {
         win = null;
         jid = items[i].getAttribute('jid');
         name = items[i].getAttribute('name');
+        groups = items[i].getElementsByTagName('group');
+
+        /*
+           <item jid="jid here" name="Full name" subscription="both">
+             <group>Group Name</group>
+           </item>
+         */
 
         if ( this.contacts[jid] ) {
           if ( name && name.length ) {
             this.contacts[jid].name = name;
-
+          }
+          if ( groups.length ) {
+            this.contacts[jid].group = Strophe.getText(groups[0]) || null;
           }
           win = this._getChatWindow(jid);
         }
@@ -723,9 +920,21 @@
     return function(pres) {
       console.debug("ApplicationChat::onPresence()");
 
+      /*
+<presence xmlns="jabber:client" to="myself@something" from="otheruser@something">
+  <show>away</show>
+  <caps:c xmlns:caps="http://jabber.org/protocol/caps" node="http://www.android.com/gtalk/client/caps" ver="1.1"></caps:c>
+  <x xmlns="vcard-temp:x:update">
+    <photo>some hash here</photo>
+  </x>
+</presence>
+*/
+
       var from  = pres.getAttribute('from'); // Contact
       var to    = pres.getAttribute('to');   // Myself
       var type  = pres.getAttribute('type');
+      var photo = null;
+
 
       if ( !to ) { return; }
 
@@ -734,6 +943,11 @@
       var show  = test.length ? test : (type === 'unavailable' ? 'offline' : 'chat');
       var jid   = from.split('/')[0];
 
+      elems = pres.getElementsByTagName('photo');
+      if ( elems.length && elems[0] ) {
+        photo = Strophe.getText(elems[0]) || null;
+      }
+
       if ( !this.contacts[jid] ) {
         this.contacts[jid] = {};
       }
@@ -741,6 +955,14 @@
       this.contacts[jid].id      = jid;
       this.contacts[jid].account = to;
       this.contacts[jid].show    = show;
+      this.contacts[jid].photo   = photo;
+
+      if ( !this.contacts[jid].vcard ) {
+        this.contacts[jid].vcard = null;
+      }
+      if ( !this.contacts[jid].group ) {
+        this.contacts[jid].group = null;
+      }
       if ( !this.contacts[jid].name ) {
         this.contacts[jid].name  = jid;
       }
@@ -805,7 +1027,8 @@
       id: this.userid,
       name: settings.name || this.userid,
       show: 'offline',
-      account: ''
+      account: '',
+      vcard: this.vcard
     };
   };
 

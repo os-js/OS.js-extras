@@ -102,17 +102,38 @@
 
 .ApplicationChatWindow .ChatMessages > div {
   padding : 5px;
+  min-height : 96px;
+  position : relative;
 }
 .ApplicationChatWindow .ChatMessages > div.Remote {
   text-align : right;
   background : #f8f8f8;
 }
+.ApplicationChatWindow .ChatMessages > div > img {
+  position : absolute;
+  top : 5px;
+}
+.ApplicationChatWindow .ChatMessages > div.Local > img {
+  left : 5px;
+}
+.ApplicationChatWindow .ChatMessages > div.Remote > img {
+  right : 5px;
+}
+
+
+.ApplicationChatWindow .ChatMessages > div.Local.HasAvatar div {
+  padding-left : 105px;
+}
+.ApplicationChatWindow .ChatMessages > div.Remote.HasAvatar div {
+  padding-right : 105px;
+}
+
 .ApplicationChatWindow .ChatMessages h1 {
   margin : 0;
   padding : 1px;
   font-size : 100%;
 }
-.ApplicationChatWindow .ChatMessages > div.Local > h1{
+.ApplicationChatWindow .ChatMessages > div.Local > h1 {
   color : #00B347;
 }
 .ApplicationChatWindow .ChatMessages h2 {
@@ -126,4 +147,12 @@
   margin : 0;
   padding : 1px;
   word-break: break-all;
+}
+
+.Window_ApplicationChatUserInfoWindow .GUITextarea {
+  position : absolute;
+  top : 5px;
+  left : 5px;
+  bottom : 5px;
+  right : 5px;
 }
