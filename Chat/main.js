@@ -29,6 +29,30 @@
  */
 (function(Application, Window, GUI, Dialogs) {
 
+  var _getStatusIcon = function(s) {
+    var icon = 'about:blank';
+
+    switch ( s ) {
+      case 'chat' :
+        icon = OSjs.API.getThemeResource('status/user-available.png', 'icon', '16x16');
+        break;
+
+      case 'xa' :
+      case 'away' :
+        icon = OSjs.API.getThemeResource('status/user-away.png', 'icon', '16x16');
+        break;
+
+      case 'dnd' :
+        icon = OSjs.API.getThemeResource('status/user-busy.png', 'icon', '16x16');
+        break;
+
+      default :
+        icon = OSjs.API.getThemeResource('status/user-offline.png', 'icon', '16x16');
+        break;
+    }
+    return icon;
+  };
+
   /////////////////////////////////////////////////////////////////////////////
   // SETTINGS WINDOW
   /////////////////////////////////////////////////////////////////////////////
@@ -122,7 +146,7 @@
   // CHAT WINDOW
   /////////////////////////////////////////////////////////////////////////////
 
-  var ChatWindow = function(id, app, metadata) {
+  var ChatWindow = function(id, contact, app, metadata) {
     var name = 'ApplicationChatWindow';
     Window.apply(this, [name + '_' + id, {width: 450, height: 300, tag: name}, app]);
 
@@ -133,6 +157,7 @@
 
     this.id = id;
     this.$textContainer = null;
+    this.contact = contact;
   };
 
   ChatWindow.prototype = Object.create(Window.prototype);
@@ -168,13 +193,15 @@
 
     root.appendChild(inputContainer);
 
+    if ( this.contact ) {
+      this.update(this.contact);
+    }
+
     return root;
   };
 
   ChatWindow.prototype.insert = function(msg, remote, contact) {
     if ( !this.$textContainer ) { return; }
-
-    this._setTitle(this.title + ' - Conversation - ' + contact.name);
 
     var el = document.createElement('div');
     el.className = remote ? 'Remote' : 'Local';
@@ -194,6 +221,15 @@
 
     this.$textContainer.appendChild(el);
     this.$textContainer.scrollTop = this.$textContainer.scrollHeight;
+
+    this.update(contact);
+  };
+
+  ChatWindow.prototype.update = function(contact) {
+    if ( contact.name ) {
+      this._setTitle(this.title + ' - Conversation - ' + contact.name);
+    }
+    this._setIcon(_getStatusIcon(contact.show));
   };
 
   /////////////////////////////////////////////////////////////////////////////
@@ -333,30 +369,6 @@
 
   MainWindow.prototype.setContacts = function(list) {
     if ( this.contactList ) {
-      var _getStatusIcon = function(s) {
-        var icon = 'about:blank';
-
-        switch ( s ) {
-          case 'chat' :
-            icon = OSjs.API.getThemeResource('status/user-available.png', 'icon', '16x16');
-            break;
-
-          case 'xa' :
-          case 'away' :
-            icon = OSjs.API.getThemeResource('status/user-away.png', 'icon', '16x16');
-            break;
-
-          case 'dnd' :
-            icon = OSjs.API.getThemeResource('status/user-busy.png', 'icon', '16x16');
-            break;
-
-          default :
-            icon = OSjs.API.getThemeResource('status/user-offline.png', 'icon', '16x16');
-            break;
-        }
-        return icon;
-      };
-
       var contacts = [];
       var iter;
       for ( var i in list ) {
@@ -518,15 +530,19 @@
     }
   };
 
+  ApplicationChat.prototype._getChatWindow = function(id) {
+    return this._getWindowByName('ApplicationChatWindow_' + id);
+  };
+
   ApplicationChat.prototype.openChatWindow = function(id) {
-    var win = this._getWindowByName('ApplicationChatWindow_' + id);
+    var win = this._getChatWindow(id);
     var contact = this.getContact(id);
     if ( win ) {
       win._restore();
       return win;
     }
 
-    win = this._addWindow(new ChatWindow(id, this, this.__metadata));
+    win = this._addWindow(new ChatWindow(id, this.contacts[id], this, this.__metadata));
     win._focus();
     return win;
   };
@@ -632,15 +648,22 @@
 
     var items = iq.getElementsByTagName('item');
     if ( items.length ) {
-      var jid, name;
+      var jid, name, win;
       for ( var i = 0; i < items.length; i++ ) {
+        win = null;
         jid = items[i].getAttribute('jid');
         name = items[i].getAttribute('name');
 
         if ( this.contacts[jid] ) {
           if ( name && name.length ) {
             this.contacts[jid].name = name;
+
           }
+          win = this._getChatWindow(jid);
+        }
+
+        if ( win ) {
+          win.update(this.contacts[jid]);
         }
       }
 
