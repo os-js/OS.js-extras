@@ -141,7 +141,7 @@
     var buttonContainer = document.createElement('div');
     buttonContainer.className = 'Buttons';
 
-    var container = _createContainer('Your Name');
+    var container = _createContainer('Account Name (Optional, Description)');
     var name = this._addGUIElement(new OSjs.GUI.Text('SettingsName', {value: settings.name}), container);
     root.appendChild(container);
 
@@ -313,7 +313,8 @@
     Window.apply(this, ['ApplicationChatMainWindow', {width: 300, height: 450}, app]);
 
     // Set window properties and other stuff here
-    this._title = metadata.name + ' (WIP)';
+    this.title  = metadata.name + ' (WIP)';
+    this._title = this.title;
     this._icon  = metadata.icon;
 
     this.menuBar          = null;
@@ -363,6 +364,9 @@
       }},
       {title: OSjs._('Busy'), onClick: function() {
         self.onSetStatus('dnd');
+      }},
+      {title: OSjs._('Offline'), onClick: function() {
+        self.onSetStatus('offline');
       }}
     ]);
 
@@ -463,6 +467,9 @@
         }
       }
     }
+    if ( !s ) {
+      this._setTitle(this.title);
+    }
     this.connectionState = s === true;
   }
 
@@ -470,6 +477,10 @@
     if ( this.statusBar ) {
       this.statusBar.setText(s || '');
     }
+  };
+
+  MainWindow.prototype.setUserStatus = function(s) {
+    this._setTitle(OSjs.Utils.format("{0} [{1}]", this.title, StatusDescriptions[s]));
   };
 
   MainWindow.prototype.setContacts = function(list) {
@@ -570,11 +581,12 @@
     var settings = {
       account : {
         configured: false,
-        name:       'Anonymous',
+        name:       'Default Account',
         type:       'default',
         username:   '',
         password:   ''
-      }
+      },
+      show: 'chat'
     };
 
     Application.apply(this, ['ApplicationChat', args, metadata, settings]);
@@ -586,8 +598,10 @@
     this.connection = null;
     this.contacts   = {};
     this.userid     = null;
+    this.fullname   = settings.account.name;
     this.started    = false;
     this.vcard      = null;
+    this.userStatus = 'offline';
   };
 
   ApplicationChat.prototype = Object.create(Application.prototype);
@@ -929,9 +943,16 @@
 
     this.connection.send($pres().tree());
 
-    this._requestVcard(this.userid, function(item) {
-      self.vcard = item || null;
-    });
+    setTimeout(function() {
+      self.setOnlineStatus(self._getSetting('show') || 'chat');
+
+      self._requestVcard(self.userid, function(item) {
+        self.vcard = item || null;
+        if ( item && item.name ) {
+          self.fullname = item.name;
+        }
+      });
+    }, 200);
   };
 
   ApplicationChat.prototype.onIQ = function(iq) {
@@ -945,6 +966,7 @@
         jid = items[i].getAttribute('jid');
         name = items[i].getAttribute('name');
         groups = items[i].getElementsByTagName('group');
+        subscription = items[i].getElementsByTagName('subscription');
 
         /*
            <item jid="jid here" name="Full name" subscription="both">
@@ -959,6 +981,7 @@
           if ( groups.length ) {
             this.contacts[jid].group = Strophe.getText(groups[0]) || null;
           }
+          this.contacts[jid].subscription = subscription;
           win = this._getChatWindow(jid);
         }
 
@@ -1036,11 +1059,21 @@
       if ( !this.contacts[jid].name ) {
         this.contacts[jid].name  = jid;
       }
+      if ( !this.contacts[jid].subscription ) {
+        this.contacts[jid].subscription  = 'unavailable';
+      }
 
       var self = this;
       if ( _renderTimeout ) {
         clearTimeout(_renderTimeout);
         _renderTimeout = null;
+      }
+
+      if ( jid == this._getSetting('account').username ) {
+        this.userStatus = show;
+        if ( this.mainWindow ) {
+          this.mainWindow.setUserStatus(this.userStatus);
+        }
       }
 
       _renderTimeout = setTimeout(function() {
@@ -1095,7 +1128,7 @@
     var settings = this._getSetting('account') || {};
     return {
       id: this.userid,
-      name: settings.name || this.userid,
+      name: this.fullname || settings.name || this.userid,
       show: 'offline',
       account: '',
       vcard: this.vcard
@@ -1106,11 +1139,22 @@
     if ( !this.connected || !this.connection ) { return; }
     console.debug("ApplicationChat::setOnlineStatus()", s);
 
-    this.connection.send($pres({
-      show: s/*,
-      status: 'text'
-      */
-    }).tree());
+    if ( s == 'offline' ) {
+      this.connection.send($pres({
+        type: 'unavailable'
+      }).tree());
+    } else {
+      this.connection.send($pres({
+        show: s
+      }).tree());
+    }
+
+    this.userStatus = s;
+    if ( this.mainWindow ) {
+      this.mainWindow.setUserStatus(this.userStatus);
+    }
+
+    this._setSetting('show', s, true);
   };
 
   ApplicationChat.prototype.setAccountSettings = function(s) {
