@@ -166,7 +166,7 @@
 
   var ChatWindow = function(id, contact, app, metadata) {
     var name = 'ApplicationChatWindow';
-    Window.apply(this, [name + '_' + id, {width: 450, height: 300, tag: name}, app]);
+    Window.apply(this, [name + '_' + id, {width: 500, height: 450, tag: name}, app]);
 
     // Set window properties and other stuff here
     this.title  = metadata.name;
@@ -481,7 +481,14 @@
       var metadata = [];
       for ( var i in self.contact ) {
         if ( self.contact.hasOwnProperty(i) ) {
-          if ( typeof self.contact[i] === 'object' ) {
+          if ( i == 'vcard' ) {
+            if ( self.contact[i] ) {
+              metadata.push("vcard name: " + self.contact[i].name);
+              metadata.push("vcard url: " + self.contact[i].url);
+              metadata.push("vcard photo: " + (self.contact[i].photo ? 'yes' : 'no'));
+            }
+            continue;
+          } if ( typeof self.contact[i] === 'object' ) {
             metadata.push(i + ": " + JSON.stringify(self.contact[i]));
           } else {
             metadata.push(i + ": " + self.contact[i]);
@@ -489,6 +496,14 @@
         }
       }
       textarea.setValue(desc + ":\n\n" + metadata.join("\n"));
+
+      var src = _getVcardImage(self.contact.vcard);
+      if ( src ) {
+        var img = document.createElement('img');
+        img.alt = '';
+        img.src = src;
+        root.appendChild(img);
+      }
     };
 
     _setInfo("Requesting information for contact");

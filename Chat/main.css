@@ -156,3 +156,9 @@
   bottom : 5px;
   right : 5px;
 }
+
+.Window_ApplicationChatUserInfoWindow img {
+  position : absolute;
+  bottom : 6px;
+  right : 6px;
+}
