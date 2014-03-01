@@ -293,10 +293,10 @@
     this.$textContainer.appendChild(el);
     this.$textContainer.scrollTop = this.$textContainer.scrollHeight;
 
-    this.update(contact);
-
     if ( remote ) {
       OSjs.API.playSound('message');
+
+      this.update(contact);
     }
   };
 
