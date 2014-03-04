@@ -418,6 +418,7 @@
       }
     };
 
+    /*
     this.contactList = this._addGUIElement(new GUI.ListView('ChatContactList', {indexKey: 'id'}), root);
     this.contactList.setColumns([
       {key: 'image',        title: '', type: 'image', domProperties: {width: "16"}},
@@ -448,7 +449,29 @@
 
       OSjs.GUI.createMenu(list, {x: ev.clientX, y: ev.clientY});
     };
+    */
 
+    this.contactList = this._addGUIElement(new GUI.TreeView('ChatContactList', {indexKey: 'id', expanded: true}), root);
+    this.contactList.onActivate = function(ev, item) {
+      if ( item )  {
+        self.onContactOpened(item);
+      }
+    };
+    this.contactList.onContextMenu = function(ev, item) {
+      var list = [
+        {name: 'Chat', title: OSjs._('Chat'), onClick: function() {
+          self.onContactOpened(iter);
+        }},
+        {name: 'Delete', title: OSjs._('Delete'), disabled: true, onClick: function() {
+          // TODO
+        }},
+        {name: 'Information', title: OSjs._('Information'), onClick: function() {
+          self.onContactInfo(item);
+        }}
+      ];
+
+      OSjs.GUI.createMenu(list, {x: ev.clientX, y: ev.clientY});
+    };
     this.contactList.render();
 
     this.statusBar = this._addGUIElement(new GUI.StatusBar('ChatStatusBar'), root);
@@ -515,6 +538,7 @@
 
   MainWindow.prototype.setContacts = function(list) {
     if ( this.contactList ) {
+      /*
       var contacts = [];
       var iter;
       for ( var i in list ) {
@@ -530,6 +554,43 @@
         }
       }
       this.contactList.setRows(contacts);
+      this.contactList.render();
+      */
+
+      var groups = {};
+      var iter, group;
+      for ( var i in list ) {
+        if ( list.hasOwnProperty(i) ) {
+          iter = list[i];
+          group = iter.group || '<Unassigned>';
+
+          if ( !groups[group] ) {
+            groups[group] = [];
+          }
+
+          groups[group].push({
+            id:    i,
+            name:  iter.name,
+            group: iter.group,
+            state: StatusDescriptions[iter.show],
+
+            icon: _getStatusIcon(iter.show),
+            title: iter.name
+          });
+        }
+      }
+
+      var contacts = [];
+      for ( var i in groups ) {
+        if ( groups.hasOwnProperty(i) ) {
+          contacts.push({
+            title: i,
+            items: groups[i]
+          });
+        }
+      }
+
+      this.contactList.setData(contacts);
       this.contactList.render();
     }
   };

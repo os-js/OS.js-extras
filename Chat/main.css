@@ -31,6 +31,22 @@
 .Window_ApplicationChatMainWindow .WindowWrapper {
 }
 
+.Window_ApplicationChatMainWindow .GUITreeView {
+  position : absolute;
+  top : 26px;
+  left : 0px;
+  bottom : 26px;
+  right : 0px;
+  margin : 0;
+  padding : 0;
+  overflow : auto;
+
+  border : 0 none;
+}
+.Window_ApplicationChatMainWindow .GUITreeView .Expandable > div > span {
+  font-weight : bold;
+}
+/*
 .Window_ApplicationChatMainWindow .GUIListView {
   position : absolute;
   top : 26px;
@@ -49,6 +65,7 @@
 .Window_ApplicationChatMainWindow .GUIListView > .Scroll {
   top : 0;
 }
+*/
 
 .Window_ApplicationChatSettingsWindow .WindowWrapper .Label {
   font-weight : bold;
