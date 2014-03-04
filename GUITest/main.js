@@ -61,7 +61,6 @@
     this.createDialogTab(this.tabs);
     this.createGUITab(this.tabs);
     this.createDnDTab(this.tabs);
-
     return root;
   };
 
@@ -322,6 +321,22 @@
       {label: 'IconView 3', icon: OSjs.API.getThemeResource('apps/xfwm4.png', 'icon')}
     ]);
     iconView.render();
+
+    var treeView = _createElement(new OSjs.GUI.TreeView('TesterTreeView'));
+    treeView.setData([
+      {title: 'TreeView root 1', icon: OSjs.API.getThemeResource('apps/xfwm4.png', 'icon')},
+      {title: 'TreeView root 2', icon: OSjs.API.getThemeResource('apps/xfwm4.png', 'icon'), items: [
+        {title: 'TreeView child 1 -> 2', icon: OSjs.API.getThemeResource('apps/xfwm4.png', 'icon')},
+        {title: 'TreeView child 2 -> 2', icon: OSjs.API.getThemeResource('apps/xfwm4.png', 'icon')},
+        {title: 'TreeView child 3 -> 2', icon: OSjs.API.getThemeResource('apps/xfwm4.png', 'icon')},
+        {title: 'TreeView child 4 -> 2', icon: OSjs.API.getThemeResource('apps/xfwm4.png', 'icon'), items: [
+          {title: 'TreeView child 1 -> 4 -> 2', icon: OSjs.API.getThemeResource('apps/xfwm4.png', 'icon')},
+          {title: 'TreeView child 2 -> 4 -> 2', icon: OSjs.API.getThemeResource('apps/xfwm4.png', 'icon')}
+        ]}
+      ]},
+      {title: 'TreeView root 3', icon: OSjs.API.getThemeResource('apps/xfwm4.png', 'icon')}
+    ]);
+    treeView.render();
 
     // FIXME: On tab select() refresh content!
     var richText = _createElement(new OSjs.GUI.RichText('TesterRichText', {
