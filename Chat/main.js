@@ -418,46 +418,13 @@
       }
     };
 
-    /*
-    this.contactList = this._addGUIElement(new GUI.ListView('ChatContactList', {indexKey: 'id'}), root);
-    this.contactList.setColumns([
-      {key: 'image',        title: '', type: 'image', domProperties: {width: "16"}},
-      {key: 'name',         title: OSjs._('Contact')},
-      {key: 'state',        title: OSjs._('Status'), domProperties: {width: "50"}},
-      {key: 'id',           title: '', visible: false},
-    ]);
+    this.contactList = this._addGUIElement(new GUI.TreeView('ChatContactList', {indexKey: 'id', expanded: true}), root);
     this.contactList.onActivate = function(ev, el, item) {
       if ( item )  {
         self.onContactOpened(item);
       }
     };
-    this.contactList.onCreateRow = function(row, iter, colref) {
-      row.title = OSjs.Utils.format("{0}\nGroup: {1}\nStatus: {2}", iter.name, iter.group || '<no group>', iter.state);
-    };
-    this.contactList.onContextMenu = function(ev, row, iter) {
-      var list = [
-        {name: 'Chat', title: OSjs._('Chat'), onClick: function() {
-          self.onContactOpened(iter);
-        }},
-        {name: 'Delete', title: OSjs._('Delete'), disabled: true, onClick: function() {
-          // TODO
-        }},
-        {name: 'Information', title: OSjs._('Information'), onClick: function() {
-          self.onContactInfo(iter);
-        }}
-      ];
-
-      OSjs.GUI.createMenu(list, {x: ev.clientX, y: ev.clientY});
-    };
-    */
-
-    this.contactList = this._addGUIElement(new GUI.TreeView('ChatContactList', {indexKey: 'id', expanded: true}), root);
-    this.contactList.onActivate = function(ev, item) {
-      if ( item )  {
-        self.onContactOpened(item);
-      }
-    };
-    this.contactList.onContextMenu = function(ev, item) {
+    this.contactList.onContextMenu = function(ev, el, item) {
       var list = [
         {name: 'Chat', title: OSjs._('Chat'), onClick: function() {
           self.onContactOpened(iter);
@@ -538,25 +505,6 @@
 
   MainWindow.prototype.setContacts = function(list) {
     if ( this.contactList ) {
-      /*
-      var contacts = [];
-      var iter;
-      for ( var i in list ) {
-        if ( list.hasOwnProperty(i) ) {
-          iter = list[i];
-          contacts.push({
-            id:    i,
-            name:  iter.name,
-            group: iter.group,
-            state: StatusDescriptions[iter.show],
-            image: _getStatusIcon(iter.show)
-          });
-        }
-      }
-      this.contactList.setRows(contacts);
-      this.contactList.render();
-      */
-
       var groups = {};
       var iter, group;
       for ( var i in list ) {
