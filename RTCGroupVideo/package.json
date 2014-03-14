@@ -6,6 +6,7 @@
     "icon":       "devices/camera-web.png",
     "category":   "network",
     "splash":     true,
+    "compability":["getUserMedia"],
     "preload":    [
       {"src": "./vendor/meeting.js", "type": "javascript"},
 
