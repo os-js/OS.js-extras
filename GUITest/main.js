@@ -256,6 +256,8 @@
       }}
     ]);
 
+    var myLabel = _createElement(new OSjs.GUI.Label('TesterLabel'));
+
     var buttonContainer = document.createElement('div');
 
     _createElement(new OSjs.GUI.Button('ButtonTest1', {label: 'Normal Button'}), buttonContainer);
