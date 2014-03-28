@@ -97,3 +97,33 @@
   white-space:      pre-wrap;
   word-wrap: break-word;
 }
+
+.Window_ApplicationTesterWindow .Compability {
+  position : absolute;
+  top : 0px;
+  left : 0px;
+  bottom : 0px;
+  right : 0px;
+  overflow : auto;
+}
+.Window_ApplicationTesterWindow .Compability table {
+  margin : 0;
+  padding : 0;
+  width : 100%;
+  border-collapse : collapse;
+}
+.Window_ApplicationTesterWindow .Compability table td {
+  padding : 5px;
+  margin : 0;
+  vertical-align : top;
+}
+.Window_ApplicationTesterWindow .Compability table td:first-child {
+  width : 100px;
+  font-weight : bold;
+}
+.Window_ApplicationTesterWindow .Compability .Yes {
+  color : #00ff00;
+}
+.Window_ApplicationTesterWindow .Compability .No {
+  color : #ff0000;
+}

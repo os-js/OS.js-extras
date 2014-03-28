@@ -61,6 +61,7 @@
     this.createDialogTab(this.tabs);
     this.createGUITab(this.tabs);
     this.createDnDTab(this.tabs);
+    this.createCompabilityTab(this.tabs);
     return root;
   };
 
@@ -378,6 +379,54 @@
 
     el.appendChild(container);
   };
+
+  ApplicationTesterWindow.prototype.createCompabilityTab = function(tabs) {
+    var self = this;
+    var el = tabs.addTab("Compability", {title: 'Compability'});
+    var container = document.createElement('div');
+    container.className = 'Compability';
+
+    var compability = OSjs.Utils.getCompability();
+    var table = document.createElement('table');
+
+    var _createRow = function(name, comp) {
+      var row = document.createElement('tr');
+      var td1 = document.createElement('td');
+      var td2 = document.createElement('td');
+
+      td1.appendChild(document.createTextNode(name));
+      if ( comp instanceof Array ) {
+        td2.appendChild(document.createTextNode(comp.join(', ')));
+      } else if ( comp instanceof Object ) {
+        for ( var i in comp ) {
+          if ( comp.hasOwnProperty(i) ) {
+            var d = document.createElement('div');
+            d.appendChild(document.createTextNode(OSjs.Utils.format("{0}: {1}", i, comp[i] ? 'Yes' : 'No')));
+            d.className = comp[i] ? 'Yes' : 'No';
+            td2.appendChild(d);
+          }
+        }
+      } else {
+        td2.appendChild(document.createTextNode(comp ? 'Yes' : 'No'));
+        td2.className = comp ? 'Yes' : 'No';
+      }
+
+      row.appendChild(td1);
+      row.appendChild(td2);
+      return row;
+    };
+
+    for ( var i in compability ) {
+      if ( compability.hasOwnProperty(i) ) {
+        table.appendChild(_createRow(i, compability[i]));
+      }
+    }
+
+    container.appendChild(table);
+    el.appendChild(container);
+  };
+
+
 
   /////////////////////////////////////////////////////////////////////////////
   // APPLICATION
