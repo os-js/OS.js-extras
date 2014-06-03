@@ -1,6 +1,6 @@
 <?php
 
-class GUITest
+class ApplicationTester
 {
   public static function call($method, $arguments) {
     return Array(
