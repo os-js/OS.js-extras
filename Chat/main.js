@@ -491,7 +491,7 @@
       this._setTitle(this.title);
     }
     this.connectionState = s === true;
-  }
+  };
 
   MainWindow.prototype.setStatus = function(s) {
     if ( this.statusBar ) {
@@ -505,9 +505,11 @@
 
   MainWindow.prototype.setContacts = function(list) {
     if ( this.contactList ) {
+      var i;
+
       var groups = {};
       var iter, group;
-      for ( var i in list ) {
+      for ( i in list ) {
         if ( list.hasOwnProperty(i) ) {
           iter = list[i];
           group = iter.group || '<Unassigned>';
@@ -529,7 +531,7 @@
       }
 
       var contacts = [];
-      for ( var i in groups ) {
+      for ( i in groups ) {
         if ( groups.hasOwnProperty(i) ) {
           contacts.push({
             title: i,
@@ -710,7 +712,8 @@
     };
 
     this.connection.connect(settings.username, settings.password, function(stat) {
-      switch ( stat << 0 ) {
+      stat = stat << 0;
+      switch ( stat ) {
         case Strophe.Status.CONNECTING :
           self.onConnecting();
           break;
