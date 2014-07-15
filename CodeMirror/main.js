@@ -104,7 +104,8 @@
     var self = this;
 
     // Force new type from extension
-    if ( save && /*!mime &&*/ path ) {
+    //if ( save && !mime && path ) {
+    if ( save && path ) {
       var fname = OSjs.Utils.filename(path);
       if ( fname.match(/\.js$/) ) {
         mime = 'application/javascript';
