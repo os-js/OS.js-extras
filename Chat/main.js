@@ -712,6 +712,10 @@
   };
 
   ApplicationChat.prototype._onMessage = function(obj, msg, args) {
+    if ( this.notification ) {
+      this.notification.destroy();
+      this.notification = null;
+    }
     Application.prototype._onMessage.apply(this, arguments);
 
     // Make sure we kill our application if main window was closed
