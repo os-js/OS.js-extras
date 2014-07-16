@@ -120,7 +120,7 @@
   /////////////////////////////////////////////////////////////////////////////
 
   var SettingsWindow = function(app, metadata) {
-    Window.apply(this, ['ApplicationChatSettingsWindow', {width: 400, height: 300}, app]);
+    Window.apply(this, ['ApplicationChatSettingsWindow', {width: 400, height: 330}, app]);
 
     // Set window properties and other stuff here
     this._title = metadata.name + ' - Settings';
@@ -199,7 +199,7 @@
 
     var notice = document.createElement('div');
     notice.className = 'Notice';
-    notice.appendChild(document.createTextNode('THIS IS A GOOGLE TALK CLIENT. If authentication fails you\'ll have to manually allow access via OS.js (Google will notify you by message automatically)'));
+    notice.appendChild(document.createTextNode('This is a Google Talk client. No passwords, messages or personal information is stored on this server, since you are connecting via PROXY to Google. If authentication fails you\'ll have to manually allow access via OS.js (Google will notify you by message automatically)'));
     root.appendChild(notice);
 
     return root;
