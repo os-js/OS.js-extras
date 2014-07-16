@@ -992,7 +992,7 @@
       this.notification.$image.title = (tooltip || desc || "");
       if ( icon !== null ) {
         //this.notification.$image.src = OSjs.API.getThemeResource(icon, 'icon', '16x16');
-        this.notification.$image.src = OSjs.API.getApplicationResource(app, 'icons/' + icon);
+        this.notification.$image.src = OSjs.API.getApplicationResource(this, 'icons/' + icon);
       }
     }
 
