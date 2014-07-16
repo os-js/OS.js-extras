@@ -307,3 +307,18 @@
   border-color:transparent #fff;
 }
 
+
+.NotificationArea.NotificationArea_ApplicationChatNotification {
+  text-align : center;
+  width : 16px;
+  min-height : 26px;
+}
+.NotificationArea.NotificationArea_ApplicationChatNotification > div {
+  width : 16px;
+  height : 16px;
+  display : inline-block;
+  margin-top : 5px;
+  cursor : pointer;
+}
+.NotificationArea.NotificationArea_ApplicationChatNotification img {
+}

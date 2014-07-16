@@ -158,7 +158,8 @@
     container = _createContainer('Account Type');
     var accountType = this._addGUIElement(new OSjs.GUI.Select('SettingsAccountType', {}), container);
     accountType.addItems({
-      'default':  'XMPP via BOSH (Jabber, Google Talk)'
+      //'default':  'XMPP via BOSH (Jabber, Google Talk)'
+      'default':  'Google Talk (XMPP via BOSH)'
     });
     root.appendChild(container);
 
@@ -198,7 +199,7 @@
 
     var notice = document.createElement('div');
     notice.className = 'Notice';
-    notice.appendChild(document.createTextNode('If authentication fails you\'ll have to manually allow access via OS.js (Google will notify you by message automatically)'));
+    notice.appendChild(document.createTextNode('THIS IS A GOOGLE TALK CLIENT. If authentication fails you\'ll have to manually allow access via OS.js (Google will notify you by message automatically)'));
     root.appendChild(notice);
 
     return root;
@@ -267,6 +268,13 @@
     this._appRef.requestVcard(this.id);
 
     return root;
+  };
+
+  ChatWindow.prototype._focus = function() {
+    Window.prototype._focus.apply(this, arguments);
+    if ( this._appRef ) {
+      this._appRef.updateNotification("onMessageRead");
+    }
   };
 
   ChatWindow.prototype.insert = function(msg, remote, contact) {
@@ -445,6 +453,7 @@
 
     this.setConnectionState(false);
     this.setStatus('Set up your account and connect');
+
     return root;
   };
 
@@ -635,14 +644,16 @@
     this.mainWindow = null;
 
     // You can set application variables here
-    this.connected  = false;
-    this.connection = null;
-    this.contacts   = {};
-    this.userid     = null;
-    this.fullname   = settings.account.name;
-    this.started    = false;
-    this.vcard      = null;
-    this.userStatus = 'offline';
+    this.connected    = false;
+    this.connection   = null;
+    this.contacts     = {};
+    this.userid       = null;
+    this.fullname     = settings.account.name;
+    this.started      = false;
+    this.vcard        = null;
+    this.userStatus   = 'offline';
+    this.notification = null;
+    this.newmessage   = false;
   };
 
   ApplicationChat.prototype = Object.create(Application.prototype);
@@ -656,11 +667,31 @@
 
   ApplicationChat.prototype.init = function(core, settings, metadata) {
     var self = this;
+    var wm = OSjs.API.getWMInstance();
 
     Application.prototype.init.apply(this, arguments);
 
     // Create your main window
     this.mainWindow = this._addWindow(new MainWindow(this, metadata));
+
+    this.notification = wm.createNotificationIcon("ApplicationChatNotification", {className: "ApplicationChatNotifications", tooltip: "", onCreated: function() {
+      var img = document.createElement("img");
+      img.alt = "";
+      img.src = OSjs.API.getApplicationResource(self, 'icons/offline.png');
+      this.$inner.appendChild(img);
+      this.$image = img;
+    }, onInited: function() {
+    }, onDestroy: function() {
+      self.notification = null;
+    }, onClick: function(ev) {
+      if ( self.mainWindow ) {
+        self.mainWindow._focus();
+      }
+    }, onContextMenu: function(ev) {
+      if ( self.mainWindow ) {
+        self.mainWindow._focus();
+      }
+    }});
 
     // Do other stuff here
     // See 'DefaultApplication' sample in 'helpers.js' for more code
@@ -900,11 +931,79 @@
     });
   };
 
+  ApplicationChat.prototype.updateNotification = function(type, args) {
+    var connectionState = null;
+    var desc = null;
+    var icon = null;
+    var tooltip = null;
+
+    switch ( type ) {
+      case "onAuthFailed" :
+        icon = 'offline.png';
+        break;
+
+      case "onConnecting" :
+        desc = "Connecting...";
+        icon = 'log-in.png';
+        break;
+
+      case "onDisconnecting" :
+        desc = "Disconnecting...";
+        icon = 'log-out.png';
+        break;
+
+      case "onDisconnected" :
+        desc = "Disconnected!";
+        connectionState = false;
+        icon = 'offline.png';
+        break;
+
+      case "onConnected" :
+        desc = "Connected :)";
+        connectionState = true;
+        icon = 'available.png';
+        break;
+
+      case "onMessageRead" :
+        desc = "Connected :)";
+        icon = 'available.png';
+        break;
+
+      case "onMessage" :
+        tooltip = "New message(s)";
+        icon = 'extended-away.png';
+        break;
+
+      default :
+        break;
+    }
+
+    if ( this.mainWindow ) {
+      if ( desc !== null ) {
+        this.mainWindow.setStatus(desc);
+      }
+      if ( connectionState !== null ) {
+        this.mainWindow.setConnectionState(connectionState);
+      }
+    }
+
+    if ( this.notification ) {
+      this.notification.$image.alt   = (tooltip || desc || "");
+      this.notification.$image.title = (tooltip || desc || "");
+      if ( icon !== null ) {
+        //this.notification.$image.src = OSjs.API.getThemeResource(icon, 'icon', '16x16');
+        this.notification.$image.src = OSjs.API.getApplicationResource(app, 'icons/' + icon);
+      }
+    }
+
+  };
+
   //
   // Events
   //
 
   ApplicationChat.prototype.onAuthFailed = function() {
+    this.updateNotification("onAuthFailed");
     alert("Authentication failed for Chat"); // FIXME
   };
 
@@ -920,16 +1019,12 @@
     console.debug("ApplicationChat::onConnecting()");
     this.started = true;
     this.connected = false;
-    if ( this.mainWindow ) {
-      this.mainWindow.setStatus("Connecting...");
-    }
+    this.updateNotification("onConnecting");
   };
 
   ApplicationChat.prototype.onDisconnecting = function() {
     console.debug("ApplicationChat::onDisconnecting()");
-    if ( this.mainWindow ) {
-      this.mainWindow.setStatus("Disconnecting...");
-    }
+    this.updateNotification("onDisconnecting");
   };
 
   ApplicationChat.prototype.onDisconnected = function() {
@@ -940,10 +1035,8 @@
 
     this.connected = false;
     //this.started = false;
-    if ( this.mainWindow ) {
-      this.mainWindow.setStatus("Disconnected!");
-      this.mainWindow.setConnectionState(false);
-    }
+
+    this.updateNotification("onDisconnected");
   };
 
   ApplicationChat.prototype.onConnected = function() {
@@ -953,10 +1046,8 @@
 
     this.connected = true;
     this.userid = this.connection.jid;
-    if ( this.mainWindow ) {
-      this.mainWindow.setStatus("Connected :)");
-    }
-    this.mainWindow.setConnectionState(true);
+
+    this.updateNotification("onConnected");
 
     this.connection.addHandler(function(pres) {
       try {
@@ -1172,6 +1263,8 @@
         }
       }
     }
+
+    this.updateNotification("onMessage", {from: from, to: to, type: type, jid: jid, msg: msg});
   };
 
   //
