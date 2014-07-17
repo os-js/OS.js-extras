@@ -273,7 +273,7 @@
   ChatWindow.prototype._focus = function() {
     Window.prototype._focus.apply(this, arguments);
     if ( this._appRef ) {
-      this._appRef.updateNotification("onMessageRead");
+      this._appRef.onCheckNotification(this);
     }
   };
 
@@ -653,7 +653,7 @@
     this.vcard        = null;
     this.userStatus   = 'offline';
     this.notification = null;
-    this.newmessage   = false;
+    this.unread       = [];
   };
 
   ApplicationChat.prototype = Object.create(Application.prototype);
@@ -684,13 +684,9 @@
     }, onDestroy: function() {
       self.notification = null;
     }, onClick: function(ev) {
-      if ( self.mainWindow ) {
-        self.mainWindow._focus();
-      }
+      self.onNotificationClick(ev);
     }, onContextMenu: function(ev) {
-      if ( self.mainWindow ) {
-        self.mainWindow._focus();
-      }
+      self.onNotificationClick(ev, true);
     }});
 
     // Do other stuff here
@@ -851,7 +847,7 @@
     var win = this._getChatWindow(id);
     var contact = this.getContact(id);
     if ( win ) {
-      win._restore();
+      //win._restore();
       return win;
     }
 
@@ -974,8 +970,11 @@
         break;
 
       case "onMessage" :
-        tooltip = "New message(s)";
+        tooltip = (this.unread.length + 1).toString() + "New message(s)";
         icon = 'extended-away.png';
+        if ( args ) {
+          this.unread.push(args);
+        }
         break;
 
       default :
@@ -1005,6 +1004,37 @@
   //
   // Events
   //
+
+  ApplicationChat.prototype.onCheckNotification = function(win) {
+    if ( this.unread.length ) {
+      for ( var i = 0; i < this.unread.length; i++ ) {
+        if ( this.unread[i] && this.unread[i].win ) {
+          if ( this.unread[i].win._wid === win._wid ) {
+            this.unread.splice(i, 1);
+            return;
+          }
+        }
+      }
+    }
+
+    if ( !this.unread.length ) {
+      this.updateNotification("onMessageRead");
+    }
+  };
+
+  ApplicationChat.prototype.onNotificationClick = function(ev, isContext) {
+    if ( this.unread.length ) {
+      var m = this.unread.pop();
+      if ( m && m.win ) {
+        m.win._focus();
+      }
+      return;
+    }
+
+    if ( this.mainWindow ) {
+      this.mainWindow._focus();
+    }
+  };
 
   ApplicationChat.prototype.onAuthFailed = function() {
     this.updateNotification("onAuthFailed");
@@ -1231,6 +1261,7 @@
   ApplicationChat.prototype.onMessage = function(msg) {
     if ( !msg ) { return; }
 
+    var win   = null;
     var elems = msg.getElementsByTagName('body');
     var to    = msg.getAttribute('to');
     var from  = msg.getAttribute('from');
@@ -1244,7 +1275,7 @@
     if ( elems.length > 0 ) {
       var message = Strophe.getText(elems[0]);
 
-      var win = this.openChatWindow(jid);
+      win = this.openChatWindow(jid);
       if ( type == "chat" ) {
         win.insert(message, true, this.getContact(jid));
       } else if ( type == "error" ) {
@@ -1268,7 +1299,9 @@
       }
     }
 
-    this.updateNotification("onMessage", {from: from, to: to, type: type, jid: jid, msg: msg});
+    if ( !win || !win._state.focused ) {
+      this.updateNotification("onMessage", {from: from, to: to, type: type, jid: jid, msg: msg, win: win});
+    }
   };
 
   //
