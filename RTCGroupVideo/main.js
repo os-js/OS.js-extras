@@ -344,7 +344,6 @@
     this.mainWindow = this._addWindow(new ApplicationRTCGroupVideoWindow(this, metadata));
 
     // Do other stuff here
-    // See 'DefaultApplication' sample in 'helpers.js' for more code
     this.meeting = new Meeting();
 
     this.meeting.onmeeting = function(room) {

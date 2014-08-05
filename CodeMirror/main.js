@@ -27,7 +27,7 @@
  * @author  Anders Evenrud <andersevenrud@gmail.com>
  * @licence Simplified BSD License
  */
-(function(Application, DefaultApplicationWindow, Window, GUI, Dialogs) {
+(function(Application, DefaultWindow, Window, GUI, Dialogs) {
 
   var EditorTab = function() {
     this.textarea     = null;
@@ -230,7 +230,7 @@
    * Main Window Constructor
    */
   var ApplicationCodeMirrorWindow = function(app, metadata) {
-    DefaultApplicationWindow.apply(this, ['ApplicationCodeMirrorWindow', {width: 800, height: 400}, app]);
+    DefaultWindow.apply(this, ['ApplicationCodeMirrorWindow', {width: 800, height: 400}, app]);
 
     this.title        = metadata.name;
     this.tabs         = [];
@@ -241,14 +241,14 @@
     this._icon        = metadata.icon;
   };
 
-  ApplicationCodeMirrorWindow.prototype = Object.create(DefaultApplicationWindow.prototype);
+  ApplicationCodeMirrorWindow.prototype = Object.create(DefaultWindow.prototype);
 
   //
   // Window methods
   //
 
   ApplicationCodeMirrorWindow.prototype.init = function(wmRef, app) {
-    var root = DefaultApplicationWindow.prototype.init.apply(this, arguments);
+    var root = DefaultWindow.prototype.init.apply(this, arguments);
     var self = this;
 
     // Create window contents (GUI) here
@@ -290,7 +290,7 @@
   };
 
   ApplicationCodeMirrorWindow.prototype._inited = function() {
-    DefaultApplicationWindow.prototype._inited.apply(this, arguments);
+    DefaultWindow.prototype._inited.apply(this, arguments);
 
     var self = this;
     var _update = function() {
@@ -308,7 +308,7 @@
   };
 
   ApplicationCodeMirrorWindow.prototype._focus = function () {
-    if (!DefaultApplicationWindow.prototype._focus.apply(this, arguments)) { return false; }
+    if (!DefaultWindow.prototype._focus.apply(this, arguments)) { return false; }
 
     if ( this.editor ) {
       this.editor.getInputField().focus();
@@ -318,7 +318,7 @@
   };
 
   ApplicationCodeMirrorWindow.prototype._blur = function () {
-    if (!DefaultApplicationWindow.prototype._blur.apply(this, arguments)) { return false; }
+    if (!DefaultWindow.prototype._blur.apply(this, arguments)) { return false; }
 
     if ( this.editor ) {
       this.editor.getInputField().blur();
@@ -332,7 +332,7 @@
 
     this.clearTabs();
 
-    DefaultApplicationWindow.prototype.destroy.apply(this, arguments);
+    DefaultWindow.prototype.destroy.apply(this, arguments);
   };
 
   //

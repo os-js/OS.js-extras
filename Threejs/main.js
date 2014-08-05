@@ -318,7 +318,6 @@
     var mainWindow = this._addWindow(new ApplicationThreejsWindow(this, metadata));
 
     // Do other stuff here
-    // See 'DefaultApplication' sample in 'helpers.js' for more code
   };
 
   ApplicationThreejs.prototype._onMessage = function(obj, msg, args) {

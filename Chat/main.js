@@ -690,7 +690,6 @@
     }});
 
     // Do other stuff here
-    // See 'DefaultApplication' sample in 'helpers.js' for more code
     var configure = true;
     if ( settings && settings.account ) {
       if ( settings.account.configured ) {
