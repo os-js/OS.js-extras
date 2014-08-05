@@ -27,7 +27,7 @@
  * @author  Anders Evenrud <andersevenrud@gmail.com>
  * @licence Simplified BSD License
  */
-(function(Application, Window, GUI, Dialogs) {
+(function(Application, DefaultApplicationWindow, Window, GUI, Dialogs) {
 
   var EditorTab = function() {
     this.textarea     = null;
@@ -226,8 +226,6 @@
   // WINDOWS
   /////////////////////////////////////////////////////////////////////////////
 
-  var DefaultApplicationWindow = OSjs.Helpers.DefaultApplicationWindow;
-
   /**
    * Main Window Constructor
    */
@@ -258,16 +256,16 @@
     var menuBar = this._addGUIElement(new OSjs.GUI.MenuBar('ApplicationCodeMirrorMenuBar'), root);
     menuBar.addItem("File", [
       {title: 'New', name: 'New', onClick: function() {
-        app.defaultAction('new');
+        app.action('new');
       }},
       {title: 'Open', name: 'Open', onClick: function() {
-        app.defaultAction('open');
+        app.action('open');
       }},
       {title: 'Save', name: 'Save', onClick: function() {
-        app.defaultAction('save');
+        app.action('save');
       }},
       {title: 'Save As...', name: 'SaveAs', onClick: function() {
-        app.defaultAction('saveas');
+        app.action('saveas');
       }},
       {title: 'Close', name: 'Close', onClick: function() {
         self._close();
@@ -460,7 +458,7 @@
   ApplicationCodeMirrorWindow.prototype.checkChanged = function(callback, msg) {
     var self = this;
     if ( this.checkTabChanges() ) {
-      return this._appRef.defaultConfirmClose(this, msg, function() {
+      return this._appRef.onConfirmDialog(this, msg, function() {
         var i = 0, l = self.tabs.length;
         for ( i; i < l; i++ ) {
           self.tabs[i].setChanged(false);
@@ -481,56 +479,16 @@
    */
   var ApplicationCodeMirror = function(args, metadata) {
     Application.apply(this, ['ApplicationCodeMirror', args, metadata]);
-    var self = this;
 
-    var _updateSessionData = function() {
-      /* TODO
-      var files = [];
-      var w = this._getWindow('ApplicationCodeMirrorWindow');
-      this._setArgument('files', files);
-      */
-    };
-
-    this.defaultActionWindow  = 'ApplicationCodeMirrorWindow';
-    this.defaultFilename      = "New code.txt";
-    this.defaultMime          = 'text/plain';
-    this.acceptMime           = metadata.mime || null;
-    this.getSaveData          = function() {
-      var w = self._getWindow('ApplicationCodeMirrorWindow');
-      return w ? w.getTabCode() : null;
-    };
-
-    this.defaultActionError = function(action, error) {
-      var w = self._getWindow('ApplicationCodeMirrorWindow');
-      var msg = "An error occured in action: " + action;
-      if ( w ) {
-        w._error("CodeMirror error", msg, error);
-      } else {
-        OSjs.API.error("CodeMirror error", msg, error);
-      }
-    };
-
-    this.defaultActionSuccess = function(action, arg1, arg2) {
-      var w = self._getWindow('ApplicationCodeMirrorWindow');
-      if ( w ) {
-        if ( action === 'open' ) {
-          w.createTab(arg2.path, arg2.mime, arg1);
-        } else if ( action === 'new' ) {
-          w.createTab();
-        } else if ( action === 'save' ) {
-          w.updateTab(arg1.path, arg1.mime, true);
-        }
-        w._focus();
-
-        _updateSessionData.call(self);
-      }
-    };
+    this.dialogOptions.mimes = metadata.mime;
+    this.dialogOptions.defaultFilename = "New code.txt";
+    this.dialogOptions.defaultMime = "text/plain";
   };
 
   ApplicationCodeMirror.prototype = Object.create(Application.prototype);
 
   ApplicationCodeMirror.prototype.init = function(core, settings, metadata) {
-    this._addWindow(new ApplicationCodeMirrorWindow(this, metadata));
+    this.mainWindow = this._addWindow(new ApplicationCodeMirrorWindow(this, metadata));
     Application.prototype.init.apply(this, arguments);
 
     /* TODO: Load last open files
@@ -540,11 +498,37 @@
     */
   };
 
-  ApplicationCodeMirror.prototype.setCurrentFile = function(filename, mime) {
-    this._setArgument('file', null);
-    this._setArgument('mime', null);
-    this.currentFile.path = filename || null;
-    this.currentFile.mime = mime     || null;
+  ApplicationCodeMirror.prototype.onNew = function() {
+    if ( this.mainWindow ) {
+      this.mainWindow.createTab();
+      this.mainWindow._focus();
+    }
+  };
+
+  ApplicationCodeMirror.prototype.onOpen = function(filename, mime, data) {
+    if ( this.mainWindow ) {
+      this.mainWindow.createTab(filename, mime, data);
+      this.mainWindow._focus();
+    }
+  };
+
+  ApplicationCodeMirror.prototype.onSave = function(filename, mime, data) {
+    if ( this.mainWindow ) {
+      this.mainWindow.updateTab(filename, mime, true);
+      this.mainWindow._focus();
+    }
+  };
+
+  ApplicationCodeMirror.prototype.onCheckChanged = function(callback) {
+    callback(true); // discard true/false
+  };
+
+  ApplicationCodeMirror.prototype.onGetSaveData = function(callback) {
+    var data = null;
+    if ( this.mainWindow ) {
+      data = this.mainWindow.getTabCode();
+    }
+    callback(data);
   };
 
   //
@@ -553,7 +537,4 @@
   OSjs.Applications = OSjs.Applications || {};
   OSjs.Applications.ApplicationCodeMirror = ApplicationCodeMirror;
 
-})(OSjs.Helpers.DefaultApplication, OSjs.Core.Window, OSjs.GUI, OSjs.Dialogs);
-//
-// ^ This is important -- We implement 'DefaultApplication' from helpers not 'Application' from core
-//
+})(OSjs.Helpers.DefaultApplication, OSjs.Helpers.DefaultApplicationWindow, OSjs.Core.Window, OSjs.GUI, OSjs.Dialogs);
