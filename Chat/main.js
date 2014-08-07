@@ -735,16 +735,13 @@
 
     this.connection = new Strophe.Connection('/http-bind-jabber/');
     this.connection.rawInput = function(data) {
-      console.warn("YYYYYYYYYYYYYY", data);
       self.onRawInput(data);
     };
     this.connection.rawOutput = function(data) {
-      console.warn("LLLLLLLLLLLLL", data);
       self.onRawOutput(data);
     };
 
     this.connection.connect(settings.username, settings.password, function(stat) {
-      console.warn("XXXXXXXXXXXXXXXX", stat, Strophe.Status);
       stat = stat << 0;
       switch ( stat ) {
         case Strophe.Status.CONNECTING :
