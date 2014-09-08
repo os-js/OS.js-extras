@@ -1,7 +1,7 @@
 /*!
  * OS.js - JavaScript Operating System
  *
- * Copyright (c) 2011-2013, Anders Evenrud <andersevenrud@gmail.com>
+ * Copyright (c) 2011-2014, Anders Evenrud <andersevenrud@gmail.com>
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without
@@ -375,6 +375,8 @@
 
         var tab = g.addTab('tab' + _id, {title: 'New tab', closeable: true, onClose: _onClose, onSelect: function() {
           self._appRef.currentFile = {'path': t.currentFile, 'mime': t.currentMime};
+          self._appRef.currentFilename = t.currentFile;
+          self._appRef.currentMime     = t.mime;
           self.currentTab = t;
 
           setTimeout(function() {
