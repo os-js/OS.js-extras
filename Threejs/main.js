@@ -309,7 +309,7 @@
     return Application.prototype.destroy.apply(this, arguments);
   };
 
-  ApplicationThreejs.prototype.init = function(core, settings, metadata) {
+  ApplicationThreejs.prototype.init = function(settings, metadata) {
     var self = this;
 
     Application.prototype.init.apply(this, arguments);

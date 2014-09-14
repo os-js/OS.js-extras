@@ -665,7 +665,7 @@
     return Application.prototype.destroy.apply(this, arguments);
   };
 
-  ApplicationChat.prototype.init = function(core, settings, metadata) {
+  ApplicationChat.prototype.init = function(settings, metadata) {
     var self = this;
     var wm = OSjs.API.getWMInstance();
 

@@ -489,7 +489,7 @@
 
   ApplicationCodeMirror.prototype = Object.create(Application.prototype);
 
-  ApplicationCodeMirror.prototype.init = function(core, settings, metadata) {
+  ApplicationCodeMirror.prototype.init = function(settings, metadata) {
     this.mainWindow = this._addWindow(new ApplicationCodeMirrorWindow(this, metadata));
     Application.prototype.init.apply(this, arguments);
 
