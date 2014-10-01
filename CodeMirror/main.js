@@ -29,13 +29,13 @@
  */
 (function(Application, DefaultWindow, Window, GUI, Dialogs) {
 
-  var EditorTab = function() {
+  var EditorTab = function(path, mime) {
     this.textarea     = null;
     this.container    = null;
     this.editor       = null;
-    this.currentFile  = null;
+    this.currentPath  = path || null;
     this.currentType  = null;
-    this.currentMime  = null;
+    this.currentMime  = mime || null;
     this.hasChanged   = false;
     this.tab          = null;
   };
@@ -160,7 +160,7 @@
     }
 
     if ( type ) { this.currentType = type; }
-    if ( path ) { this.currentFile = path; }
+    if ( path ) { this.currentPath = path; }
     if ( mime ) { this.currentMime = mime; }
     this.hasChanged  = false;
 
@@ -199,9 +199,9 @@
 
   EditorTab.prototype.getTitle = function(shorthand) {
     if ( shorthand ) {
-      return OSjs.Utils.filename(this.currentFile || 'New file');
+      return OSjs.Utils.filename(this.currentPath || 'New file');
     }
-    return OSjs.Utils.filename(this.currentFile || 'New file' ) + ' [' + (this.currentType || 'unknown') + ']';
+    return OSjs.Utils.filename(this.currentPath || 'New file' ) + ' [' + (this.currentType || 'unknown') + ']';
   };
 
   EditorTab.prototype.setChanged = function(c) {
@@ -277,7 +277,7 @@
 
     menuBar.onMenuOpen = function(menu, cpos, item) {
       if ( item == "File" ) {
-        var cur = self.currentTab && self.currentTab.currentFile;
+        var cur = self.currentTab && self.currentTab.currentPath;
         menu.setItemDisabled("Save", !cur);
       } else if ( item == "Run" ) {
         self.run();
@@ -342,7 +342,9 @@
   ApplicationCodeMirrorWindow.prototype.initTabs = function() {
     if ( !this.tabs.length ) {
       this._setTitle(this.title);
-      this.createTab();
+      var fn = '/' + this._appRef.dialogOptions.defaultFilename;
+      var mi = this._appRef.dialogOptions.defaultMime;
+      this.createTab(fn, mi);
     }
   };
 
@@ -350,7 +352,7 @@
     var _id = 0;
 
     return function(filename, mime, content) {
-      var t = new EditorTab();
+      var t = new EditorTab(filename, mime);
       var g = this._getGUIElement('ApplicationCodeMirrorTabs');
 
       var self = this;
@@ -374,9 +376,7 @@
         };
 
         var tab = g.addTab('tab' + _id, {title: 'New tab', closeable: true, onClose: _onClose, onSelect: function() {
-          self._appRef.currentFile = {'path': t.currentFile, 'mime': t.currentMime};
-          self._appRef.currentFilename = t.currentFile;
-          self._appRef.currentMime     = t.mime;
+          self._appRef.currentFile = new OSjs.VFS.File(t.currentPath, t.currentMime);
           self.currentTab = t;
 
           setTimeout(function() {
@@ -507,16 +507,16 @@
     }
   };
 
-  ApplicationCodeMirror.prototype.onOpen = function(filename, mime, data) {
+  ApplicationCodeMirror.prototype.onOpen = function(file, data) {
     if ( this.mainWindow ) {
-      this.mainWindow.createTab(filename, mime, data);
+      this.mainWindow.createTab(file.path, file.mime, data);
       this.mainWindow._focus();
     }
   };
 
-  ApplicationCodeMirror.prototype.onSave = function(filename, mime, data) {
+  ApplicationCodeMirror.prototype.onSave = function(file, data) {
     if ( this.mainWindow ) {
-      this.mainWindow.updateTab(filename, mime, true);
+      this.mainWindow.updateTab(file.path, file.mime, true);
       this.mainWindow._focus();
     }
   };
