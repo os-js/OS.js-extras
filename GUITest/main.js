@@ -148,7 +148,8 @@
         case 'ApplicationChooser' :
           var apps = Object.keys(OSjs.API.getHandlerInstance().getApplicationsMetadata());
           var fname = OSjs.API.getDefaultPath() + '/test.txt';
-          opts = [fname, 'text/plain', apps, function(btn, val, def) {
+          var file  = new OSjs.VFS.File(fname, 'text/plain');
+          opts = [file, apps, function(btn, val, def) {
             _closeDialog(btn, {application: val, useDefault: def});
           }];
         break;
