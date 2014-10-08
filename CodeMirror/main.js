@@ -352,6 +352,12 @@
     var _id = 0;
 
     return function(filename, mime, content) {
+
+      if ( filename === null && mime === null ) {
+        filename = '/' + this._appRef.dialogOptions.defaultFilename;
+        mime     = this._appRef.dialogOptions.defaultMime;
+      }
+
       var t = new EditorTab(filename, mime);
       var g = this._getGUIElement('ApplicationCodeMirrorTabs');
 
@@ -502,7 +508,7 @@
 
   ApplicationCodeMirror.prototype.onNew = function() {
     if ( this.mainWindow ) {
-      this.mainWindow.createTab();
+      this.mainWindow.createTab(null, null);
       this.mainWindow._focus();
     }
   };
