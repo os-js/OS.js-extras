@@ -1,19 +1,18 @@
 {
-  "ApplicationCodeMirror":  {
-    "name":       "CodeMirror",
-    "mime":       ["^text", "inode\\/x\\-empty", "application\\/x\\-python", "application\\/javascript"],
-    "icon":       "./icon.png",
-    "category":   "development",
-    "enabled":    true,
-    "splash":     true,
-    "preload":    [
-      {"src": "vendor/CodeMirror/lib/codemirror.js", "type": "javascript", "combine": false},
-      {"src": "vendor/CodeMirror/lib/codemirror.css", "type": "stylesheet", "combine": false},
-      {"src": "vendor/CodeMirror/mode/javascript/javascript.js", "type": "javascript", "combine": false},
-      {"src": "vendor/CodeMirror/mode/xml/xml.js", "type": "javascript", "combine": false},
-      {"src": "vendor/CodeMirror/mode/python/python.js", "type": "javascript", "combine": false},
-      {"src": "main.js", "type": "javascript"},
-      {"src": "main.css", "type": "stylesheet"}
-    ]
-  }
+  "className":  "ApplicationCodeMirror",
+  "name":       "CodeMirror",
+  "mime":       ["^text", "inode\\/x\\-empty", "application\\/x\\-python", "application\\/javascript"],
+  "icon":       "./icon.png",
+  "category":   "development",
+  "enabled":    true,
+  "splash":     true,
+  "preload":    [
+    {"src": "vendor/CodeMirror/lib/codemirror.js", "type": "javascript", "combine": false},
+    {"src": "vendor/CodeMirror/lib/codemirror.css", "type": "stylesheet", "combine": false},
+    {"src": "vendor/CodeMirror/mode/javascript/javascript.js", "type": "javascript", "combine": false},
+    {"src": "vendor/CodeMirror/mode/xml/xml.js", "type": "javascript", "combine": false},
+    {"src": "vendor/CodeMirror/mode/python/python.js", "type": "javascript", "combine": false},
+    {"src": "main.js", "type": "javascript"},
+    {"src": "main.css", "type": "stylesheet"}
+  ]
 }

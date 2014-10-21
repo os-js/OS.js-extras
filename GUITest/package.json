@@ -1,14 +1,13 @@
 {
-  "ApplicationTester":  {
-    "name":       "GUITest",
-    "mime":       null,
-    "icon":       "categories/applications-system.png",
-    "enabled":    true,
-    "preload":    [
-      {"src": "main.js", "type": "javascript"},
-      {"src": "main.css", "type": "stylesheet"}
-    ]
-  }
+  "className":  "ApplicationTester",
+  "name":       "GUITest",
+  "mime":       null,
+  "icon":       "categories/applications-system.png",
+  "enabled":    true,
+  "preload":    [
+    {"src": "main.js", "type": "javascript"},
+    {"src": "main.css", "type": "stylesheet"}
+  ]
 }
 
 
