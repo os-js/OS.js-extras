@@ -190,15 +190,15 @@
 
     // Create window contents (GUI) here
     this.menuBar = this._addGUIElement(new GUI.MenuBar('RTCGroupVideoMenuBar'), root);
-    this.menuBar.addItem({name: 'file', title: OSjs._("File")}, [
-      {title: OSjs._('Close'), onClick: function() {
+    this.menuBar.addItem({name: 'file', title: OSjs.API._("File")}, [
+      {title: OSjs.API._('Close'), onClick: function() {
         self._close();
       }}
     ]);
-    this.menuBar.addItem({name: 'create', title: OSjs._("Create Room")});
-    this.menuBar.addItem({name: 'leave', title: OSjs._("Leave Room")});
-    this.menuBar.addItem({name: 'help', title: OSjs._("Help")}, [
-      {title: OSjs._('About'), onClick: function() {
+    this.menuBar.addItem({name: 'create', title: OSjs.API._("Create Room")});
+    this.menuBar.addItem({name: 'leave', title: OSjs.API._("Leave Room")});
+    this.menuBar.addItem({name: 'help', title: OSjs.API._("Help")}, [
+      {title: OSjs.API._('About'), onClick: function() {
         self.onOpenAbout();
       }}
     ]);
@@ -214,7 +214,7 @@
 
     this.listView = this._addGUIElement(new GUI.ListView('RTCGroupVideoRoomList'), root);
     this.listView.setColumns([
-      {key: 'roomid',       title: OSjs._('Room ID')},
+      {key: 'roomid',       title: OSjs.API._('Room ID')},
       {key: 'join',         title: '', type: 'button', domProperties: {width: "40"}}
     ]);
 

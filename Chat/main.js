@@ -172,7 +172,7 @@
     root.appendChild(container);
 
 
-    this._addGUIElement(new OSjs.GUI.Button('Save', {label: OSjs._('Save'), onClick: function(el, ev) {
+    this._addGUIElement(new OSjs.GUI.Button('Save', {label: OSjs.API._('Save'), onClick: function(el, ev) {
       var opts = {
         name : name.getValue(),
         type : accountType.getValue(),
@@ -191,7 +191,7 @@
       self._close();
     }}), buttonContainer);
 
-    this._addGUIElement(new OSjs.GUI.Button('Close', {label: OSjs._('Close'), onClick: function(el, ev) {
+    this._addGUIElement(new OSjs.GUI.Button('Close', {label: OSjs.API._('Close'), onClick: function(el, ev) {
       self._close();
     }}), buttonContainer);
 
@@ -369,47 +369,47 @@
 
     // Create window contents (GUI) here
     this.menuBar = this._addGUIElement(new GUI.MenuBar('ChatMenuBar'), root);
-    this.menuBar.addItem({name: 'file', title: OSjs._("File")}, [
-      {title: OSjs._('Close'), onClick: function() {
+    this.menuBar.addItem({name: 'file', title: OSjs.API._("File")}, [
+      {title: OSjs.API._('Close'), onClick: function() {
         self._close();
       }}
     ]);
 
-    this.menuBar.addItem({name: 'account', title: OSjs._("Account")}, [
-      {title: OSjs._('Settings'), onClick: function() {
+    this.menuBar.addItem({name: 'account', title: OSjs.API._("Account")}, [
+      {title: OSjs.API._('Settings'), onClick: function() {
         self.onOpenSettings();
       }},
-      {title: OSjs._('Connect'), onClick: function() {
+      {title: OSjs.API._('Connect'), onClick: function() {
         app.connect();
       }},
-      {title: OSjs._('Disconnect'), onClick: function() {
+      {title: OSjs.API._('Disconnect'), onClick: function() {
         app.disconnect();
       }},
-      {title: OSjs._('Add contact'), disabled: true, onClick: function() {
+      {title: OSjs.API._('Add contact'), disabled: true, onClick: function() {
         self.onAddContact();
       }},
-      {title: OSjs._('Create group chat'), disabled: true, onClick: function() {
+      {title: OSjs.API._('Create group chat'), disabled: true, onClick: function() {
         self.onCreateGroupChat();
       }}
     ]);
 
-    this.menuBar.addItem({name: 'status', title: OSjs._("Status")}, [
-      {title: OSjs._('Online'), onClick: function() {
+    this.menuBar.addItem({name: 'status', title: OSjs.API._("Status")}, [
+      {title: OSjs.API._('Online'), onClick: function() {
         self.onSetStatus('chat');
       }},
-      {title: OSjs._('Away'), onClick: function() {
+      {title: OSjs.API._('Away'), onClick: function() {
         self.onSetStatus('away');
       }},
-      {title: OSjs._('Busy'), onClick: function() {
+      {title: OSjs.API._('Busy'), onClick: function() {
         self.onSetStatus('dnd');
       }},
-      {title: OSjs._('Offline'), onClick: function() {
+      {title: OSjs.API._('Offline'), onClick: function() {
         self.onSetStatus('offline');
       }}
     ]);
 
-    this.menuBar.addItem({name: 'help', title: OSjs._("Help")}, [
-      {title: OSjs._('About'), onClick: function() {
+    this.menuBar.addItem({name: 'help', title: OSjs.API._("Help")}, [
+      {title: OSjs.API._('About'), onClick: function() {
         self.onOpenAbout();
       }}
     ]);
@@ -417,11 +417,11 @@
     this.menuBar.onMenuOpen = function(menu, mpos, mitem, menuBar) {
       if ( mitem.name == 'account' ) {
         if ( self.connectionState ) {
-          menu.setItemDisabled(OSjs._('Connect'), true);
-          menu.setItemDisabled(OSjs._('Disconnect'), false);
+          menu.setItemDisabled(OSjs.API._('Connect'), true);
+          menu.setItemDisabled(OSjs.API._('Disconnect'), false);
         } else {
-          menu.setItemDisabled(OSjs._('Connect'), false);
-          menu.setItemDisabled(OSjs._('Disconnect'), true);
+          menu.setItemDisabled(OSjs.API._('Connect'), false);
+          menu.setItemDisabled(OSjs.API._('Disconnect'), true);
         }
       }
     };
@@ -434,13 +434,13 @@
     };
     this.contactList.onContextMenu = function(ev, el, item) {
       var list = [
-        {name: 'Chat', title: OSjs._('Chat'), onClick: function() {
+        {name: 'Chat', title: OSjs.API._('Chat'), onClick: function() {
           self.onContactOpened(iter);
         }},
-        {name: 'Delete', title: OSjs._('Delete'), disabled: true, onClick: function() {
+        {name: 'Delete', title: OSjs.API._('Delete'), disabled: true, onClick: function() {
           // TODO
         }},
-        {name: 'Information', title: OSjs._('Information'), onClick: function() {
+        {name: 'Information', title: OSjs.API._('Information'), onClick: function() {
           self.onContactInfo(item);
         }}
       ];
