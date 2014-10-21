@@ -7,6 +7,15 @@
   "category":   "network",
   "singular":   true,
   "splash":     true,
+  "build":      {
+    "copy": [
+      "package.json",
+      "main.css",
+      "main.js",
+      "icons",
+      "vendor/strophejs/strophe.js"
+    ]
+  },
   "preload":    [
     {"src": "vendor/strophejs/strophe.js", "type": "javascript"},
     {"src": "main.js", "type": "javascript"},

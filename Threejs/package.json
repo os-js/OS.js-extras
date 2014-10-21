@@ -7,6 +7,16 @@
   "enabled":    true,
   "splash":     true,
   "compability":["webgl"],
+  "build":      {
+    "copy": [
+      "package.json",
+      "main.js",
+      "main.css",
+      "vendor/three.js/build/three.min.js",
+      "vendor/three.js/examples/js/libs/tween.min.js",
+      "vendor/three.js/examples/js/libs/stats.min.js"
+    ]
+  },
   "preload":    [
     {"src": "vendor/three.js/build/three.min.js", "type": "javascript"},
     {"src": "vendor/three.js/examples/js/libs/tween.min.js", "type": "javascript"},

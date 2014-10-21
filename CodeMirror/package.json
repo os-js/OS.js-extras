@@ -6,6 +6,18 @@
   "category":   "development",
   "enabled":    true,
   "splash":     true,
+  "build":      {
+    "copy": [
+      "icon.png",
+      "main.css",
+      "main.js",
+      "package.json",
+      "vendor/CodeMirror/lib/codemirror.js",
+      "vendor/CodeMirror/lib/codemirror.css",
+      "vendor/CodeMirror/lib/codemirror.css",
+      "vendor/CodeMirror/mode"
+    ]
+  },
   "preload":    [
     {"src": "vendor/CodeMirror/lib/codemirror.js", "type": "javascript", "combine": false},
     {"src": "vendor/CodeMirror/lib/codemirror.css", "type": "stylesheet", "combine": false},
