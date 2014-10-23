@@ -20,14 +20,6 @@ ZIP Archive manipulation with zip.js
 
 A code editor that uses CodeMirror API
 
-## GUITest
-
-For testing OS.js APIs
-
 ## RTCGroupVideo
 
 RTC Group Video Conference (HTML5 API)
-
-## Threejs
-
-Three.js testing application
