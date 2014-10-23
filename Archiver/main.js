@@ -352,7 +352,7 @@
         writer.close(function(blob) {
           VFS.upload({
             destination: Utils.dirname(self.currentFile.path),
-            files: [{filename: Utils.filename(self.currentFile.path), data: blob}]
+            files: [{filename: Utils.filename(self.currentFile.path), data: blob, _overwrite: true}]
             }, function(error, result) {
               if ( error ) {
                 console.warn('Error creating blank zip', error);
