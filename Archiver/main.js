@@ -310,7 +310,7 @@
     this.defaultCheckChange  = true;
     this.dialogOptions.upload = true;
     this.dialogOptions.mimes = metadata.mime;
-    this.dialogOptions.defaultFilename = "New arcive.zip";
+    this.dialogOptions.defaultFilename = "New archive.zip";
     this.dialogOptions.defaultMime = "application/zip";
   };
 
