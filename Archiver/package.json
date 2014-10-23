@@ -5,6 +5,7 @@
   "icon":       "apps/system-software-install.png",
   "category":   "utilities",
   "singular":   true,
+  "compability":["file", "blob"],
   "preload":    [
     {"src": "vendor/zip.js/WebContent/zip.js", "type": "javascript"},
     {"src": "main.js", "type": "javascript"},
