@@ -118,10 +118,10 @@
     this.view.setColumns([
       {key: 'icon',     title: '', type: 'image', callback: _callbackIcon, domProperties: {width: '16'}, resizable: false},
       {key: 'filename', title: API._('Filename')},
-      {key: 'comment',  title: API._('Comment'), domProperties: {width: '200'}},
+      {key: 'comment',  title: API._('Comment'), domProperties: {width: '100'}},
       {key: 'path',     title: API._('Path'), visible: false},
-      {key: 'csize',    title: API._('Compressed Size'), domProperties: {width: '120'}},
-      {key: 'rsize',    title: API._('Real Size'), domProperties: {width: '120'}},
+      {key: 'csize',    title: API._('Compressed Size'), domProperties: {width: '100'}, visible: false},
+      {key: 'rsize',    title: API._('Size'), domProperties: {width: '100'}},
       {key: 'type',     title: '', visible: false}
     ]);
     this.view.onActivate = function(ev, el, item) {
