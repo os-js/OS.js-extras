@@ -12,6 +12,10 @@ Follow [the documentation found on the official wiki](https://github.com/anderse
 
 A XMPP client for Google Talk. Includes proxy for Apache (See INSTALL file)
 
+## Archiver
+
+ZIP Archive manipulation with zip.js
+
 ## CodeMirror
 
 A code editor that uses CodeMirror API

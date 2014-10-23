@@ -10,3 +10,6 @@
 [submodule "Chat/vendor/strophejs"]
 	path = Chat/vendor/strophejs
 	url = https://github.com/strophe/strophejs.git
+[submodule "Archiver/vendor/zip.js"]
+	path = Archiver/vendor/zip.js
+	url = https://github.com/gildas-lormeau/zip.js.git

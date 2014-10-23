@@ -1,0 +1,16 @@
+{
+  "className":  "ApplicationArchiver",
+  "name":       "Archiver",
+  "mime":       ["application\/zip"],
+  "icon":       "apps/system-software-install.png",
+  "category":   "utilities",
+  "singular":   true,
+  "preload":    [
+    {"src": "vendor/zip.js/WebContent/zip.js", "type": "javascript"},
+    {"src": "main.js", "type": "javascript"},
+    {"src": "main.css", "type": "stylesheet"}
+  ]
+}
+
+
+
