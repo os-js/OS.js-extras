@@ -93,7 +93,7 @@
     ]);
 
     menuBar.addItem(API._("Add File"));
-
+    menuBar.addItem(API._("Add Folder"));
     menuBar.addItem(API._("Extract to"));
 
     menuBar.onMenuOpen = function(menu, pos, title) {
@@ -106,6 +106,9 @@
         }
         if ( title === API._('Add File') ) {
           self.onAddFileClicked();
+        }
+        if ( title === API._('Add Folder') ) {
+          self.onAddFolderClicked();
         }
       }
     };
@@ -294,6 +297,12 @@
     }
   };
 
+  ApplicationArchiverWindow.prototype.onAddFolderClicked = function() {
+    if ( this._appRef ) {
+      this._appRef.addFile(null, this.currentDir, true);
+    }
+  };
+
   /////////////////////////////////////////////////////////////////////////////
   // APPLICATION
   /////////////////////////////////////////////////////////////////////////////
@@ -444,11 +453,12 @@
   /**
    * Re-create zip with new file
    */
-  ApplicationArchiver.prototype.addFile = function(reqFile, currentDir) {
+  ApplicationArchiver.prototype.addFile = function(reqFile, currentDir, isFolder) {
     if ( !this.currentFile ) {
       throw new Error('You have to create a new archive or open a existing one to add files.');
     }
     var self =  this;
+    var entries = [];
     var opt = { // FIXME
       path: '/',
       type: 'open'
@@ -462,20 +472,46 @@
       }
     }
 
+    function _onError(error) {
+      if ( self.mainWindow ) {
+        self.mainWindow._toggleLoading(false);
+      }
+      if ( error ) {
+        alert(error);
+      }
+    }
+
+    function _openZip(cb) {
+      VFS.download(self.currentFile, function(error, data) {
+        if ( error ) {
+          console.warning('An error while opening zip', error);
+          return _onError(error);
+        }
+
+        var blob = new Blob([data], {type: self.currentFile.mime});
+        getEntries(blob, function(result) {
+          entries = result;
+
+          cb();
+        });
+      });
+    }
+
     function _importFiles(cb) {
-      console.log('Importing files');
+      console.group('ApplicationArchiver::addFile()=>_importFiles()')
 
       function _importList(list) {
         function _next(index) {
           if ( !list.length || index >= list.length ) {
+            console.groupEnd();
             return cb();
           }
 
           var current = list[index];
-          console.log('Importing file', index, current);
+          console.log('Importing', index, current);
           getEntryFile(current, function(blob) {
             zipWriter.add(current.filename, new zip.BlobReader(blob), function() {
-              console.log("IMPORTED FILE", current);
+              console.log('Imported', current);
               updateStatusbar(Utils.format('Added {0}', current.filename));
               _next(index+1);
             }, function(current, total) {
@@ -491,17 +527,7 @@
         _next(0);
       }
 
-      VFS.download(self.currentFile, function(error, data) {
-        if ( error ) {
-          consol.warning('An error while opening zip', error);
-        }
-
-        var blob = new Blob([data], {type: self.currentFile.mime});
-        getEntries(blob, function(entries) {
-          _importList(entries);
-        });
-
-      });
+      _importList(entries);
     }
 
     function _createZip(cb) {
@@ -515,12 +541,13 @@
           cb();
         });
       }, function(error) {
-        alert(error);
+        console.error('ApplicationArchiver::addFile()=>createZip()', arguments);
         updateStatusbar('Error while creating zip: ' + error);
+        _onError(error);
       });
     }
 
-    function _saveChanges() {
+    function _saveChanges(cb) {
       console.log('Saving changes');
 
       zipWriter.close(function(blob) {
@@ -528,10 +555,12 @@
           destination: Utils.dirname(self.currentFile.path),
           files: [{filename: Utils.filename(self.currentFile.path), data: blob, _overwrite: true}]
           }, function(error, result) {
+            cb(error);
+
             console.log('Saved changes', error);
             zipWriter = null;
             if ( error ) {
-              alert(error);
+              _onError(error);
             } else {
               self._onOpen(self.currentFile, {dir: self.mainWindow ? self.mainWindow.currentDir : '/'});
             }
@@ -539,49 +568,119 @@
       });
     }
 
-    function _addFile(item) {
+    function _addFile(item, cb) {
       var filename = item instanceof window.File ? item.name : item.filename;
+      var type = item instanceof window.File ? 'file' : (item.type || 'file');
 
       filename = ((currentDir || '/').replace(/\/$/, '') + '/' + filename).replace(/^\//, '');
       function _addBlob(blob) {
         zipWriter.add(filename, new zip.BlobReader(blob), function() {
           console.log('ADDED FILE', filename);
 
-          _saveChanges();
+          _saveChanges(cb);
         }, function(current, total) {
           updateStatusbar(Utils.format('Compressing file {0} {1}/{2}', filename, current, total));
         });
       }
 
-      if ( item instanceof window.File ) {
-        _addBlob(item);
-      } else {
-        VFS.download(item, function(error, data) {
-          if ( error ) {
-            alert(error);
-            return;
-          }
+      function _addFolder() {
+        zipWriter.add(filename, null, function() {
+          console.log('ADDED FOLDER', filename);
 
-          var blob = new Blob([data], {type: item.mime});
-          _addBlob(blob);
-        });
+          _saveChanges(cb);
+        }, null, {directory: true});
+      }
+
+      if ( type === 'dir' ) {
+        _addFolder();
+      } else {
+        if ( item instanceof window.File ) {
+          _addBlob(item);
+        } else {
+          VFS.download(item, function(error, data) {
+            if ( error ) {
+              return _onError(error);
+            }
+
+            var blob = new Blob([data], {type: item.mime});
+            _addBlob(blob);
+          });
+        }
       }
     }
 
-    if ( reqFile ) {
-      _createZip(function() {
-        _addFile(reqFile);
+    function _onFinish(error) {
+      if ( self.mainWindow ) {
+        self.mainWindow._toggleLoading(false);
+      }
+      _onError(error);
+    }
+
+    function _checkExistence(item, cb) {
+      var chk = Utils.filename(item.path); //VFS.getRelativeURL(item.path).replace(/^\//, '');
+      var found = false;
+
+      entries.forEach(function(i) {
+        if ( i.filename === chk ) {
+          if ( !i.directory || (i.directory && item.type === 'dir') ) {
+            found = true;
+          }
+        }
+        return !found;
       });
-    } else {
-      this.mainWindow._toggleDisabled(true);
-      this._createDialog('File', [opt, function(btn, item) {
-        self.mainWindow._toggleDisabled(false);
-        if ( btn === 'ok' && item ) {
-          return _createZip(function() {
-            _addFile(item);
+
+      cb(found ? 'File is already in archive' : null);
+    }
+
+    function _initAdd(item) {
+      if ( self.mainWindow ) {
+        self.mainWindow._toggleLoading(true);
+      }
+
+      _openZip(function() {
+        _checkExistence(item, function(error) {
+          if ( error ) {
+            return _onFinish(error);
+          }
+
+          _createZip(function() {
+            _addFile(item, function(error) {
+              _onFinish(error);
+            });
+          });
+        });
+      });
+    }
+
+    if ( isFolder ) {
+      if ( this.mainWindow ) {
+        this.mainWindow._toggleDisabled(true);
+      }
+      this._createDialog('Input', [API._('Create a new directory in <span>{0}</span>', self.currentDir), '', function(btn, value) {
+        if ( self.mainWindow ) {
+          self.mainWindow._toggleDisabled(false);
+        }
+        if ( btn === 'ok' && value ) {
+          _initAdd({
+            filename: value,
+            path: value,
+            type: 'dir'
           });
         }
       }], this.mainWindow);
+
+    } else {
+      if ( reqFile ) {
+        _initAdd(reqFile);
+      } else {
+        this.mainWindow._toggleDisabled(true);
+        this._createDialog('File', [opt, function(btn, item) {
+          self.mainWindow._toggleDisabled(false);
+          if ( btn === 'ok' && item ) {
+            _initAdd(item);
+          }
+        }], this.mainWindow);
+      }
     }
   };
 
