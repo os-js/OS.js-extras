@@ -361,7 +361,7 @@
         writer.close(function(blob) {
           VFS.upload({
             destination: Utils.dirname(self.currentFile.path),
-            files: [{filename: Utils.filename(self.currentFile.path), data: blob, _overwrite: true}]
+            files: [{filename: Utils.filename(self.currentFile.path), data: blob}]
             }, function(error, result) {
               if ( error ) {
                 console.warn('Error creating blank zip', error);
@@ -369,7 +369,7 @@
               writer = null;
 
               cb();
-            });
+            }, {overwrite: true}, self);
         });
       });
     }
@@ -553,7 +553,7 @@
       zipWriter.close(function(blob) {
         VFS.upload({
           destination: Utils.dirname(self.currentFile.path),
-          files: [{filename: Utils.filename(self.currentFile.path), data: blob, _overwrite: true}]
+          files: [{filename: Utils.filename(self.currentFile.path), data: blob}]
           }, function(error, result) {
             cb(error);
 
@@ -564,7 +564,7 @@
             } else {
               self._onOpen(self.currentFile, {dir: self.mainWindow ? self.mainWindow.currentDir : '/'});
             }
-        });
+        }, {overwrite: true});
       });
     }
 
