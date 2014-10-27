@@ -80,34 +80,34 @@
 
     // Create window contents (GUI) here
     var menuBar = this._addGUIElement(new GUI.MenuBar('ApplicationArchiverMenuBar'), root);
-    menuBar.addItem(API._("File"), [
-      {title: API._('New'), name: 'New', onClick: function() {
+    menuBar.addItem(API._("LBL_FILE"), [
+      {title: API._('LBL_NEW'), name: 'New', onClick: function() {
         app.action('new');
       }},
-      {title: API._('Open'), name: 'Open', onClick: function() {
+      {title: API._('LBL_OPEN'), name: 'Open', onClick: function() {
         app.action('open');
       }},
-      {title: API._('Close'), name: 'Close', onClick: function() {
+      {title: API._('LBL_CLOSE'), name: 'Close', onClick: function() {
         self._close();
       }}
     ]);
 
-    menuBar.addItem(API._("Add File"));
-    menuBar.addItem(API._("Add Folder"));
+    menuBar.addItem(API._("LBL_ADD_FILE"));
+    menuBar.addItem(API._("LBL_ADD_FOLDER"));
     menuBar.addItem(API._("Extract to"));
 
     menuBar.onMenuOpen = function(menu, pos, title) {
-      if ( menu && title === API._('File') ) {
+      if ( menu && title === API._('LBL_FILE') ) {
         menu.setItemDisabled("Save", app.currentFile ? false : true);
       }
       if ( app.currentFile ) {
         if ( title === API._('Extract to') ) {
           self.onExtractClicked();
         }
-        if ( title === API._('Add File') ) {
+        if ( title === API._('LBL_ADD_FILE') ) {
           self.onAddFileClicked();
         }
-        if ( title === API._('Add Folder') ) {
+        if ( title === API._('LBL_ADD_FOLDER') ) {
           self.onAddFolderClicked();
         }
       }
@@ -120,11 +120,11 @@
     this.view = this._addGUIElement(new GUI.ListView('ArchiverListView'), root);
     this.view.setColumns([
       {key: 'icon',     title: '', type: 'image', callback: _callbackIcon, domProperties: {width: '16'}, resizable: false},
-      {key: 'filename', title: API._('Filename')},
-      {key: 'comment',  title: API._('Comment'), domProperties: {width: '100'}},
-      {key: 'path',     title: API._('Path'), visible: false},
+      {key: 'filename', title: API._('LBL_FILENAME')},
+      {key: 'comment',  title: API._('LBL_COMMENT'), domProperties: {width: '100'}},
+      {key: 'path',     title: API._('LBL_PATH'), visible: false},
       {key: 'csize',    title: API._('Compressed Size'), domProperties: {width: '100'}, visible: false},
-      {key: 'rsize',    title: API._('Size'), domProperties: {width: '100'}},
+      {key: 'rsize',    title: API._('LBL_SIZE'), domProperties: {width: '100'}},
       {key: 'type',     title: '', visible: false}
     ]);
     this.view.onActivate = function(ev, el, item) {
@@ -155,7 +155,7 @@
 
       if ( menu ) {
         OSjs.GUI.createMenu([
-          {title: API._('Open arvhive'), onClick: function(ev) {
+          {title: API._('Open archive'), onClick: function(ev) {
             self._appRef.action('open', file);
           }},
           {title: API._('Add to archive'), onClick: function(ev) {

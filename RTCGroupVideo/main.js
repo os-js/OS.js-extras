@@ -190,15 +190,15 @@
 
     // Create window contents (GUI) here
     this.menuBar = this._addGUIElement(new GUI.MenuBar('RTCGroupVideoMenuBar'), root);
-    this.menuBar.addItem({name: 'file', title: OSjs.API._("File")}, [
-      {title: OSjs.API._('Close'), onClick: function() {
+    this.menuBar.addItem({name: 'file', title: OSjs.API._("LBL_FILE")}, [
+      {title: OSjs.API._('LBL_CLOSE'), onClick: function() {
         self._close();
       }}
     ]);
     this.menuBar.addItem({name: 'create', title: OSjs.API._("Create Room")});
     this.menuBar.addItem({name: 'leave', title: OSjs.API._("Leave Room")});
-    this.menuBar.addItem({name: 'help', title: OSjs.API._("Help")}, [
-      {title: OSjs.API._('About'), onClick: function() {
+    this.menuBar.addItem({name: 'help', title: OSjs.API._("LBL_HELP")}, [
+      {title: OSjs.API._('LBL_ABOUT'), onClick: function() {
         self.onOpenAbout();
       }}
     ]);

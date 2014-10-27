@@ -27,7 +27,7 @@
  * @author  Anders Evenrud <andersevenrud@gmail.com>
  * @licence Simplified BSD License
  */
-(function(Application, DefaultWindow, Window, GUI, Dialogs) {
+(function(Application, DefaultWindow, Window, GUI, Dialogs, API) {
 
   var EditorTab = function(path, mime) {
     this.textarea     = null;
@@ -254,20 +254,20 @@
     // Create window contents (GUI) here
 
     var menuBar = this._addGUIElement(new OSjs.GUI.MenuBar('ApplicationCodeMirrorMenuBar'), root);
-    menuBar.addItem("File", [
-      {title: 'New', name: 'New', onClick: function() {
+    menuBar.addItem(API._("LBL_FILE"), [
+      {title: API._('LBL_NEW'), name: 'New', onClick: function() {
         app.action('new');
       }},
-      {title: 'Open', name: 'Open', onClick: function() {
+      {title: API._('LBL_OPEN'), name: 'Open', onClick: function() {
         app.action('open');
       }},
-      {title: 'Save', name: 'Save', onClick: function() {
+      {title: API._('LBL_SAVE'), name: 'Save', onClick: function() {
         app.action('save');
       }},
-      {title: 'Save As...', name: 'SaveAs', onClick: function() {
+      {title: API._('LBL_SAVEAS'), name: 'SaveAs', onClick: function() {
         app.action('saveas');
       }},
-      {title: 'Close', name: 'Close', onClick: function() {
+      {title: API._('LBL_CLOSE'), name: 'Close', onClick: function() {
         self._close();
       }}
     ]);
@@ -545,4 +545,4 @@
   OSjs.Applications = OSjs.Applications || {};
   OSjs.Applications.ApplicationCodeMirror = ApplicationCodeMirror;
 
-})(OSjs.Helpers.DefaultApplication, OSjs.Helpers.DefaultApplicationWindow, OSjs.Core.Window, OSjs.GUI, OSjs.Dialogs);
+})(OSjs.Helpers.DefaultApplication, OSjs.Helpers.DefaultApplicationWindow, OSjs.Core.Window, OSjs.GUI, OSjs.Dialogs, OSjs.API);

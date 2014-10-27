@@ -172,7 +172,7 @@
     root.appendChild(container);
 
 
-    this._addGUIElement(new OSjs.GUI.Button('Save', {label: OSjs.API._('Save'), onClick: function(el, ev) {
+    this._addGUIElement(new OSjs.GUI.Button('Save', {label: OSjs.API._('LBL_SAVE'), onClick: function(el, ev) {
       var opts = {
         name : name.getValue(),
         type : accountType.getValue(),
@@ -191,7 +191,7 @@
       self._close();
     }}), buttonContainer);
 
-    this._addGUIElement(new OSjs.GUI.Button('Close', {label: OSjs.API._('Close'), onClick: function(el, ev) {
+    this._addGUIElement(new OSjs.GUI.Button('Close', {label: OSjs.API._('LBL_CLOSE'), onClick: function(el, ev) {
       self._close();
     }}), buttonContainer);
 
@@ -369,20 +369,20 @@
 
     // Create window contents (GUI) here
     this.menuBar = this._addGUIElement(new GUI.MenuBar('ChatMenuBar'), root);
-    this.menuBar.addItem({name: 'file', title: OSjs.API._("File")}, [
-      {title: OSjs.API._('Close'), onClick: function() {
+    this.menuBar.addItem({name: 'file', title: OSjs.API._("LBL_FILE")}, [
+      {title: OSjs.API._('LBL_CLOSE'), onClick: function() {
         self._close();
       }}
     ]);
 
-    this.menuBar.addItem({name: 'account', title: OSjs.API._("Account")}, [
-      {title: OSjs.API._('Settings'), onClick: function() {
+    this.menuBar.addItem({name: 'account', title: OSjs.API._("LBL_ACCOUNT")}, [
+      {title: OSjs.API._('LBL_SETTINGS'), onClick: function() {
         self.onOpenSettings();
       }},
-      {title: OSjs.API._('Connect'), onClick: function() {
+      {title: OSjs.API._('LBL_CONNECT'), onClick: function() {
         app.connect();
       }},
-      {title: OSjs.API._('Disconnect'), onClick: function() {
+      {title: OSjs.API._('LBL_DISCONNECT'), onClick: function() {
         app.disconnect();
       }},
       {title: OSjs.API._('Add contact'), disabled: true, onClick: function() {
@@ -393,23 +393,23 @@
       }}
     ]);
 
-    this.menuBar.addItem({name: 'status', title: OSjs.API._("Status")}, [
-      {title: OSjs.API._('Online'), onClick: function() {
+    this.menuBar.addItem({name: 'status', title: OSjs.API._("LBL_STATUS")}, [
+      {title: OSjs.API._('LBL_ONLINE'), onClick: function() {
         self.onSetStatus('chat');
       }},
-      {title: OSjs.API._('Away'), onClick: function() {
+      {title: OSjs.API._('LBL_AWAY'), onClick: function() {
         self.onSetStatus('away');
       }},
-      {title: OSjs.API._('Busy'), onClick: function() {
+      {title: OSjs.API._('LBL_BUSY'), onClick: function() {
         self.onSetStatus('dnd');
       }},
-      {title: OSjs.API._('Offline'), onClick: function() {
+      {title: OSjs.API._('LBL_OFFLINE'), onClick: function() {
         self.onSetStatus('offline');
       }}
     ]);
 
-    this.menuBar.addItem({name: 'help', title: OSjs.API._("Help")}, [
-      {title: OSjs.API._('About'), onClick: function() {
+    this.menuBar.addItem({name: 'help', title: OSjs.API._("LBL_HELP")}, [
+      {title: OSjs.API._('LBL_ABOUT'), onClick: function() {
         self.onOpenAbout();
       }}
     ]);
@@ -417,11 +417,11 @@
     this.menuBar.onMenuOpen = function(menu, mpos, mitem, menuBar) {
       if ( mitem.name == 'account' ) {
         if ( self.connectionState ) {
-          menu.setItemDisabled(OSjs.API._('Connect'), true);
-          menu.setItemDisabled(OSjs.API._('Disconnect'), false);
+          menu.setItemDisabled(OSjs.API._('LBL_CONNECT'), true);
+          menu.setItemDisabled(OSjs.API._('LBL_DISCONNECT'), false);
         } else {
-          menu.setItemDisabled(OSjs.API._('Connect'), false);
-          menu.setItemDisabled(OSjs.API._('Disconnect'), true);
+          menu.setItemDisabled(OSjs.API._('LBL_CONNECT'), false);
+          menu.setItemDisabled(OSjs.API._('LBL_DISCONNECT'), true);
         }
       }
     };
@@ -434,13 +434,13 @@
     };
     this.contactList.onContextMenu = function(ev, el, item) {
       var list = [
-        {name: 'Chat', title: OSjs.API._('Chat'), onClick: function() {
+        {name: 'Chat', title: OSjs.API._('LBL_CHAT'), onClick: function() {
           self.onContactOpened(iter);
         }},
-        {name: 'Delete', title: OSjs.API._('Delete'), disabled: true, onClick: function() {
+        {name: 'Delete', title: OSjs.API._('LBL_DELETE'), disabled: true, onClick: function() {
           // TODO
         }},
-        {name: 'Information', title: OSjs.API._('Information'), onClick: function() {
+        {name: 'Information', title: OSjs.API._('LBL_INFORMATION'), onClick: function() {
           self.onContactInfo(item);
         }}
       ];
