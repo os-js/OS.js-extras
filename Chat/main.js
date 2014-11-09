@@ -730,7 +730,8 @@
     var self = this;
     var settings = this._getSetting('account') || {};
     if ( !settings.name || !settings.username || !settings.password ) {
-      throw "Cannot connect, you need to configure your account!";
+      OSjs.API.error('Chat Error', 'Cannot connect', 'Cannot connect, you need to configure your account!');
+      return;
     }
 
     this.connection = new Strophe.Connection('/http-bind-jabber/');
