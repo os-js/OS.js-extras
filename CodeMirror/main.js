@@ -136,6 +136,7 @@
         type = 'xml';
       break;
 
+      case 'application/x-empty' :
       case 'inode/x-empty' :
       case 'text/plain' :
         type = 'text';
