@@ -1,7 +1,7 @@
 /*!
  * OS.js - JavaScript Operating System
  *
- * Copyright (c) 2011-2014, Anders Evenrud <andersevenrud@gmail.com>
+ * Copyright (c) 2011-2015, Anders Evenrud <andersevenrud@gmail.com>
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without
@@ -515,6 +515,7 @@
   };
 
   ApplicationCodeMirror.prototype.onOpen = function(file, data) {
+    console.log(data);
     if ( this.mainWindow ) {
       this.mainWindow.createTab(file.path, file.mime, data);
       this.mainWindow._focus();
