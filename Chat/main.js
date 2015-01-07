@@ -445,7 +445,7 @@
         }}
       ];
 
-      OSjs.GUI.createMenu(list, {x: ev.clientX, y: ev.clientY});
+      OSjs.API.createMenu(list, {x: ev.clientX, y: ev.clientY});
     };
     this.contactList.render();
 

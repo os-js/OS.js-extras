@@ -154,7 +154,7 @@
       var file = data instanceof window.File ? data : new VFS.File(data);
 
       if ( menu ) {
-        OSjs.GUI.createMenu([
+        OSjs.API.createMenu([
           {title: API._('Open archive'), onClick: function(ev) {
             self._appRef.action('open', file);
           }},
