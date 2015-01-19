@@ -667,7 +667,7 @@
 
   ApplicationChat.prototype.init = function(settings, metadata) {
     var self = this;
-    var wm = OSjs.API.getWMInstance();
+    var wm = OSjs.Core.getWindowManager();
 
     Application.prototype.init.apply(this, arguments);
 
