@@ -1,6 +1,6 @@
 {
   "className":  "ApplicationRTCGroupVideo",
-  "name":       "WebRTC Experiment - Group Video",
+  "name":       "WebRTC Video Conference",
   "description":"Group calls using webcam and microphone",
   "mime":       null,
   "icon":       "devices/camera-web.png",
