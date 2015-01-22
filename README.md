@@ -8,6 +8,10 @@ Follow [the documentation found on the official wiki](https://github.com/anderse
 
 # Packages
 
+## PDFjs
+
+Read PDF documents
+
 ## Chat
 
 A XMPP client for Google Talk. Includes proxy for Apache (See INSTALL file)
