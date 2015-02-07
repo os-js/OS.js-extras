@@ -44,20 +44,20 @@
 
     switch ( s ) {
       case 'chat' :
-        icon = OSjs.API.getThemeResource('status/user-available.png', 'icon', '16x16');
+        icon = OSjs.API.getIcon('status/user-available.png', '16x16');
         break;
 
       case 'xa' :
       case 'away' :
-        icon = OSjs.API.getThemeResource('status/user-away.png', 'icon', '16x16');
+        icon = OSjs.API.getIcon('status/user-away.png', '16x16');
         break;
 
       case 'dnd' :
-        icon = OSjs.API.getThemeResource('status/user-busy.png', 'icon', '16x16');
+        icon = OSjs.API.getIcon('status/user-busy.png', '16x16');
         break;
 
       default :
-        icon = OSjs.API.getThemeResource('status/user-offline.png', 'icon', '16x16');
+        icon = OSjs.API.getIcon('status/user-offline.png', '16x16');
         break;
     }
     return icon;
@@ -994,7 +994,6 @@
       this.notification.$image.alt   = (tooltip || desc || "");
       this.notification.$image.title = (tooltip || desc || "");
       if ( icon !== null ) {
-        //this.notification.$image.src = OSjs.API.getThemeResource(icon, 'icon', '16x16');
         this.notification.$image.src = OSjs.API.getApplicationResource(this, 'icons/' + icon);
       }
     }

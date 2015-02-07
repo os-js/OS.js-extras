@@ -114,7 +114,7 @@
     };
 
     function _callbackIcon(iter) {
-      return API.getIcon(iter.icon, null, '16x16');
+      return API.getIcon(iter.icon, '16x16');
     }
 
     this.view = this._addGUIElement(new GUI.ListView('ArchiverListView'), root);

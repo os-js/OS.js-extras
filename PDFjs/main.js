@@ -60,7 +60,7 @@
     var self = this;
 
     var _createIcon = function(i) {
-      return OSjs.API.getThemeResource(i, 'icon');
+      return OSjs.API.getIcon(i);
     };
 
     // Create window contents (GUI) here
