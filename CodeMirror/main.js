@@ -464,17 +464,19 @@
     return false;
   };
 
-  ApplicationCodeMirrorWindow.prototype.checkChanged = function(callback, msg) {
+  ApplicationCodeMirrorWindow.prototype.onCheckChanged = function(callback, msg) {
     var self = this;
     if ( this.checkTabChanges() ) {
-      return this._appRef.onConfirmDialog(this, msg, function() {
+      this._appRef.onConfirmDialog(this, msg, function(ok) {
         var i = 0, l = self.tabs.length;
         for ( i; i < l; i++ ) {
           self.tabs[i].setChanged(false);
         }
 
-        callback();
+        callback(ok);
       });
+
+      return true;
     }
     return false;
   };
@@ -529,7 +531,7 @@
     }
   };
 
-  ApplicationCodeMirror.prototype.onCheckChanged = function(callback) {
+  ApplicationCodeMirror.prototype._onCheckChanged = function(callback) {
     callback(true); // discard true/false
   };
 
