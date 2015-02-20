@@ -362,9 +362,9 @@
           VFS.upload({
             destination: Utils.dirname(self.currentFile.path),
             files: [{filename: Utils.filename(self.currentFile.path), data: blob}]
-            }, function(error, result) {
-              if ( error ) {
-                console.warn('Error creating blank zip', error);
+            }, function(type, ev) {
+              if ( type === 'error' ) {
+                console.warn('Error creating blank zip', ev);
               }
               writer = null;
 
@@ -554,9 +554,9 @@
         VFS.upload({
           destination: Utils.dirname(self.currentFile.path),
           files: [{filename: Utils.filename(self.currentFile.path), data: blob}]
-          }, function(error, result) {
+          }, function(type, ev) {
+            var error = (type === 'error') ? ev : false;
             cb(error);
-
             console.log('Saved changes', error);
             zipWriter = null;
             if ( error ) {
@@ -757,7 +757,8 @@
           VFS.upload({
             destination: dest,
             files: [{filename: Utils.filename(item.filename), data: blob}]
-          }, function(error, result, ev) {
+          }, function(type, ev) {
+            var error = (type === 'error') ? ev : false;
             if ( error ) {
               warnings.push(Utils.format('Could not extract "{0}": {1}', item.filename, error));
             } else {
