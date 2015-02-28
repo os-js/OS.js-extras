@@ -119,12 +119,12 @@
 
     this.view = this._addGUIElement(new GUI.ListView('ArchiverListView'), root);
     this.view.setColumns([
-      {key: 'icon',     title: '', type: 'image', callback: _callbackIcon, domProperties: {width: '16'}, resizable: false},
+      {key: 'icon',     title: '', type: 'image', callback: _callbackIcon, width: 16, resizable: false},
       {key: 'filename', title: API._('LBL_FILENAME')},
-      {key: 'comment',  title: API._('LBL_COMMENT'), domProperties: {width: '100'}},
+      {key: 'comment',  title: API._('LBL_COMMENT'), width: 100},
       {key: 'path',     title: API._('LBL_PATH'), visible: false},
-      {key: 'csize',    title: API._('Compressed Size'), domProperties: {width: '100'}, visible: false},
-      {key: 'rsize',    title: API._('LBL_SIZE'), domProperties: {width: '100'}},
+      {key: 'csize',    title: API._('Compressed Size'), width: 100, visible: false},
+      {key: 'rsize',    title: API._('LBL_SIZE'), width: 100},
       {key: 'type',     title: '', visible: false}
     ]);
     this.view.onActivate = function(ev, el, item) {

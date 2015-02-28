@@ -215,7 +215,7 @@
     this.listView = this._addGUIElement(new GUI.ListView('RTCGroupVideoRoomList'), root);
     this.listView.setColumns([
       {key: 'roomid',       title: OSjs.API._('Room ID')},
-      {key: 'join',         title: '', type: 'button', domProperties: {width: "40"}}
+      {key: 'join',         title: '', type: 'button', width: 40}
     ]);
 
     this.listView.render();
