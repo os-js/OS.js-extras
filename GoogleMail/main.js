@@ -51,7 +51,9 @@
   ApplicationGmail.prototype = Object.create(Application.prototype);
 
   ApplicationGmail.prototype.destroy = function() {
-    OSjs.Applications.ApplicationGmail.Mailer.abort();
+    if ( OSjs.Applications.ApplicationGmail.GoogleMail ) {
+      OSjs.Applications.ApplicationGmail.GoogleMail.abort();
+    }
     return Application.prototype.destroy.apply(this, arguments);
   };
 
