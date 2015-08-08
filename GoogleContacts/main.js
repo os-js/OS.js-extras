@@ -134,116 +134,50 @@
   /**
    * Main Window Constructor
    */
-  var ApplicationGoogleContactsWindow = function(app, metadata) {
+  var ApplicationGoogleContactsWindow = function(app, metadata, scheme) {
     Window.apply(this, ['ApplicationGoogleContactsWindow', {
       icon: metadata.icon,
       title: metadata.name,
       width: 400,
       height: 200
-    }, app]);
-
-    this.contactView = null;
+    }, app, scheme]);
   };
 
   ApplicationGoogleContactsWindow.prototype = Object.create(Window.prototype);
 
-  ApplicationGoogleContactsWindow.prototype.init = function(wmRef, app) {
+  ApplicationGoogleContactsWindow.prototype.init = function(wmRef, app, scheme) {
     var root = Window.prototype.init.apply(this, arguments);
     var self = this;
 
-    // Create window contents (GUI) here
-    var vbox = this._addGUIElement(new GUI.VBox('ApplicationGoogleContactsVBox'), root);
-    var container = vbox.insert('MenuBar', 0, 1);
+    // Load and set up scheme (GUI) here
+    scheme.render(this, 'ApplicationGoogleContactsWindow', root);
 
-    var menuBar = this._addGUIElement(new GUI.MenuBar('ApplicationGoogleContactsMenuBar'), container);
-    menuBar.addItem(API._('LBL_FILE'), [
-      {title: API._('LBL_CLOSE'), name: 'Close', onClick: function() {
-        self._close();
-      }}
-    ]);
-    /*
-    menuBar.addItem(API._('LBL_EDIT'), [
-      {title: API._('LBL_EDIT'), name: 'Edit', onClick: function() {
-        var selected = self.getSelectedContact();
-        self.editContact(selected);
-      }},
-      {title: API._('LBL_DELETE'), name: 'Delete', onClick: function() {
-        var selected = self.getSelectedContact();
-        self.deleteContact(selected);
-      }},
-      {title: API._('LBL_NEW'), name: 'Create', onClick: function() {
-        self.createContact();
-      }}
-    ]);
-    */
-    menuBar.addItem(API._('LBL_REFRESH'));
-    menuBar.onMenuOpen = function(menu, mpos, mtitle, menuBar) {
-      if ( mtitle === API._('LBL_FILE') ) return;
-      if ( mtitle === API._('LBL_REFRESH') ) {
-        if ( app ) {
-          app.sync();
-        }
-        return;
-      }
-
-      /*
-      var selected = self.getSelectedContact();
-      if ( selected ) {
-        menu.setItemDisabled('Edit', false);
-        menu.setItemDisabled('Delete', false);
-      } else {
-        menu.setItemDisabled('Edit', true);
-        menu.setItemDisabled('Delete', true);
-      }
-      */
-    };
-
-    container = vbox.insert('ListView', 1, 0);
-
-    this.contactView = this._addGUIElement(new GUI.ListView('ApplicationGoogleContactsListView', {
-      columns: [
-        {'key': 'id', 'title': 'ID', visible: false},
-        {'key': 'title', 'title': 'Title'},
-        {'key': 'email', 'title': 'Email', width: 200}
-      ],
-      onContextMenu: function(ev, el, item) {
-        if ( menuBar ) {
-          menuBar.createContextMenu(ev, 1);
-        }
-      },
-      onActivate: function(ev, el, item) {
-        self.activateContact(item);
-      }
-    }), container);
+    scheme.find(this, 'View').on('activate', function(ev) {
+      self.activateContact(ev.detail.entries[0].data);
+    });
+    scheme.find(this, 'Refresh').on('select', function() {
+      app.sync();
+    });
 
     return root;
   };
 
-  ApplicationGoogleContactsWindow.prototype._inited = function() {
-    Window.prototype._inited.apply(this, arguments);
-  };
-
-  ApplicationGoogleContactsWindow.prototype.destroy = function() {
-    Window.prototype.destroy.apply(this, arguments);
-    this.contactView = null;
-  };
-
   ApplicationGoogleContactsWindow.prototype.renderGoogleContacts = function(contacts) {
     contacts = contacts || [];
-    if ( !this.contactView ) return;
 
-    var view = this.contactView;
     var rows = [];
     contacts.forEach(function(c) {
       rows.push({
-        id: c.id,
-        title: c.title,
-        email: c.emails ? c.emails[0] : ''
+        value: c,
+        columns: [
+          {label: c.title},
+          {label: (c.emails ? c.emails[0] : '')}
+        ]
       });
     });
 
-    view.setRows(rows);
-    view.render();
+    var view = this._scheme.find(this, 'View');
+    view.clear().add(rows);
   };
 
   ApplicationGoogleContactsWindow.prototype.editContact = function(contact) {
@@ -263,12 +197,12 @@
   ApplicationGoogleContactsWindow.prototype.activateContact = function(contact) {
     if ( !contact ) { return; }
     console.debug('activateContact', contact);
-    if ( !contact.email ) { return; }
+    if ( !contact.emails.length ) { return; }
 
     API.launch('ApplicationGmail', {
       action: 'create',
       title: contact.title,
-      email: contact.email
+      email: contact.emails[0]
     });
   };
 
@@ -285,60 +219,46 @@
   // APPLICATION
   /////////////////////////////////////////////////////////////////////////////
 
-  /**
-   * Application constructor
-   */
-  var ApplicationGoogleContacts = function(args, metadata) {
+  function ApplicationGoogleContacts(args, metadata) {
     Application.apply(this, ['ApplicationGoogleContacts', args, metadata]);
-    this.mainWindow;
-  };
+  }
 
   ApplicationGoogleContacts.prototype = Object.create(Application.prototype);
-
-  ApplicationGoogleContacts.prototype.destroy = function() {
-    if ( Application.prototype.destroy.apply(this, arguments) ) {
-      this.mainWindow = null;
-      return true;
-    }
-    return false;
-  };
 
   ApplicationGoogleContacts.prototype.init = function(settings, metadata) {
     Application.prototype.init.apply(this, arguments);
 
-    this.mainWindow = this._addWindow(new ApplicationGoogleContactsWindow(this, metadata));
-    this.sync();
-  };
-
-  ApplicationGoogleContacts.prototype._onMessage = function(obj, msg, args) {
-    Application.prototype._onMessage.apply(this, arguments);
-    if ( msg == 'destroyWindow' && obj._name === 'ApplicationGoogleContactsWindow' ) {
-      this.destroy();
-    }
+    var self = this;
+    var url = API.getApplicationResource(this, './scheme.html');
+    var scheme = GUI.createScheme(url);
+    scheme.load(function(error, result) {
+      self._addWindow(new ApplicationGoogleContactsWindow(self, metadata, scheme));
+      self.sync();
+    });
   };
 
   ApplicationGoogleContacts.prototype.sync = function() {
-    var self = this;
+    var mainWindow = this.__windows[0];
 
-    this.mainWindow._toggleLoading(true);
-
+    mainWindow._toggleLoading(true);
     pullContacts(function(error, result) {
       if ( error ) {
         API.error('Google Calendar Error', 'An error occured while getting contacts', error);
       }
 
-      if ( self.mainWindow ) {
-        self.mainWindow._toggleLoading(false);
+      if ( mainWindow ) {
+        mainWindow._toggleLoading(false);
         if ( result ) {
-          self.mainWindow.renderGoogleContacts(result);
+          mainWindow.renderGoogleContacts(result);
         }
       }
     });
   };
 
-  //
+  /////////////////////////////////////////////////////////////////////////////
   // EXPORTS
-  //
+  /////////////////////////////////////////////////////////////////////////////
+
   OSjs.Applications = OSjs.Applications || {};
   OSjs.Applications.ApplicationGoogleContacts = OSjs.Applications.ApplicationGoogleContacts || {};
   OSjs.Applications.ApplicationGoogleContacts.Class = ApplicationGoogleContacts;

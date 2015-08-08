@@ -1,0 +1,28 @@
+<application-window data-id="ApplicationGoogleContactsWindow">
+
+  <gui-vbox>
+    <gui-vbox-container data-grow="0" data-shrink="1" data-basis="auto">
+      <gui-menu-bar>
+        <gui-menu-bar-entry data-label="File">
+          <gui-menu data-id="SubmenuFile">
+            <gui-menu-entry data-id="MenuClose" data-label="LBL_CLOSE"></gui-menu-entry>
+          </gui-menu>
+        </gui-menu-bar-entry>
+        <gui-menu-bar-entry data-label="LBL_REFRESH" data-id="Refresh">
+        </gui-menu-bar-entry>
+      </gui-menu-bar>
+    </gui-vbox-container>
+
+    <gui-vbox-container data-grow="1" data-fill="true">
+      <gui-list-view data-id="View" data-multiple="false">
+        <gui-list-view-head>
+          <gui-list-view-row>
+            <gui-list-view-column data-grow="1" data-shrink="1">Name</gui-list-view-column>
+            <gui-list-view-column data-grow="0" data-shrink="1" data-basis="300px">Address</gui-list-view-column>
+          </gui-list-view-row>
+        </gui-list-view-head>
+      </gui-list-view>
+    </gui-vbox-container>
+  </gui-vbox>
+
+</application-window>

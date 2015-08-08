@@ -1,6 +1,5 @@
 {
   "className":  "ApplicationGoogleContacts",
-  "enabled":    false,
   "name":       "Google Contacts",
   "mime":       null,
   "category":   "office",
