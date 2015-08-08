@@ -5,7 +5,6 @@
   "mime":       ["^text", "inode\\/x\\-empty", "application\\/x\\-empty", "application\\/x\\-python", "application\\/javascript"],
   "icon":       "./icon.png",
   "category":   "development",
-  "enabled":    true,
   "splash":     true,
   "build":      {
     "copy": [
