@@ -1,3 +1,51 @@
+<application-window data-id="GmailSettingsWindow">
+  <gui-vbox>
+    <gui-vbox-container data-shrink="1">
+      <gui-label data-id="Message">Max Pages per folder (10 is absolute maximum)</gui-label>
+    </gui-vbox-container>
+
+    <gui-vbox-container data-expand="true" data-grow="1">
+      <gui-text data-id="MaxPages"></gui-text>
+    </gui-vbox-container>
+
+    <gui-vbox-container data-shrink="1" data-align="end">
+      <gui-button-bar>
+        <gui-button data-id="ButtonSave">LBL_SAVE</gui-button>
+        <gui-button data-id="ButtonClose">LBL_CLOSE</gui-button>
+      </gui-button-bar>
+    </gui-vbox-container>
+  </gui-vbox>
+</application-window>
+
+<application-window data-id="GmailMessageWindow">
+
+  <gui-vbox>
+    <!-- MENU BAR -->
+    <gui-vbox-container data-grow="0" data-shrink="1" data-basis="auto">
+      <gui-menu-bar>
+
+        <gui-menu-bar-entry data-label="File">
+          <gui-menu data-id="SubmenuFile">
+            <gui-menu-entry data-id="MenuClose" data-label="Close"></gui-menu-entry>
+          </gui-menu>
+        </gui-menu-bar-entry>
+
+      </gui-menu-bar>
+    </gui-vbox-container>
+
+    <!-- CONTENT -->
+    <gui-vbox-container data-grow="1" data-shrink="0" data-basis="auto" data-fill="true">
+    </gui-vbox-container>
+
+
+    <!-- STATUSBAR -->
+    <gui-vbox-container data-grow="0" data-shrink="1" data-basis="auto">
+      <gui-statusbar data-id="Statusbar"></gui-statusbar>
+    </gui-vbox-container>
+  </gui-vbox>
+
+</application-window>
+
 <application-window data-id="GmailWindow">
 
   <gui-vbox>

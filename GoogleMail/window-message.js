@@ -29,7 +29,7 @@
  */
 (function(Application, Window, GUI, Dialogs, Utils, API, VFS) {
 
-  var ApplicationGmailMessageWindow = function(app, metadata, mailArgs) {
+  var ApplicationGmailMessageWindow = function(app, metadata, mailArgs, scheme) {
     mailArgs = mailArgs || {};
     Window.apply(this, ['ApplicationGmailMessageWindow', {
       icon: metadata.icon,
@@ -37,20 +37,23 @@
       allow_session: false,
       width: 500,
       height: 400
-    }, app]);
+    }, app, scheme]);
 
     this.mailArgs = mailArgs;
-    this.menuBar = null;
-    this.statusBar = null;
-    this.inputMessage = null;
   };
 
   ApplicationGmailMessageWindow.prototype = Object.create(Window.prototype);
 
-  ApplicationGmailMessageWindow.prototype.init = function(wmRef, app) {
+  ApplicationGmailMessageWindow.prototype.init = function(wmRef, app, scheme) {
     var self = this;
     var root = Window.prototype.init.apply(this, arguments);
 
+    // Load and set up scheme (GUI) here
+    scheme.render(this, 'GmailMessageWindow', root);
+
+    return root;
+
+    /*
 
     var sender = this.mailArgs.sender || this.mailArgs.to;
     var subject = this.mailArgs.subject || '';
@@ -117,6 +120,7 @@
     this.statusBar = statusBar;
     this.inputMessage = inputMessage;
     this.menuBar = menuBar;
+    */
 
     return root;
   };
@@ -129,18 +133,9 @@
     }
   };
 
-  ApplicationGmailMessageWindow.prototype.destroy = function() {
-    Window.prototype.destroy.apply(this, arguments);
-    this.statusBar = null;
-    this.inputMessage = null;
-    this.menuBar = null;
-  };
-
   ApplicationGmailMessageWindow.prototype.onPrepareReceive = function() {
     this._toggleLoading(true);
-    if ( this.statusBar ) {
-      this.statusBar.setText('Preparing to receive email...');
-    }
+    this._scheme.find(this, 'Statusbar').set('value', 'Preparing to receive email...');
   };
 
   ApplicationGmailMessageWindow.prototype.onEndReceive = function(parsed) {
@@ -154,6 +149,7 @@
 
     if ( !parsed ) return;
 
+    /*
     var l = parsed.attachments.length;
     if ( this.menuBar && l ) {
       var items = [];
@@ -171,22 +167,15 @@
 
       this.menuBar.addItem('Attachments', items);
     }
+    */
 
-    if ( this.statusBar ) {
-      var text = 'Message downloaded (' + l + ' attachments)';
-      this.statusBar.setText(text);
-    }
-
-    if ( this.inputMessage ) {
-      this.inputMessage.setContent(parsed.raw);
-    }
+    this._scheme.find(this, 'Statusbar').set('value', text);
+    this._scheme.find(this, 'Message').set('value', parsed.raw);
   };
 
   ApplicationGmailMessageWindow.prototype.onPrepareSend = function() {
     this._toggleLoading(true);
-    if ( this.statusBar ) {
-      this.statusBar.setText('Preparing to send email...');
-    }
+    this._scheme.find(this, 'Statusbar').set('value', 'Preparing to send email...');
   };
 
   ApplicationGmailMessageWindow.prototype.onEndSend = function(result, error) {
@@ -195,9 +184,7 @@
     if ( result ) {
       this._close();
     } else {
-      if ( this.statusBar ) {
-        this.statusBar.setText('FAILED TO SEND MESSAGE: ' + error);
-      }
+      this._scheme.find(this, 'Statusbar').set('value', 'FAILED TO SEND MESSAGE: ' + error);
     }
   };
 

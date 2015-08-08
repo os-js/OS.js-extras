@@ -29,7 +29,7 @@
  */
 (function(Application, Window, GUI, Dialogs, Utils, API, VFS) {
 
-  var ApplicationGmailSettingsWindow = function(app, metadata, settings, maxPages) {
+  var ApplicationGmailSettingsWindow = function(app, metadata, maxPages, scheme) {
     Window.apply(this, ['ApplicationGmailSettingsWindow', {
       icon: metadata.icon,
       title: metadata.name + ' - Settings',
@@ -38,7 +38,7 @@
       allow_maximize: false,
       width: 400,
       height: 200
-    }, app]);
+    }, app, scheme]);
 
     this.defaultMaxPages = metadata.settings ? metadata.settings.maxPages : 10;
     this.currentMaxPages = maxPages || this.defaultMaxPages;
@@ -46,10 +46,13 @@
 
   ApplicationGmailSettingsWindow.prototype = Object.create(Window.prototype);
 
-  ApplicationGmailSettingsWindow.prototype.init = function(wmRef, app) {
+  ApplicationGmailSettingsWindow.prototype.init = function(wmRef, app, scheme) {
+    var self = this;
     var root = Window.prototype.init.apply(this, arguments);
 
-    var self = this;
+    // Load and set up scheme (GUI) here
+    scheme.render(this, 'GmailSettingsWindow', root);
+
     function save(maxPages) {
       if ( maxPages && self._appRef ) {
         maxPages = parseInt(maxPages, 10);
@@ -57,7 +60,7 @@
           maxPages = self.defaultMaxPages;
         }
 
-        self._appRef._setSetting('maxPages', maxPages, true, function() {
+        app._setSetting('maxPages', maxPages, true, function() {
           self._close();
         });
         return;
@@ -65,33 +68,16 @@
       self._close();
     }
 
-    var container = document.createElement('div');
-    container.className = 'Settings';
-    this._addGUIElement(new GUI.Label('MaxPagesLabel', {label: 'Max Pages per folder (10 is absolute maximum)'}), container);
-    var maxPagesInput = this._addGUIElement(new GUI.Text('MaxPages', {value: this.currentMaxPages}), container);
-    root.appendChild(container);
+    var maxPages = scheme.find(this, 'MaxPages').set('value', this.currentMaxPages);
 
-    container = document.createElement('div');
-    container.className = 'Buttons';
-
-    this._addGUIElement(new GUI.Button('ButtonCancel', {label: API._('LBL_CANCEL'), onClick: function() {
+    scheme.find(this, 'ButtonClose').on('click', function() {
       save(false);
-    }}), container);
-    this._addGUIElement(new GUI.Button('ButtonSave', {label: API._('LBL_SAVE'), onClick: function() {
-      save(maxPagesInput ? maxPagesInput.getValue() : false);
-    }}), container);
-
-    root.appendChild(container);
+    });
+    scheme.find(this, 'ButtonSave').on('click', function() {
+      save(maxPages.get('value'));
+    });
 
     return root;
-  };
-
-  ApplicationGmailSettingsWindow.prototype._inited = function() {
-    Window.prototype._inited.apply(this, arguments);
-  };
-
-  ApplicationGmailSettingsWindow.prototype.destroy = function() {
-    Window.prototype.destroy.apply(this, arguments);
   };
 
   /////////////////////////////////////////////////////////////////////////////

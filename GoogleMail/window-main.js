@@ -306,8 +306,7 @@
         }
      */
 
-    scheme.find(this, 'Folders').on('select', function(ev) {
-    }).on('activate', function(ev) {
+    scheme.find(this, 'Folders').on('activate', function(ev) {
       var item = ev.detail.entries[0].data;
       app.setFolder(item);
     }).on('contextmenu', function(ev) {
@@ -376,19 +375,19 @@
     var view = this._scheme.find(this, 'Messages');
     view.clear();
     view.add(list);
-    //view.set('value', selected); // FIXME
+    //view.set('value', current);
   };
 
   ApplicationGmailWindow.prototype.renderFolders = function(folders, current) {
     var view = this._scheme.find(this, 'Folders');
     view.clear();
     view.add(resolveFolders(folders, current));
-    //view.set('value', current); // FIXME
+    view.set('value', current, 'id');
   };
 
   ApplicationGmailWindow.prototype.setSelectedFolder = function(id) {
     var view = this._scheme.find(this, 'Folders');
-    //view.set('value', id); // FIXME
+    view.set('value', id, 'id');
   };
 
   /////////////////////////////////////////////////////////////////////////////
