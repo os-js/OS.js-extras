@@ -27,7 +27,7 @@
  * @author  Anders Evenrud <andersevenrud@gmail.com>
  * @licence Simplified BSD License
  */
-(function(Application, Window, GUI, Utils, API, VFS) {
+(function(DefaultApplication, DefaultApplicationWindow, Application, Window, Utils, API, VFS, GUI) {
 
   /////////////////////////////////////////////////////////////////////////////
   // WINDOWS
@@ -36,109 +36,53 @@
   /**
    * Main Window Constructor
    */
-  var ApplicationPDFjsWindow = function(app, metadata) {
-    Window.apply(this, ['ApplicationPDFjsWindow', {
+  function ApplicationPDFjsWindow(app, metadata, scheme, file) {
+    DefaultApplicationWindow.apply(this, ['ApplicationPDFjsWindow', {
+      allow_drop: true,
       icon: metadata.icon,
       title: metadata.name,
       width: 500,
       height: 400
-    }, app]);
+    }, app, scheme, file]);
 
-    this.title = metadata.name;
-    this.$container = null;
     this.pageCount = 0;
     this.pageIndex = 0;
-    this.file = null;
     this.pdf = null;
     this.currentScale = 1.5;
-  };
+  }
 
-  ApplicationPDFjsWindow.prototype = Object.create(Window.prototype);
+  ApplicationPDFjsWindow.prototype = Object.create(DefaultApplicationWindow.prototype);
+  ApplicationPDFjsWindow.constructor = DefaultApplicationWindow.prototype;
 
-  ApplicationPDFjsWindow.prototype.init = function(wmRef, app) {
-    var root = Window.prototype.init.apply(this, arguments);
+  ApplicationPDFjsWindow.prototype.init = function(wmRef, app, scheme) {
+    var root = DefaultApplicationWindow.prototype.init.apply(this, arguments);
     var self = this;
 
-    var _createIcon = function(i) {
-      return OSjs.API.getIcon(i);
-    };
+    // Load and set up scheme (GUI) here
+    scheme.render(this, 'PDFWindow', root);
 
-    // Create window contents (GUI) here
-    var menuBar = this._addGUIElement(new GUI.MenuBar('ApplicationPDFjsMenuBar'), root);
-    menuBar.addItem(API._("LBL_FILE"), [
-      {title: API._('LBL_OPEN'), name: 'Open', onClick: function() {
-        app.action('open');
-      }},
-      {title: API._('LBL_CLOSE'), name: 'Close', onClick: function() {
-        self._close();
-      }}
-    ]);
-
-    var toolBar = this._addGUIElement(new GUI.ToolBar('ApplicationPDFjsToolBar'), root);
-    toolBar.addItem('prevPage', {title: 'Previous page', icon: _createIcon('actions/go-previous.png'), onClick: function(ev, el, name, item) {
+    scheme.find(this, 'Prev').on('click', function() {
       self.prevPage();
-    }});
-    toolBar.addItem('nextPage', {title: 'Next page', icon: _createIcon('actions/go-next.png'), onClick: function(ev, el, name, item) {
+    });
+    scheme.find(this, 'Next').on('click', function() {
       self.nextPage();
-    }});
-    toolBar.addItem('zoomOut', {title: 'Zoom out', icon: _createIcon('actions/zoom-out.png'), onClick: function(ev, el, name, item) {
-      self.zoomOut();
-    }});
-    toolBar.addItem('zoomIn', {title: 'Zoom in', icon: _createIcon('actions/zoom-in.png'), onClick: function(ev, el, name, item) {
+    });
+    scheme.find(this, 'In').on('click', function() {
       self.zoomIn();
-    }});
-    toolBar.render();
-
-    this.$container = document.createElement('div');
-    this.$container.className = 'PDFContainer';
-    root.appendChild(this.$container);
+    });
+    scheme.find(this, 'Out').on('click', function() {
+      self.zoomOut();
+    });
 
     return root;
   };
 
-  ApplicationPDFjsWindow.prototype._inited = function() {
-    Window.prototype._inited.apply(this, arguments);
-
-    // Window has been successfully created and displayed.
-    // You can start communications, handle files etc. here
-
-  };
-
   ApplicationPDFjsWindow.prototype.destroy = function() {
-    // Destroy custom objects etc. here
-
-    Window.prototype.destroy.apply(this, arguments);
-
-    if ( this.$container ) {
-      if ( this.$container.parentNode ) {
-        this.$container.parentNode.removeChild(this.$container);
-      }
-      this.$container = null;
-    }
-
-    this.file = null;
+    DefaultApplicationWindow.prototype.destroy.apply(this, arguments);
     this.pdf = null;
   };
 
   ApplicationPDFjsWindow.prototype.open = function(file, url) {
-    var self = this;
-
-    Utils.$empty(this.$container);
-
-    this._setTitle(this.title);
-
-    this.pageCount = 0;
-    this.pageIndex = 0;
-
-    PDFJS.getDocument(url).then(function getPdfHelloWorld(pdf) {
-      console.warn("XXX", file, url, pdf);
-
-      self.pageCount = pdf.numPages;
-      self.file = file;
-      self.pdf = pdf;
-
-      self.page(1);
-    });
   };
 
   ApplicationPDFjsWindow.prototype.page = function(pageNum) {
@@ -148,11 +92,13 @@
       return;
     }
 
-    Utils.$empty(this.$container);
+    var container = this._scheme.find(this, 'Content').$element;
+    Utils.$empty(container);
 
     this.pageIndex = pageNum;
 
-    this._setTitle(Utils.format('{0} - {1} (Page {2}/{3}) - {4}%', this.title, this.file.filename, this.pageIndex, this.pageCount, this.currentScale*100));
+    var statustext = Utils.format('Page {0}/{1} - {2}%', this.pageIndex, this.pageCount, this.currentScale*100);
+    this._scheme.find(this, 'Statusbar').set('value', statustext);
 
     this.pdf.getPage(this.pageIndex).then(function getPageHelloWorld(page) {
       var scale = self.currentScale;
@@ -162,7 +108,7 @@
       canvas.height = viewport.height;
       canvas.width = viewport.width;
 
-      self.$container.appendChild(canvas);
+      container.appendChild(canvas);
 
       var renderContext = {
         canvasContext: context,
@@ -192,76 +138,54 @@
     this.page(this.pageIndex);
   };
 
+  ApplicationPDFjsWindow.prototype.showFile = function(file, result) {
+    var self = this;
+    var container = this._scheme.find(this, 'Content').$element;
+
+    Utils.$empty(container);
+
+    this.pageCount = 0;
+    this.pageIndex = 0;
+
+    PDFJS.getDocument(result).then(function getPdfHelloWorld(pdf) {
+      self.pageCount = pdf.numPages;
+      self.pdf = pdf;
+      self.page(1);
+    });
+
+    DefaultApplicationWindow.prototype.showFile.apply(this, arguments);
+  };
+
   /////////////////////////////////////////////////////////////////////////////
   // APPLICATION
   /////////////////////////////////////////////////////////////////////////////
 
-  /**
-   * Application constructor
-   */
-  var ApplicationPDFjs = function(args, metadata) {
-    Application.apply(this, ['ApplicationPDFjs', args, metadata]);
-
-    // You can set application variables here
-    this.mainWindow = null;
-
-    this.dialogOptions.mimes = metadata.mime;
-    this.dialogOptions.read  = false;
+  function ApplicationPDFjs(args, metadata) {
+    DefaultApplication.apply(this, ['ApplicationPDFjs', args, metadata, {
+      readData: false
+    }]);
 
     window.PDFJS = window.PDFJS || {};
     var src = API.getApplicationResource(this, 'vendor/pdf.js/src/worker_loader.js');
     PDFJS.workerSrc = src;
-  };
+  }
 
-  ApplicationPDFjs.prototype = Object.create(Application.prototype);
-
-  ApplicationPDFjs.prototype.destroy = function() {
-    // Destroy communication, timers, objects etc. here
-    this.mainWindow = null;
-
-    return Application.prototype.destroy.apply(this, arguments);
-  };
+  ApplicationPDFjs.prototype = Object.create(DefaultApplication.prototype);
+  ApplicationPDFjs.constructor = DefaultApplication;
 
   ApplicationPDFjs.prototype.init = function(settings, metadata) {
     var self = this;
-
-    this.mainWindow = this._addWindow(new ApplicationPDFjsWindow(this, metadata));
-
-    Application.prototype.init.apply(this, arguments);
+    DefaultApplication.prototype.init.call(this, settings, metadata, function(scheme, file) {
+      self._addWindow(new ApplicationPDFjsWindow(self, metadata, scheme, file));
+    });
   };
 
-  ApplicationPDFjs.prototype._onMessage = function(obj, msg, args) {
-    Application.prototype._onMessage.apply(this, arguments);
-
-    // Make sure we kill our application if main window was closed
-    if ( msg == 'destroyWindow' && obj._name === 'ApplicationPDFjsWindow' ) {
-      this.destroy();
-    }
-  };
-
-  ApplicationPDFjs.prototype.onOpen = function(file, data) {
-    var self = this;
-    if ( this.mainWindow ) {
-      this.mainWindow._focus();
-
-      VFS.url(file, function(error, url) {
-        if ( !self.mainWindow ) { return; }
-
-        if ( error ) {
-          alert(error); // FIXME
-          return;
-        }
-
-        self.mainWindow.open(file, url);
-      });
-    }
-  };
-
-  //
+  /////////////////////////////////////////////////////////////////////////////
   // EXPORTS
-  //
+  /////////////////////////////////////////////////////////////////////////////
+
   OSjs.Applications = OSjs.Applications || {};
   OSjs.Applications.ApplicationPDFjs = OSjs.Applications.ApplicationPDFjs || {};
   OSjs.Applications.ApplicationPDFjs.Class = ApplicationPDFjs;
 
-})(OSjs.Helpers.DefaultApplication, OSjs.Helpers.DefaultApplicationWindow, OSjs.GUI, OSjs.Utils, OSjs.API, OSjs.VFS);
+})(OSjs.Helpers.DefaultApplication, OSjs.Helpers.DefaultApplicationWindow, OSjs.Core.Application, OSjs.Core.Window, OSjs.Utils, OSjs.API, OSjs.VFS, OSjs.GUI);

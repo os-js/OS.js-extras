@@ -28,15 +28,6 @@
  * @licence Simplified BSD License
  */
 
-.Window_ApplicationPDFjsWindow .WindowWrapper {
-}
-
-.Window_ApplicationPDFjsWindow .WindowWrapper .PDFContainer {
-  position : absolute;
-  top : 68px;
-  left : 5px;
-  bottom : 5px;
-  right : 5px;
+.ApplicationPDFjsWindow gui-container {
   background : #fff;
-  overflow : auto;
 }
