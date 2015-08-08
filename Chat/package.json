@@ -1,5 +1,6 @@
 {
   "className":  "ApplicationChat",
+  "enabled":    false,
   "name":       "Chat",
   "description":"Chat with your buddies",
   "mime":       null,

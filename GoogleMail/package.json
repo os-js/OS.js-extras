@@ -1,5 +1,6 @@
 {
   "className":  "ApplicationGmail",
+  "enabled":    false,
   "name":       "Google Mail",
   "mime":       null,
   "icon":       "./icon.png",

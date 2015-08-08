@@ -1,5 +1,6 @@
 {
   "className":  "ApplicationArchiver",
+  "enabled":    false,
   "name":       "Archiver",
   "mime":       ["application\/zip"],
   "icon":       "apps/system-software-install.png",

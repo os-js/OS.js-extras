@@ -1,6 +1,7 @@
 {
   "className":  "ApplicationCodeMirror",
   "name":       "CodeMirror",
+  "enabled":    false,
   "mime":       ["^text", "inode\\/x\\-empty", "application\\/x\\-empty", "application\\/x\\-python", "application\\/javascript"],
   "icon":       "./icon.png",
   "category":   "development",
