@@ -1,0 +1,83 @@
+<application-window data-id="GmailWindow">
+
+  <gui-vbox>
+    <!-- MENU BAR -->
+    <gui-vbox-container data-grow="0" data-shrink="1" data-basis="auto">
+      <gui-menu-bar>
+
+        <gui-menu-bar-entry data-label="File">
+          <gui-menu data-id="SubmenuFile">
+            <gui-menu-entry data-id="MenuClose" data-label="Close"></gui-menu-entry>
+          </gui-menu>
+        </gui-menu-bar-entry>
+
+        <gui-menu-bar-entry data-label="Folder">
+          <gui-menu data-id="SubmenuFolder">
+            <gui-menu-entry data-id="FolderNew" data-label="LBL_NEW"></gui-menu-entry>
+            <gui-menu-entry data-id="FolderRename" data-label="LBL_RENAME"></gui-menu-entry>
+            <gui-menu-entry data-id="FolderDelete" data-label="LBL_DELETEE"></gui-menu-entry>
+          </gui-menu>
+        </gui-menu-bar-entry>
+
+        <gui-menu-bar-entry data-label="Message">
+          <gui-menu data-id="SubmenuMessage">
+            <gui-menu-entry data-id="MessageNew" data-label="LBL_NEW"></gui-menu-entry>
+            <gui-menu-entry data-id="MessageReply" data-label="Reply"></gui-menu-entry>
+            <gui-menu-entry data-id="MessageMove" data-label="LBL_MOVE"></gui-menu-entry>
+            <gui-menu-entry data-id="MessageMarkAs" data-label="Mark As...">
+              <gui-menu data-id="SubmenuMarkAs">
+                <gui-menu-entry data-id="MarkRead" data-label="Read"></gui-menu-entry>
+                <gui-menu-entry data-id="MarkUnread" data-label="Unread"></gui-menu-entry>
+                <gui-menu-entry data-id="MarkStarred" data-label="Star"></gui-menu-entry>
+                <gui-menu-entry data-id="MarkUnstar" data-label="Unstar"></gui-menu-entry>
+              </gui-menu>
+            </gui-menu-entry>
+          </gui-menu>
+        </gui-menu-bar-entry>
+
+        <gui-menu-bar-entry data-id="GetMessages" data-label="Get Messages"></gui-menu-bar-entry>
+        <gui-menu-bar-entry data-id="OpenContacts" data-label="Open Contacts"></gui-menu-bar-entry>
+
+        <gui-menu-bar-entry data-label="Options">
+          <gui-menu data-id="SubmenuOptions">
+            <gui-menu-entry data-id="OpenSettings" data-label="LBL_SETTINGS"></gui-menu-entry>
+            <gui-menu-entry data-id="ForceUpdate" data-label="Force Update"></gui-menu-entry>
+          </gui-menu>
+        </gui-menu-bar-entry>
+      </gui-menu-bar>
+    </gui-vbox-container>
+
+    <!-- CONTENT -->
+    <gui-vbox-container data-grow="1" data-shrink="0" data-basis="auto" data-fill="true">
+      <gui-paned-view>
+        <gui-paned-view-container data-basis="150px" data-grow="0" data-shrink="0" data-multiple="false" data-id="SideContainer">
+          <gui-tree-view data-id="Folders" data-single-click="true">
+          </gui-tree-view>
+        </gui-paned-view-container>
+
+        <gui-paned-view-container data-grow="1" data-shrink="1">
+          <gui-list-view data-id="Messages">
+            <gui-list-view-head>
+              <gui-list-view-row>
+                <gui-list-view-column data-grow="0" data-shrink="0" data-basis="16px"></gui-list-view-column>
+                <gui-list-view-column data-grow="0" data-shrink="0" data-basis="16px"></gui-list-view-column>
+                <gui-list-view-column data-grow="0" data-shrink="0" data-basis="200px">Sender</gui-list-view-column>
+                <gui-list-view-column data-grow="1" data-shrink="1" data-basis="200px">Subject</gui-list-view-column>
+                <gui-list-view-column data-grow="0" data-shrink="1" data-basis="100px">Date</gui-list-view-column>
+              </gui-list-view-row>
+            </gui-list-view-head>
+          </gui-list-view>
+        </gui-paned-view-container>
+      </gui-paned-view>
+    </gui-vbox-container>
+
+
+    <!-- STATUSBAR -->
+    <gui-vbox-container data-grow="0" data-shrink="1" data-basis="auto">
+      <gui-statusbar data-id="Statusbar"></gui-statusbar>
+    </gui-vbox-container>
+  </gui-vbox>
+
+  <gui-progress-bar data-id="Progressbar"></gui-progress-bar>
+
+</application-window>

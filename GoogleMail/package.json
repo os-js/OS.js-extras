@@ -1,6 +1,5 @@
 {
   "className":  "ApplicationGmail",
-  "enabled":    false,
   "name":       "Google Mail",
   "mime":       null,
   "icon":       "./icon.png",
@@ -13,10 +12,8 @@
   },
   "preload":    [
     {"src": "mailer.js", "type": "javascript"},
-    {"src": "main.js", "type": "javascript"},
     {"src": "window-main.js", "type": "javascript"},
-    {"src": "window-message.js", "type": "javascript"},
-    {"src": "window-settings.js", "type": "javascript"},
+    {"src": "main.js", "type": "javascript"},
     {"src": "main.css", "type": "stylesheet"}
   ]
 }

@@ -64,32 +64,39 @@
     var defaultSettings = metadata.settings || {};
     settings = Utils.argumentDefaults(settings, defaultSettings);
 
-    this.mainWindow = this._addWindow(new OSjs.Applications.ApplicationGmail.MainWindow(this, metadata));
-
-    if ( !this._getArgument('__resume__') ) {
-      var action = this._getArgument('action');
-      if ( action ) {
-        this.handleAction(this._getArguments());
+    function onloaded() {
+      if ( !self._getArgument('__resume__') ) {
+        var action = self._getArgument('action');
+        if ( action ) {
+          self.handleAction(self._getArguments());
+        }
       }
+
+      self.mailer = new OSjs.Applications.ApplicationGmail.GoogleMail({
+        maxPages: settings.maxPages,
+        onAbortStart: function() {
+          if ( self.mainWindow ) {
+            self.mainWindow._toggleLoading(true);
+          }
+        },
+        onAbortEnd: function() {
+          if ( self.mainWindow ) {
+            self.mainWindow._toggleLoading(false);
+          }
+        }
+      }, function(error, result) {
+        if ( self.mainWindow && self.mailer.user ) {
+          self.mainWindow.updateTitleBar(self.mailer.user);
+        }
+        self.sync();
+      });
     }
 
-    this.mailer = new OSjs.Applications.ApplicationGmail.GoogleMail({
-      maxPages: settings.maxPages,
-      onAbortStart: function() {
-        if ( self.mainWindow ) {
-          self.mainWindow._toggleLoading(true);
-        }
-      },
-      onAbortEnd: function() {
-        if ( self.mainWindow ) {
-          self.mainWindow._toggleLoading(false);
-        }
-      }
-    }, function(error, result) {
-      if ( self.mainWindow && self.mailer.user ) {
-        self.mainWindow.updateTitleBar(self.mailer.user);
-      }
-      self.sync();
+    var url = API.getApplicationResource(this, './scheme.html');
+    var scheme = GUI.createScheme(url);
+    scheme.load(function(error, result) {
+      self.mainWindow = self._addWindow(new OSjs.Applications.ApplicationGmail.MainWindow(self, metadata, scheme, settings));
+      onloaded();
     });
   };
 
