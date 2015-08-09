@@ -377,19 +377,19 @@
     var view = this._scheme.find(this, 'Messages');
     view.clear();
     view.add(list);
-    //view.set('value', current);
+    view.set('value', current);
   };
 
   ApplicationGmailWindow.prototype.renderFolders = function(folders, current) {
     var view = this._scheme.find(this, 'Folders');
     view.clear();
     view.add(resolveFolders(folders, current));
-    view.set('value', current, 'id');
+    view.set('value', current);
   };
 
   ApplicationGmailWindow.prototype.setSelectedFolder = function(id) {
     var view = this._scheme.find(this, 'Folders');
-    view.set('value', id, 'id');
+    view.set('value', id);
   };
 
   /////////////////////////////////////////////////////////////////////////////
