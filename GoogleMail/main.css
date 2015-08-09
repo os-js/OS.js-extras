@@ -37,3 +37,28 @@
   line-height : 20px;
   z-index : 999999;
 }
+.ApplicationGmailWindow gui-list-view-row.unread {
+   font-weight : bold;
+}
+.ApplicationGmailWindow gui-list-view-body > gui-list-view-row > gui-list-view-column:nth-child(1) {
+}
+.ApplicationGmailWindow gui-list-view-body > gui-list-view-row > gui-list-view-column:nth-child(1):after {
+  content : "";
+  position : absolute;
+  left : 50%;
+  top : 50%;
+  width : 8px;
+  height : 8px;
+  margin : -4px;
+  border-radius : 8px;
+  background-color : #D3D3D3;
+}
+.ApplicationGmailWindow gui-list-view-body > gui-list-view-row.unread > gui-list-view-column:nth-child(1):after {
+  background-color : #A0C3FF;
+}
+.ApplicationGmailWindow gui-list-view-body > gui-list-view-row > gui-list-view-column:nth-child(2) {
+  background : transparent url('unstar.png') no-repeat center center;
+}
+.ApplicationGmailWindow gui-list-view-body > gui-list-view-row.starred > gui-list-view-column:nth-child(2) {
+  background-image : url('starred.png');
+}

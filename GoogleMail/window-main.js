@@ -80,22 +80,17 @@
   }
 
   function toggleReadState(id, messageView) {
-    return; // TODO
     if ( messageView ) {
-      var el = messageView.getItemByKey('id', id);
-      if ( el && el._element ) {
-        Utils.$removeClass(el._element, 'unread');
+      var el = messageView.get('entry', id, 'id');
+      if ( el ) {
+        Utils.$removeClass(el, 'unread');
       }
     }
   }
 
-  function toggleMessageState(id, state, row) {
+  function toggleMessageState(id, state, row, messageView) {
     if ( messageView ) {
       var states = OSjs.Applications.ApplicationGmail.MessageStates;
-      var el = messageView.getItemByKey('id', id);
-      if ( el && el._element ) {
-        row = el._element;
-      }
       if ( row ) {
         Utils.$removeClass(row, 'unread');
         Utils.$removeClass(row, 'starred');
@@ -197,6 +192,8 @@
     // Load and set up scheme (GUI) here
     scheme.render(this, 'GmailWindow', root);
 
+    var messageView;
+
     var menuMap = {
       MenuClose:        function() { self._close(); },
       MenuFolderNew: function() {
@@ -234,34 +231,38 @@
         }
       },
 
-      MessageMarkRead: function() {
+      MarkRead: function() {
         app.markMessage('read', self, function(err, res, id, state) {
           if ( !err && res ) {
-            toggleMessageState(id, state);
+            var row = messageView.get('entry', id, 'id');
+            toggleMessageState(id, state, row, messageView);
           }
         });
       },
 
-      MessageMarkUnread: function() {
+      MarkUnread: function() {
         app.markMessage('unread', self, function(err, res, id, state) {
           if ( !err && res ) {
-            toggleMessageState(id, state);
+            var row = messageView.get('entry', id, 'id');
+            toggleMessageState(id, state, row, messageView);
           }
         });
       },
 
-      MessageMarkStarred: function() {
+      MarkStarred: function() {
         app.markMessage('starred', self, function(err, res, id, state) {
           if ( !err && res ) {
-            toggleMessageState(id, state);
+            var row = messageView.get('entry', id, 'id');
+            toggleMessageState(id, state, row, messageView);
           }
         });
       },
 
-      MessageMarkUnstar: function() {
+      MarkUnstar: function() {
         app.markMessage('unstar', self, function(err, res, id, state) {
           if ( !err && res ) {
-            toggleMessageState(id, state);
+            var row = messageView.get('entry', id, 'id');
+            toggleMessageState(id, state, row, messageView);
           }
         });
       },
@@ -301,13 +302,6 @@
     scheme.find(this, 'SubmenuOptions').on('select', menuEvent);
     scheme.find(this, 'Menubar').on('select', menuEvent);
 
-    /*
-     * ON RENDER:
-        if ( row && iter ) {
-          toggleMessageState(iter.id, iter.state, row);
-        }
-     */
-
     scheme.find(this, 'Folders').on('activate', function(ev) {
       var item = ev.detail.entries[0].data;
       app.setFolder(item);
@@ -315,9 +309,13 @@
       folderMenu.show(ev);
     });
 
-    var messageView = scheme.find(this, 'Messages').on('select', function(ev) {
+    messageView = scheme.find(this, 'Messages').on('select', function(ev) {
       var item = ev.detail.entries[0].data;
       app.setMessage(item.id);
+    }).on('render', function(ev) {
+      var row = ev.detail.element;
+      var iter = ev.detail.data;
+      toggleMessageState(iter.id, iter.state, row, messageView);
     }).on('activate', function(ev) {
       var item = ev.detail.entries[0].data;
 
