@@ -79,7 +79,8 @@
     return fiters;
   }
 
-  function toggleReadState(id) {
+  function toggleReadState(id, messageView) {
+    return; // TODO
     if ( messageView ) {
       var el = messageView.getItemByKey('id', id);
       if ( el && el._element ) {
@@ -295,9 +296,10 @@
 
     scheme.find(this, 'SubmenuFile').on('select', menuEvent);
     var folderMenu = scheme.find(this, 'SubmenuFolder').on('select', menuEvent);
-    var messageMenu = scheme.find(this, 'SubmenuMessages').on('select', menuEvent);
+    var messageMenu = scheme.find(this, 'SubmenuMessage').on('select', menuEvent);
     scheme.find(this, 'SubmenuMarkAs').on('select', menuEvent);
     scheme.find(this, 'SubmenuOptions').on('select', menuEvent);
+    scheme.find(this, 'Menubar').on('select', menuEvent);
 
     /*
      * ON RENDER:
@@ -313,7 +315,7 @@
       folderMenu.show(ev);
     });
 
-    scheme.find(this, 'Messages').on('select', function(ev) {
+    var messageView = scheme.find(this, 'Messages').on('select', function(ev) {
       var item = ev.detail.entries[0].data;
       app.setMessage(item.id);
     }).on('activate', function(ev) {
@@ -324,7 +326,7 @@
         subject: item.subject,
         sender: item.sender,
         onRecieved: function() {
-          toggleReadState(item.id);
+          toggleReadState(item.id, messageView);
         }
       });
     }).on('contextmenu', function(ev) {

@@ -22,19 +22,35 @@
   <gui-vbox>
     <!-- MENU BAR -->
     <gui-vbox-container data-grow="0" data-shrink="1" data-basis="auto">
-      <gui-menu-bar>
+      <gui-menu-bar data-id="Menubar">
 
         <gui-menu-bar-entry data-label="File">
           <gui-menu data-id="SubmenuFile">
             <gui-menu-entry data-id="MenuClose" data-label="Close"></gui-menu-entry>
           </gui-menu>
         </gui-menu-bar-entry>
+        <gui-menu-bar-entry data-id="Reply" data-label="Reply"></gui-menu-bar-entry>
+        <gui-menu-bar-entry data-id="Send" data-label="Send"></gui-menu-bar-entry>
+        <gui-menu-bar-entry data-id="Attachments" data-label="Attachments"></gui-menu-bar-entry>
 
       </gui-menu-bar>
     </gui-vbox-container>
 
+    <!-- ENTRIES -->
+    <gui-vbox-container data-grow="0" data-shrink="1" data-basis="auto" data-id="EntrySubject" data-expand="true">
+      <gui-text data-id="Subject" data-placeholder="Subject..."></gui-text>
+    </gui-vbox-container>
+    <gui-vbox-container data-grow="0" data-shrink="1" data-basis="auto" data-id="EntryTo" data-expand="true">
+      <gui-text data-id="To" data-placeholder="To..."></gui-text>
+    </gui-vbox-container>
+
     <!-- CONTENT -->
-    <gui-vbox-container data-grow="1" data-shrink="0" data-basis="auto" data-fill="true">
+    <gui-vbox-container data-grow="1" data-shrink="0" data-basis="auto" data-fill="true" data-id="ViewMessage">
+      <gui-richtext data-id="Message"></gui-richtext>
+    </gui-vbox-container>
+
+    <gui-vbox-container data-grow="1" data-shrink="0" data-basis="auto" data-fill="true" data-id="ViewInput">
+      <gui-textarea data-id="Input"></gui-textarea>
     </gui-vbox-container>
 
 
@@ -51,7 +67,7 @@
   <gui-vbox>
     <!-- MENU BAR -->
     <gui-vbox-container data-grow="0" data-shrink="1" data-basis="auto">
-      <gui-menu-bar>
+      <gui-menu-bar data-id="Menubar">
 
         <gui-menu-bar-entry data-label="File">
           <gui-menu data-id="SubmenuFile">

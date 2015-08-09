@@ -40,6 +40,7 @@
     }, app, scheme]);
 
     this.mailArgs = mailArgs;
+    this.attachmentMenu = [];
   };
 
   ApplicationGmailMessageWindow.prototype = Object.create(Window.prototype);
@@ -51,76 +52,51 @@
     // Load and set up scheme (GUI) here
     scheme.render(this, 'GmailMessageWindow', root);
 
-    return root;
+    var input = scheme.find(this, 'Input');
+    var subject = scheme.find(this, 'Subject').set('value', this.mailArgs.subject || '');
+    var to = scheme.find(this, 'To').set('value', this.mailArgs.to || '');
 
-    /*
-
-    var sender = this.mailArgs.sender || this.mailArgs.to;
-    var subject = this.mailArgs.subject || '';
-    var message = this.mailArgs.message || '';
-    var disable = !!this.mailArgs.id;
-
-    var vboxMain = this._addGUIElement(new GUI.VBox('ApplicationGmailMessageVboxMain'), root);
-    var container;
-    var menuBar, statusBar;
-    var inputTo, inputSubject, inputMessage;
-
-    //
-    // Menu Bar
-    //
-    container = vboxMain.insert('MenuBar', 0, 1);
-    menuBar = this._addGUIElement(new GUI.MenuBar('ApplicationGmailMessageMenuBar'), container);
-    menuBar.addItem(API._('LBL_FILE'), [
-      {title: API._('LBL_CLOSE'), name: 'Close', onClick: function() {
+    var menuMap = {
+      MenuClose: function() {
         self._close();
-      }}
-    ]);
-    if ( disable ) {
-      menuBar.addItem('Reply', []);
-    } else {
-      menuBar.addItem('Send', []);
-    }
-    menuBar.onMenuOpen = function(menu, mpos, mtitle, menuBar) {
-      if ( !app ) return;
-
-      var to = inputTo ? inputTo.getValue() : null;
-      var subject = inputSubject ? inputSubject.getValue() : null;
-      var txt = inputMessage ? inputMessage.getContent() : null;
-      if ( mtitle === 'Send' ) {
-        app.sendMessage(self, to, subject, txt);
-      } else if ( mtitle === 'Reply' ) {
+      },
+      Reply: function() {
         self._toggleLoading(true);
         app.replyToMessage(self.mailArgs.id, function() {
           self._toggleLoading(false);
         });
 
         self._close();
+      },
+      Send: function() {
+        app.sendMessage(self, to.get('value'), subject.get('value'), input.get('value'));
+      },
+      Attachments: function(ev) {
+        var pos = Utils.$position(ev.target);
+        API.createMenu(self.attachmentMenu, {x: pos.left, y: pos.top});
       }
     };
 
-    //
-    // Fields
-    //
-    container = vboxMain.insert('Fields', 0, 1);
-    inputTo = this._addGUIElement(new GUI.Text('ApplicationGmailMessageTo', {placeholder: 'To...', value: sender, disabled: disable}), container);
-    inputSubject = this._addGUIElement(new GUI.Text('ApplicationGmailMessageSubject', {placeholder: 'Subject...', value: subject, disabled: disable}), container);
+    function menuEvent(ev) {
+      if ( menuMap[ev.detail.id] ) {
+        menuMap[ev.detail.id](ev);
+      }
+    }
 
-    //
-    // Main View
-    //
-    container = vboxMain.insert('Message', 1, 0);
-    inputMessage = this._addGUIElement(new GUI.RichText('ApplicationGmailMessageText', {value: message, editable: !disable}), container);
+    if ( this.mailArgs && this.mailArgs.id ) {
+      scheme.find(this, 'ViewInput').hide();
+      scheme.find(this, 'EntrySubject').hide();
+      scheme.find(this, 'EntryTo').hide();
 
-    //
-    // Status Bar
-    //
-    container = vboxMain.insert('StatusBar', 0, 1);
-    statusBar = this._addGUIElement(new GUI.StatusBar('ApplicationGmailMessageStatusBar'), container);
+      scheme.find(this, 'Send').set('disabled', true);
+    } else {
+      scheme.find(this, 'ViewMessage').hide();
+      scheme.find(this, 'Attachments').set('disabled', true);
+      scheme.find(this, 'Reply').set('disabled', true);
+    }
 
-    this.statusBar = statusBar;
-    this.inputMessage = inputMessage;
-    this.menuBar = menuBar;
-    */
+    scheme.find(this, 'SubmenuFile').on('select', menuEvent);
+    scheme.find(this, 'Menubar').on('select', menuEvent);
 
     return root;
   };
@@ -128,8 +104,8 @@
   ApplicationGmailMessageWindow.prototype._inited = function() {
     Window.prototype._inited.apply(this, arguments);
 
-    if ( this.mailArgs.id && this._appRef ) {
-      this._appRef.recieveMessage(this, this.mailArgs.id);
+    if ( this.mailArgs.id && this._app ) {
+      this._app.recieveMessage(this, this.mailArgs.id);
     }
   };
 
@@ -149,26 +125,22 @@
 
     if ( !parsed ) return;
 
-    /*
     var l = parsed.attachments.length;
-    if ( this.menuBar && l ) {
-      var items = [];
-      parsed.attachments.forEach(function(i) {
-        items.push({
-          title: i.filename + ' (' + i.mime + ', ' + i.size + 'b)',
-          name: i.filename,
-          onClick: function() {
-            if ( self._appRef ) {
-              self._appRef.downloadAttachment(self, i);
-            }
+    var items = [];
+    parsed.attachments.forEach(function(i) {
+      items.push({
+        title: i.filename + ' (' + i.mime + ', ' + i.size + 'b)',
+        onClick: function() {
+          if ( self._app ) {
+            self._app.downloadAttachment(self, i);
           }
-        });
+        }
       });
+    });
 
-      this.menuBar.addItem('Attachments', items);
-    }
-    */
+    this.attachmentMenu = items;
 
+    var text = 'Message downloaded (' + l + ' attachments)';
     this._scheme.find(this, 'Statusbar').set('value', text);
     this._scheme.find(this, 'Message').set('value', parsed.raw);
   };
