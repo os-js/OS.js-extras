@@ -1,0 +1,17 @@
+{
+  "className":  "ApplicationAceEditor",
+  "name":       "AceEditor",
+  "mime":       null,
+  "icon":       "categories/applications-system.png",
+  "category":   "development",
+  "mime":       ["^text", "inode\\/x\\-empty", "application\\/x\\-empty", "application\\/x\\-python", "application\\/javascript"],
+  "icon":       "./ace-logo.png",
+  "preload":    [
+    {"src": "vendor/ace/build/src/ace.js", "type": "javascript"},
+    {"src": "main.js", "type": "javascript"},
+    {"src": "main.css", "type": "stylesheet"}
+  ]
+}
+
+
+

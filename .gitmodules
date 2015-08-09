@@ -10,3 +10,6 @@
 [submodule "PDFjs/vendor/pdf.js"]
 	path = PDFjs/vendor/pdf.js
 	url = https://github.com/mozilla/pdf.js.git
+[submodule "AceEditor/vendor/ace"]
+	path = AceEditor/vendor/ace
+	url = git://github.com/ajaxorg/ace.git
