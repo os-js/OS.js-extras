@@ -26,6 +26,21 @@ Google Contacts client (with mail integration)
 
 Read PDF documents
 
+## Ace Editor
+
+A code editor.
+
+
+# CURRENTLY INCOMPATIBLE
+
+Due to changes: https://github.com/andersevenrud/OS.js-v2/issues/136
+
+**THESE WILL BE UPDATED VERY SOON**
+
+## RTCGroupVideo
+
+RTC Group Video Conference (HTML5 API)
+
 ## Chat
 
 A XMPP client for Google Talk. Includes proxy for Apache (See INSTALL file)
@@ -33,11 +48,3 @@ A XMPP client for Google Talk. Includes proxy for Apache (See INSTALL file)
 ## Archiver
 
 ZIP Archive manipulation with zip.js
-
-## CodeMirror
-
-A code editor that uses CodeMirror API
-
-## RTCGroupVideo
-
-RTC Group Video Conference (HTML5 API)
