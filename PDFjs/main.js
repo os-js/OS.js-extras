@@ -173,9 +173,9 @@
   ApplicationPDFjs.prototype = Object.create(DefaultApplication.prototype);
   ApplicationPDFjs.constructor = DefaultApplication;
 
-  ApplicationPDFjs.prototype.init = function(settings, metadata) {
+  ApplicationPDFjs.prototype.init = function(settings, metadata, onInited) {
     var self = this;
-    DefaultApplication.prototype.init.call(this, settings, metadata, function(scheme, file) {
+    DefaultApplication.prototype.init.call(this, settings, metadata, onInited, function(scheme, file) {
       self._addWindow(new ApplicationPDFjsWindow(self, metadata, scheme, file));
     });
   };

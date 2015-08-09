@@ -185,9 +185,9 @@
   ApplicationAceEditor.prototype = Object.create(DefaultApplication.prototype);
   ApplicationAceEditor.constructor = DefaultApplication;
 
-  ApplicationAceEditor.prototype.init = function(settings, metadata) {
+  ApplicationAceEditor.prototype.init = function(settings, metadata, onInited) {
     var self = this;
-    DefaultApplication.prototype.init.call(this, settings, metadata, function(scheme, file) {
+    DefaultApplication.prototype.init.call(this, settings, metadata, onInited, function(scheme, file) {
       self._addWindow(new ApplicationAceEditorWindow(self, metadata, scheme, file));
     });
   };

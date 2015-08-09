@@ -59,7 +59,7 @@
     return Application.prototype.destroy.apply(this, arguments);
   };
 
-  ApplicationGmail.prototype.init = function(settings, metadata) {
+  ApplicationGmail.prototype.init = function(settings, metadata, onInited) {
     var self = this;
 
     Application.prototype.init.apply(this, arguments);
@@ -92,6 +92,8 @@
         }
         self.sync();
       });
+
+      onInited();
     }
 
     var url = API.getApplicationResource(this, './scheme.html');
