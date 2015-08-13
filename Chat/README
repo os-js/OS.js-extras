@@ -8,10 +8,6 @@ Then:
 # Install system deps
 sudo apt-get install python-twisted python-openssl make openjdk-6-jre
 
-# Install YUI compressor somewhere and make strophejs
-cd Chat/vendor/strophejs
-YUI_COMPRESSOR=/path/to/yui.jar make
-
 # Build and install deps
 cd Chat/vendor/punjab
 python setup.py build
@@ -22,3 +18,11 @@ sudo a2enmod proxy_http
 sudo service apache2 restart
 sudo twistd punjab
 ```
+
+# Notes
+
+Connect with your Google Mail account.
+
+You have to enable "Allow less secure apps" in your Account Settings to allow authentication.
+
+https://myaccount.google.com/security?pli=1

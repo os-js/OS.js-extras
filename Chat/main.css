@@ -28,282 +28,78 @@
  * @licence Simplified BSD License
  */
 
-.Window_ApplicationChatMainWindow .WindowWrapper {
+.ApplicationChatWindow application-window-content {
 }
 
-.Window_ApplicationChatMainWindow .GUITreeView {
-  position : absolute;
-  top : 26px;
-  left : 0px;
-  bottom : 26px;
-  right : 0px;
-  margin : 0;
-  padding : 0;
-  overflow : auto;
-
-  border : 0 none;
-}
-.Window_ApplicationChatMainWindow .GUITreeView .Expandable > div > span {
-  font-weight : bold;
-}
-/*
-.Window_ApplicationChatMainWindow .GUIListView {
-  position : absolute;
-  top : 26px;
-  left : 0px;
-  bottom : 26px;
-  right : 0px;
-  margin : 0;
-  padding : 0;
-  overflow : auto;
-
-  border : 0 none;
-}
-.Window_ApplicationChatMainWindow .GUIListView > .Header {
-  display : none;
-}
-.Window_ApplicationChatMainWindow .GUIListView > .Scroll {
-  top : 0;
-}
-*/
-
-.Window_ApplicationChatSettingsWindow .WindowWrapper .Label {
-  font-weight : bold;
-}
-.Window_ApplicationChatSettingsWindow .WindowWrapper .Setting {
-  margin : 5px;
-}
-.Window_ApplicationChatSettingsWindow .WindowWrapper .Buttons {
-  position : absolute;
-  bottom : 0px;
-  right : 0px;
-  width : 120px;
-}
-.Window_ApplicationChatSettingsWindow .WindowWrapper .Buttons .GUIButton {
-  display : inline-block;
-  width : 50px;
-  margin : 5px;
-}
-.Window_ApplicationChatSettingsWindow .WindowWrapper .Notice {
-  padding : 10px;
-  font-style : italic;
+.ApplicationConversationWindow gui-container {
 }
 
-.ApplicationChatWindow .ChatMessages {
-  position : absolute;
-  top : 0px;
-  left : 0px;
-  bottom : 28px;
-  right : 0px;
-  overflow : auto;
-  z-index : 1;
-
-  background : #fff;
-  color : #000;
-}
-
-.ApplicationChatWindow .ChatInput {
-  position : absolute;
-  left : 0px;
-  bottom : 0px;
-  right : 0px;
-  height : 24px;
-  z-index : 1;
-}
-.ApplicationChatWindow .ChatInput .GUIText {
-  display : inline-block;
-  width : 100%;
-}
-.ApplicationChatWindow .ChatInput .GUIText > input {
-  background : #fff;
-  border : 0 none;
-}
-
-.ApplicationChatWindow .ChatMessages > div {
-  margin : 5px;
+.ApplicationConversationWindow gui-container ul {
   position : relative;
-  margin-bottom : 10px;
-  min-height : 56px;
-}
-.ApplicationChatWindow .ChatMessages > div.HasAvatar {
-  min-height : 96px;
-}
-
-/*
-.ApplicationChatWindow .ChatMessages > div.Remote {
-  text-align : right;
-}
-*/
-.ApplicationChatWindow .ChatMessages > div > img {
-  position : absolute;
-  top : 0px;
-  z-index : 1;
-
-  -webkit-border-radius:10px;
-  -moz-border-radius:10px;
-  border-radius:10px;
-}
-.ApplicationChatWindow .ChatMessages > div.Local > img {
-  left : 0px;
-}
-.ApplicationChatWindow .ChatMessages > div.Remote > img {
-  right : 0px;
-}
-.ApplicationChatWindow .ChatMessages > div > div {
-  min-height : 30px;
-  z-index : 100;
-}
-.ApplicationChatWindow .ChatMessages > div.HasAvatar > div {
-  min-height : 76px;
-}
-
-.ApplicationChatWindow .ChatMessages h1 {
   margin : 0;
-  padding : 1px;
-  font-size : 100%;
+  padding : 0;
+  list-style-type : none;
 }
-.ApplicationChatWindow .ChatMessages p {
+
+.ApplicationConversationWindow gui-container ul > li {
+  position : relative;
+  display : block;
+  margin : 10px;
+  padding : 0;
+  padding : 10px;
+  padding-bottom : 25px;
+  background-color : #e6e6e6;
+  border-radius : 5px;
+}
+.ApplicationConversationWindow gui-container ul > li.remote {
+  margin-right : 50px;
+}
+.ApplicationConversationWindow gui-container ul > li.self {
+  margin-left : 50px;
+}
+
+.ApplicationConversationWindow gui-container ul > li > p {
+  display : block;
   margin : 0;
-  padding : 1px;
-  word-break: break-all;
-}
-.ApplicationChatWindow .ChatNotifications {
-  position : absolute;
-  top : 0px;
-  left : 0px;
-  right : 0px;
-  z-index : 100;
-
-  background : #fff;
-  color : #000;
-  text-align : center;
-  padding : 5px;
-  display : none;
-  border : 1px solid #000;
+  padding : 0;
 }
 
-.Window_ApplicationChatUserInfoWindow .GUITextarea {
+.ApplicationConversationWindow gui-container ul > li > span {
+  opacity : .8;
+  font-size : 10px;
   position : absolute;
-  top : 5px;
-  left : 5px;
   bottom : 5px;
   right : 5px;
+  display : inline-block;
 }
-
-.Window_ApplicationChatUserInfoWindow img {
+.ApplicationConversationWindow gui-container ul > li > img {
+  display : inline-block;
+  width : 32px;
+  height : 32px;
+  border-radius : 32px;
   position : absolute;
-  bottom : 6px;
-  right : 6px;
+  top : 50%;
+  margin-top : -16px;
+  left : -45px;
+  background-color : #e6e6e6;
+}
+.ApplicationConversationWindow gui-container ul > li.remote > img {
+  left : auto;
+  right : -45px;
 }
 
-.Window_ApplicationChatAboutWindow .WindowWrapper {
-  background : #fff;
-  text-align : center;
-  padding : 10px;
+.ApplicationConversationWindow gui-container ul > li:before {
+  content : '';
+  background : #e6e6e6;
+  position : absolute;
+  left : -6px;
+  top : 50%;
+  margin-top : -6px;
+  width : 12px;
+  height : 12px;
+  transform : rotate(45deg);
 }
-.Window_ApplicationChatAboutWindow .WindowWrapper h1 {
-  padding : 0;
-  margin : 0;
-  font-size : 24px;
+.ApplicationConversationWindow gui-container ul > li.remote:before {
+  left : auto;
+  right : -6px;
 }
-.Window_ApplicationChatAboutWindow .WindowWrapper span {
-  font-size : 16px;
-}
-.Window_ApplicationChatAboutWindow .WindowWrapper a {
-  text-decoration : none;
-  color : #0000ff;
-}
-.Window_ApplicationChatAboutWindow .WindowWrapper > div {
-  font-size : 12px;
-  line-height : 24px;
-}
-
-.triangle-border {
-  position:relative;
-  padding:5px;
-  border:5px solid #B3DFC3;
-  color:#333;
-  background:#fff;
-
-  -webkit-border-radius:10px;
-  -moz-border-radius:10px;
-  border-radius:10px;
-}
-.triangle-border.left {
-  margin-left : 25px;
-}
-.triangle-border.right {
-  margin-right : 25px;
-  border-color: #DFB3B3;
-}
-.ApplicationChatWindow .ChatMessages > div.HasAvatar .triangle-border.left {
-  margin-left : 105px;
-}
-.ApplicationChatWindow .ChatMessages > div.HasAvatar .triangle-border.right {
-  margin-right : 105px;
-}
-.triangle-border:before {
-  content:"";
-  position:absolute;
-  bottom:-20px; /* value = - border-top-width - border-bottom-width */
-  left:40px; /* controls horizontal position */
-  border-width:20px 20px 0;
-  border-style:solid;
-  border-color:#B3DFC3 transparent;
-  /* reduce the damage in FF3.0 */
-  display:block;
-  width:0;
-}
-
-/* creates the smaller  triangle */
-.triangle-border:after {
-  content:"";
-  position:absolute;
-  bottom:-13px; /* value = - border-top-width - border-bottom-width */
-  left:47px; /* value = (:before left) + (:before border-left) - (:after border-left) */
-  border-width:13px 13px 0;
-  border-style:solid;
-  border-color:#fff transparent;
-  /* reduce the damage in FF3.0 */
-  display:block;
-  width:0;
-}
-
-/* creates the larger triangle */
-.triangle-border.left:before {
-  top:10px; /* controls vertical position */
-  bottom:auto;
-  left:-30px; /* value = - border-left-width - border-right-width */
-  border-width:15px 30px 15px 0;
-  border-color:transparent #B3DFC3;
-}
-
-/* creates the smaller  triangle */
-.triangle-border.left:after {
-  top:16px; /* value = (:before top) + (:before border-top) - (:after border-top) */
-  bottom:auto;
-  left:-21px; /* value = - border-left-width - border-right-width */
-  border-width:9px 21px 9px 0;
-  border-color:transparent #fff;
-}
-
-/* creates the larger triangle */
-.triangle-border.right:before {
-  top:10px; /* controls vertical position */
-  bottom:auto;
-  left:auto;
-  right:-30px; /* value = - border-left-width - border-right-width */
-  border-width:15px 0 15px 30px;
-  border-color:transparent #DFB3B3;
-}
-
-/* creates the smaller  triangle */
-.triangle-border.right:after {
-  top:16px; /* value = (:before top) + (:before border-top) - (:after border-top) */
-  bottom:auto;
-  left:auto;
-  right:-21px; /* value = - border-left-width - border-right-width */
-  border-width:9px 0 9px 21px;
-  border-color:transparent #fff;
-}
-
