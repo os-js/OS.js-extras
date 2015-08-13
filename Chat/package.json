@@ -12,7 +12,6 @@
       "package.json",
       "main.css",
       "main.js",
-      "icons",
       "vendor/strophejs/strophe.js"
     ]
   },
