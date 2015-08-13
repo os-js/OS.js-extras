@@ -600,7 +600,7 @@
   function ApplicationChatWindow(app, metadata, scheme) {
     Window.apply(this, ['ApplicationChatWindow', {
       icon: metadata.icon,
-      title: metadata.name,
+      title: metadata.name + ' v0.1',
       width: 300,
       height: 500
     }, app, scheme]);
