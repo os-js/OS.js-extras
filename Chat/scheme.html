@@ -1,0 +1,117 @@
+<application-window data-id="SettingsWindow">
+  <gui-vbox>
+    <gui-vbox-container data-shrink="1">
+      <p style="padding:10px;">
+        Connect with your Google Mail account.<br />You have to enable &quot;Allow less secure apps&quot; in your <a target="_blank" href="https://myaccount.google.com/security?pli=1">Account Settings</a> to allow authentication. Your information is stored in the browser and the server does not log.
+      </p>
+    </gui-vbox-container>
+
+    <gui-vbox-container data-shrink="1">
+      <gui-label>Username</gui-label>
+    </gui-vbox-container>
+
+    <gui-vbox-container data-expand="true" data-grow="1" data-expand="true">
+      <gui-text data-id="Username" data-placeholder="username@google.com"></gui-text>
+    </gui-vbox-container>
+
+    <gui-vbox-container data-shrink="1">
+      <gui-label>Password</gui-label>
+    </gui-vbox-container>
+
+    <gui-vbox-container data-expand="true" data-grow="1" data-expand="true">
+      <gui-password data-id="Password" data-placeholder=""></gui-password>
+    </gui-vbox-container>
+
+    <gui-vbox-container data-shrink="1" data-align="end">
+      <gui-button-bar>
+        <gui-button data-id="ButtonSave">LBL_SAVE</gui-button>
+        <gui-button data-id="ButtonClose">LBL_CLOSE</gui-button>
+      </gui-button-bar>
+    </gui-vbox-container>
+  </gui-vbox>
+</application-window>
+
+<application-window data-id="ConversationWindow">
+
+  <gui-vbox>
+    <!-- MENU BAR -->
+    <gui-vbox-container data-grow="0" data-shrink="1" data-basis="auto">
+      <gui-menu-bar data-id="Menubar">
+
+        <gui-menu-bar-entry data-label="LBL_FILE">
+          <gui-menu data-id="SubmenuFile">
+            <gui-menu-entry data-id="MenuClose" data-label="Close"></gui-menu-entry>
+          </gui-menu>
+        </gui-menu-bar-entry>
+
+      </gui-menu-bar>
+    </gui-vbox-container>
+
+    <!-- CONTENT -->
+    <gui-vbox-container data-grow="3" data-shrink="0" data-basis="auto" data-fill="true">
+      <gui-container data-borders="true">
+        <ul data-id="Conversation">
+        </ul>
+      </gui-container>
+    </gui-vbox-container>
+    <gui-vbox-container data-grow="1" data-shrink="1" data-basis="auto" data-fill="true">
+      <gui-textarea data-id="Input"></gui-textarea>
+    </gui-vbox-container>
+
+
+    <!-- STATUSBAR -->
+    <gui-vbox-container data-grow="0" data-shrink="1" data-basis="auto">
+      <gui-statusbar data-id="Statusbar"></gui-statusbar>
+    </gui-vbox-container>
+  </gui-vbox>
+</application-window>
+
+<application-window data-id="ChatWindow">
+
+  <gui-vbox>
+    <!-- MENU BAR -->
+    <gui-vbox-container data-grow="0" data-shrink="1" data-basis="auto">
+      <gui-menu-bar data-id="Menubar">
+
+        <gui-menu-bar-entry data-label="LBL_FILE">
+          <gui-menu data-id="SubmenuFile">
+            <gui-menu-entry data-id="MenuClose" data-label="Exit"></gui-menu-entry>
+          </gui-menu>
+        </gui-menu-bar-entry>
+
+        <gui-menu-bar-entry data-label="LBL_ACCOUNT">
+          <gui-menu data-id="SubmenuAccount">
+            <gui-menu-entry data-id="AccountSettings" data-label="LBL_SETTINGS"></gui-menu-entry>
+            <gui-menu-entry data-id="AccountConnect" data-label="LBL_CONNECT"></gui-menu-entry>
+            <gui-menu-entry data-id="AccountDisconnect" data-label="LBL_DISCONNECT"></gui-menu-entry>
+          </gui-menu>
+        </gui-menu-bar-entry>
+
+        <gui-menu-bar-entry data-label="LBL_STATUS" data-id="MenuStatus">
+          <gui-menu data-id="SubmenuStatus">
+            <gui-menu-entry data-id="StatusOnline" data-label="LBL_ONLINE" data-type="radio" data-group="Status"></gui-menu-entry>
+            <gui-menu-entry data-id="StatusAway" data-label="LBL_AWAY" data-type="radio" data-group="Status"></gui-menu-entry>
+            <gui-menu-entry data-id="StatusBusy" data-label="LBL_BUSY" data-type="radio" data-group="Status"></gui-menu-entry>
+            <gui-menu-entry data-id="StatusExtendedAway" data-label="Extended Away" data-type="radio" data-group="Status"></gui-menu-entry>
+          </gui-menu>
+        </gui-menu-bar-entry>
+
+      </gui-menu-bar>
+    </gui-vbox-container>
+
+    <!-- CONTENT -->
+    <gui-vbox-container data-grow="1" data-shrink="0" data-basis="auto" data-fill="true">
+
+      <gui-tree-view data-id="Contacts" data-expanded="true" data-multiple="false">
+      </gui-tree-view>
+
+    </gui-vbox-container>
+
+
+    <!-- STATUSBAR -->
+    <gui-vbox-container data-grow="0" data-shrink="1" data-basis="auto">
+      <gui-statusbar data-id="Statusbar"></gui-statusbar>
+    </gui-vbox-container>
+  </gui-vbox>
+
+</application-window>
