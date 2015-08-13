@@ -10,6 +10,7 @@
   "build":      {
     "copy": [
       "package.json",
+      "scheme.html",
       "main.css",
       "main.js",
       "vendor/strophejs/strophe.js"
