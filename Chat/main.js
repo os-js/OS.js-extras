@@ -42,6 +42,13 @@
     'invisible': 'status/user-invisible.png'
   };
 
+  function getDisplayName(contact) {
+    if ( contact.vcard && contact.vcard.name ) {
+      return contact.vcard.name + ' (' + contact.username + ')';
+    }
+    return contact.username;
+  }
+
   function getVcardImage(vcard) {
     vcard = vcard || {};
     if ( vcard.photo && vcard.photo.type && vcard.photo.data ) {
@@ -73,6 +80,23 @@
 
     this.connection.rawOutput = function(data) {
     };
+
+    var _vctimeout;
+    var self = this;
+    this.on('contacts', function(contacts, vcard) {
+      if ( vcard ) return;
+
+      Object.keys(self.contacts).forEach(function(i) {
+        var c = self.contacts[i];
+
+        self.vcard(c.username, function() {
+          clearTimeout(_vctimeout);
+          _vctimeout = setTimeout(function() {
+            self._trigger('contacts', self.contacts, true);
+          }, 2000);
+        });
+      });
+    });
   }
   StropheConnection.prototype.destroy = function() {
     this.disconnect();
@@ -234,8 +258,9 @@
     callback = callback || function() {};
 
     console.log('StropheConnection::vcard()', jid);
-    if ( this.contacts[jid] && this.contacts.vcard ) {
-      callback(this.contacts[jid].vcard);
+    var username = jid.split('/')[0];
+    if ( this.contacts[username] && this.contacts[username].vcard ) {
+      callback(this.contacts[username].vcard);
       return;
     }
 
@@ -270,8 +295,8 @@
             photo:  photo
           };
 
-          if ( self.contacts[jid] ) {
-            self.contacts[jid].vcard = item;
+          if ( self.contacts[username] ) {
+            self.contacts[username].vcard = item;
           }
         }
       } catch ( e ) {
@@ -333,7 +358,8 @@
   };
 
   StropheConnection.prototype._onPresence = (function() {
-    function parsePresence(pres) {
+
+    function parsePresence(pres, self) {
       var from = pres.getAttribute('from') || '';
       var error = pres.querySelector('error');
       if ( error ) {
@@ -343,6 +369,7 @@
 
       var contact = {
         id:           from,
+        vcard:        null,
         group:        null,
         photo:        null,
         username:     from.split('/')[0], // Contact
@@ -382,9 +409,17 @@
       clearTimeout(_timeout);
 
       try {
-        var c = parsePresence(pres);
+        var c = parsePresence(pres, self);
         if ( c ) {
-          this.contacts[c.username] = c;
+          if ( this.contacts[c.username] ) {
+            Object.keys(c).forEach(function(k) {
+              if ( !self.contacts[c.username][k] ) {
+                self.contacts[c.username][k] = c[k];
+              }
+            });
+          } else {
+            this.contacts[c.username] = c;
+          }
         }
       } catch ( e ) {
         console.warn(e, e.stack);
@@ -499,7 +534,7 @@
     Window.apply(this, ['ApplicationConversationWindow_' + String(id), {
       tag: 'ApplicationConversationWindow',
       icon: metadata.icon,
-      title: metadata.name + ' - ' + id,
+      title: metadata.name,
       width: 400,
       height: 400
     }, app, scheme]);
@@ -531,11 +566,11 @@
     return root;
   };
 
-  ApplicationConversationWindow.prototype.message = function(msg, contact, myself) {
-    contact = contact || {};
+  ApplicationConversationWindow.prototype.message = function(msg, jid, myself) {
+    var username = (jid || '').split('/')[0];
+    var contact = jid ? this._app.connection.contacts[username] : null;
     var now = new OSjs.Helpers.Date();
     var text = msg.message;
-    var stamp = (myself ? 'me' : msg.jid) + ' | ' + now.format('isoTime');
 
     var root = this._scheme.find(this, 'Conversation');
     var container = document.createElement('li');
@@ -546,6 +581,9 @@
     image.width = 32;
     image.height = 32;
     image.src = getVcardImage(vcard);
+
+    var name = vcard.name || username || jid;
+    var stamp = (myself ? 'me' : name) + ' | ' + now.format('isoTime');
 
     var p = document.createElement('p');
     p.appendChild(document.createTextNode(text));
@@ -572,7 +610,7 @@
     }
   };
 
-  ApplicationConversationWindow.prototype.compose = function(cmp) {
+  ApplicationConversationWindow.prototype.compose = function(cmp, jid) {
     var statusbar = this._scheme.find(this, 'Statusbar');
 
     this._timeout = clearTimeout(this._timeout);
@@ -688,7 +726,7 @@
 
         entries.push({
           icon: API.getIcon(iconMap[iter.state]),
-          label: iter.username,
+          label: getDisplayName(iter),
           value: iter
         });
       });
@@ -851,7 +889,7 @@
           }
 
           try {
-            w.message(msg, self.connection.contacts[msg.jid]);
+            w.message(msg, msg.jid);
           } catch ( e ) {
             console.warn(e, e.stack);
           }
@@ -863,7 +901,7 @@
       if ( cmp.jid ) {
         self.openChatWindow(cmp.jid.split('/')[0], function(w) {
           if ( w ) {
-            w.compose(cmp, self.connection.contacts[cmp.jid]);
+            w.compose(cmp, cmp.jid);
           }
         }, true);
       }
@@ -919,7 +957,10 @@
       win = this._addWindow(new ApplicationConversationWindow(id, this, this.__metadata, this.scheme));
     }
 
-    this.connection.vcard(id, function() {
+    this.connection.vcard(id, function(vc) {
+      if ( vc && vc.name ) {
+        win._setTitle(vc.name, true);
+      }
       cb(win);
     });
   };
