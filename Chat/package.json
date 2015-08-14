@@ -11,6 +11,7 @@
     "copy": [
       "package.json",
       "scheme.html",
+      "user.png",
       "main.css",
       "main.js",
       "vendor/strophejs/strophe.js"
