@@ -187,6 +187,15 @@
 
   ApplicationAceEditor.prototype.init = function(settings, metadata, onInited) {
     var self = this;
+
+    var path = API.getApplicationResource(this, 'vendor/ace/build/src');
+    ace.config.set('basePath', path);
+    /*
+    ace.config.set('modePath', '/path/to/src');
+    ace.config.set('workerPath', '/path/to/src');
+    ace.config.set('themePath', '/path/to/src');
+    */
+
     DefaultApplication.prototype.init.call(this, settings, metadata, onInited, function(scheme, file) {
       self._addWindow(new ApplicationAceEditorWindow(self, metadata, scheme, file));
     });

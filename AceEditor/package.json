@@ -6,6 +6,16 @@
   "category":   "development",
   "mime":       ["^text", "inode\\/x\\-empty", "application\\/x\\-empty", "application\\/x\\-python", "application\\/javascript"],
   "icon":       "./ace-logo.png",
+  "build":      {
+    "copy": [
+      "ace-logo.png",
+      "package.json",
+      "scheme.html",
+      "main.css",
+      "main.js",
+      "vendor/ace/build/src"
+    ]
+  },
   "preload":    [
     {"src": "vendor/ace/build/src/ace.js", "type": "javascript"},
     {"src": "main.js", "type": "javascript"},
