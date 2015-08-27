@@ -237,6 +237,8 @@
 
       onInited();
     });
+
+    this._setScheme(scheme);
   };
 
   ApplicationGoogleContacts.prototype.sync = function() {

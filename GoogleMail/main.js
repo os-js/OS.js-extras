@@ -46,7 +46,6 @@
     this.mainWindow = null;
     this.currentFolder = 'INBOX';
     this.currentMessage = null;
-    this._scheme;
   };
 
   ApplicationGmail.prototype = Object.create(Application.prototype);
@@ -55,7 +54,6 @@
     if ( this.mailer ) {
       this.mailer.destroy();
     }
-    this._scheme = null;
     return Application.prototype.destroy.apply(this, arguments);
   };
 
@@ -98,11 +96,13 @@
 
     var url = API.getApplicationResource(this, './scheme.html');
 
-    this._scheme = GUI.createScheme(url);
-    this._scheme.load(function(error, result) {
-      self.mainWindow = self._addWindow(new OSjs.Applications.ApplicationGmail.MainWindow(self, metadata, self._scheme, settings));
+    var scheme = GUI.createScheme(url);
+    scheme.load(function(error, result) {
+      self.mainWindow = self._addWindow(new OSjs.Applications.ApplicationGmail.MainWindow(self, metadata, scheme, settings));
       onloaded();
     });
+
+    this._setScheme(scheme);
   };
 
   ApplicationGmail.prototype._onMessage = function(obj, msg, args) {
@@ -125,7 +125,7 @@
   };
 
   ApplicationGmail.prototype.openMessageWindow = function(args) {
-    this._addWindow(new OSjs.Applications.ApplicationGmail.MessageWindow(this, this.__metadata, args, this._scheme));
+    this._addWindow(new OSjs.Applications.ApplicationGmail.MessageWindow(this, this.__metadata, args, this.__scheme));
   };
 
   ApplicationGmail.prototype.openSettingsWindow = function() {
@@ -138,7 +138,7 @@
     }
 
     var maxPages = this.mailer.args.maxPages;
-    win = this._addWindow(new OSjs.Applications.ApplicationGmail.SettingsWindow(this, this.__metadata, maxPages, this._scheme));
+    win = this._addWindow(new OSjs.Applications.ApplicationGmail.SettingsWindow(this, this.__metadata, maxPages, this.__scheme));
     win._focus();
   };
 

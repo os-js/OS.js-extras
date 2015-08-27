@@ -839,7 +839,6 @@
 
     this.notification = null;
     this.connection = new StropheConnection(this);
-    this.scheme = null;
   }
 
   ApplicationChat.prototype = Object.create(Application.prototype);
@@ -859,7 +858,6 @@
 
     this.notification = null;
     this.connection = null;
-    this.scheme = null;
 
     return Application.prototype.destroy.apply(this, arguments);
   };
@@ -934,7 +932,7 @@
 
     var acc = this._getSetting('account') || {};
     scheme.load(function(error, result) {
-      self.scheme = scheme;
+      self._setScheme(scheme);
 
       mainWindow = self._addWindow(new ApplicationChatWindow(self, metadata, scheme));
 
@@ -946,6 +944,7 @@
 
       onInited();
     });
+
   };
 
   ApplicationChat.prototype.openChatWindow = function(id, cb, check) {
@@ -954,7 +953,7 @@
     var self = this;
     var win = this._getWindowByName('ApplicationConversationWindow_' + String(id));
     if ( !win && !check ) {
-      win = this._addWindow(new ApplicationConversationWindow(id, this, this.__metadata, this.scheme));
+      win = this._addWindow(new ApplicationConversationWindow(id, this, this.__metadata, this.__scheme));
     }
 
     this.connection.vcard(id, function(vc) {
@@ -970,7 +969,7 @@
     if ( win ) {
       win._restore();
     } else {
-      win = this._addWindow(new ApplicationSettingsWindow(this, this.__metadata, this.scheme));
+      win = this._addWindow(new ApplicationSettingsWindow(this, this.__metadata, this.__scheme));
     }
 
   };
