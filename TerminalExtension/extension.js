@@ -68,7 +68,6 @@
 
     function done() {
       var username = OSjs.Core.getHandler().userData.username;
-      username = 'anders';
 
       mainSocket.emit('spawn', username, function(_pid, _port) {
         cb(_pid, _port);
