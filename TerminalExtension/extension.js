@@ -39,7 +39,9 @@
   /////////////////////////////////////////////////////////////////////////////
 
   var sessions = {};
-  var socket;
+  var pid;
+  var port;
+  var mainSocket;
 
   function destroySessions() {
     Object.keys(sessions).forEach(function(k) {
@@ -50,63 +52,49 @@
         delete sessions[k];
       }
     });
+
+    if ( mainSocket ) {
+      if ( pid ) {
+        mainSocket.emit('kill', pid);
+      }
+
+      mainSocket.disconnect();
+      mainSocket = null;
+    }
   }
 
-  function createSession(host, term) {
-    createConnection(host, function() {
-      socket.emit('spawn', function(id) {
-        console.warn('SPAWNED TERMINAL ON SERVER WITH', id);
+  function createSpawnConnection(host, cb) {
+    console.warn('OPENING SPAWNER CONNECTION ON', host);
 
-        term.id = id;
-        sessions[id] = term;
+    function done() {
+      var username = OSjs.Core.getHandler().userData.username;
+      username = 'anders';
 
-        term.emit('connected');
+      mainSocket.emit('spawn', username, function(_pid, _port) {
+        cb(_pid, _port);
       });
-    });
-  }
+    }
 
-  function createConnection(host, cb) {
-    if ( socket ) {
-      console.info('SOCKET OPEN ALREADY');
-      cb();
+    if ( mainSocket ) {
+      done(pid, port);
       return;
     }
 
-    socket = io.connect(host, {
+    mainSocket = io.connect(host, {
       'max reconnection attempts': 10,
       'force new connection': true
     });
 
-    socket.on('disconnect', function() {
-      destroySessions();
-      socket = null;
+    mainSocket.on('warning', function(msg) {
+      console.warn('Failed to connect to spawner:', msg);
     });
 
-    socket.on('connect', function() {
+    mainSocket.on('connect', function() {
+      done();
+    });
 
-      /*
-      socket.on('resize', function(x, y) {
-        if ( term ) {
-          term.resize(x, y);
-        }
-      });
-      */
-
-      socket.on('kill', function(id) {
-        var term = sessions[id];
-        if ( term ) {
-          term.destroy();
-        }
-      });
-
-      socket.on('data', function(id, data) {
-        var term = sessions[id];
-        if ( term ) {
-          term.put(data);
-        }
-      });
-
-      cb();
+    mainSocket.on('disconnect', function() {
+      destroySessions(null);
     });
   }
 
@@ -129,6 +117,8 @@
     this.previousTitle = null;
     this.hostname = host;
     this.events = {'connected': [], 'destroyed': [], 'title': []};
+    this.socket = null;
+    this.sessionId = null;
     this.id = null;
   }
 
@@ -184,8 +174,8 @@
     });
 
     this.titleInterval = setInterval(function() {
-      if ( socket && self.id ) {
-        socket.emit('process', self.id, function(err, name) {
+      if ( self.socket && self.id ) {
+        self.socket.emit('process', self.id, function(err, name) {
           if ( name ) {
             self.emit('title', name);
           }
@@ -194,14 +184,14 @@
     }, 1000);
 
     this.pingInterval = setInterval(function() {
-      if ( socket && self.id ) {
-        socket.emit('ping', self.id);
+      if ( self.socket && self.id ) {
+        self.socket.emit('ping', self.id);
       }
     }, 30000);
 
     term.on('data', function(data) {
-      if ( socket && self.id ) {
-        socket.emit('data', self.id, data);
+      if ( self.socket && self.id ) {
+        self.socket.emit('data', self.id, data);
       }
     });
 
@@ -217,6 +207,8 @@
    * @return  void
    */
   PTYTerminal.prototype.connect = function() {
+    var self = this;
+
     if ( this.terminal ) {
       this.terminal.startBlink();
       this.terminal.focus();
@@ -224,7 +216,56 @@
 
     this.put('... connecting to ' + this.hostname + '\r\n');
 
-    createSession(this.hostname, this);
+    function createSocket(host) {
+      var socket = io.connect(host, {
+        'max reconnection attempts': 10,
+        'force new connection': true
+      });
+
+      socket.on('disconnect', function() {
+        destroySessions();
+        socket = null;
+      });
+
+      socket.on('connect', function() {
+
+        socket.emit('spawn', function(id) {
+          console.warn('SPAWNED TERMINAL ON SERVER WITH', id);
+
+          self.id = id;
+          sessions[id] = self;
+
+          self.emit('connected');
+        });
+
+        socket.on('kill', function(id) {
+          var term = sessions[id];
+          if ( term ) {
+            term.destroy();
+          }
+        });
+
+        socket.on('data', function(id, data) {
+          var term = sessions[id];
+          if ( term ) {
+            term.put(data);
+          }
+        });
+
+      });
+
+      return socket;
+    }
+
+
+    var hostname = this.hostname;
+    createSpawnConnection(hostname, function(_pid, _port) {
+      pid  = _pid  || pid;
+      port = _port || port;
+
+      var host = hostname.split(':')[0] + ':' + port;
+      self.socket = createSocket(host);
+    });
   };
 
   /**
@@ -251,8 +292,8 @@
    * @return  void
    */
   PTYTerminal.prototype.resize = function(x, y) {
-    if ( socket && this.id ) {
-      socket.emit('resize', this.id, x, y);
+    if ( this.socket && this.id ) {
+      this.socket.emit('resize', this.id, x, y);
     }
     if ( this.terminal ) {
       this.terminal.resize(x, y);
@@ -295,8 +336,8 @@
     if ( this.pingInterval ) {
       this.pingInterval = clearInterval(this.pingInterval);
     }
-    if ( socket && this.id ) {
-      socket.emit('destroy', this.id);
+    if ( this.socket && this.id ) {
+      this.socket.emit('destroy', this.id);
     }
     if ( this.terminal ) {
       this.terminal.destroy();
@@ -314,10 +355,10 @@
 
     if ( !Object.keys(sessions).length ) {
       console.warn('ALL SESSIONS DESTROYED...CLOSING CONNECTION');
-      if ( socket ) {
-        socket.disconnect();
+      if ( this.socket ) {
+        this.socket.disconnect();
       }
-      socket = null;
+      this.socket = null;
     }
   };
 

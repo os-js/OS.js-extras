@@ -1,6 +1,25 @@
-# PTY Terminal
+# PTY Terminal Application
 
-This shows you how to set up the PTY/SSH terminal. **Please mind that this is experimental**.
+This shows you how to set up the PTY/SSH terminal.
+
+**Please mind that this is experimental**.
+
+**It takes the client username and uses it on the server, so your username has to match a system user**
+
+## Server
+
+In `TerminalExtension`:
+
+```
+
+npm install
+node src/packages/extras/TerminalExtension/spawner.js
+
+```
+
+**The spawner must run with root privileges to spawn with correct uid**
+
+## Client
 
 
 In `TerminalExtension/package.json`:
@@ -24,11 +43,11 @@ In `Terminal/package.json`:
   ...
   "enabled": true,
   "config": {
-    "host": "YOUR.IP.ADDRESS.HERE:PORT"
+    "host": "YOUR.IP.ADDRESS.HERE:8080"
   },
   ...
 }
 
 ```
 
-Run `grunt config manifest`, then `node src/packages/extras/TerminalExtension/server.js`
+Run `grunt config manifest`.

@@ -4,18 +4,23 @@
   var app = require('http').createServer(handler)
   var io = require('socket.io')(app);
   var fs = require('fs');
+  var path = require('path');
+
   var sessions = {};
+  var userinfo = {
+    dir: process.env.HOME,
+    shell: 'bash'
+  };
 
   function createSession() {
 
-    var term = pty.spawn('bash', [], {
+    var term = pty.spawn(userinfo.shell || 'bash', [], {
       name: 'xterm-color',
       cols: 80,
       rows: 30,
-      cwd: process.env.HOME,
+      cwd: userinfo.dir,
       env: process.env
     });
-
 
     term.on('data', function(data) {
       var id = term.pty;
@@ -139,6 +144,15 @@
 
   });
 
-  app.listen(8080);
+  if ( process.argv.length < 4 ) {
+    throw 'You have to specify <port> and <uid>';
+  }
+
+  var port = process.argv[2];
+  var uid = parseInt(process.argv[3], 10);
+
+  userinfo = require('pwuid')(uid);
+
+  app.listen(port);
 
 })();
