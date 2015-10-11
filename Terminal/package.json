@@ -1,0 +1,18 @@
+{
+  "className":  "ApplicationTerminal",
+  "name":       "SSH Terminal",
+  "mime":       null,
+  "icon":       "apps/gnome-terminal.png",
+  "category":   "system",
+  "singular":   false,
+  "config": {
+    "host": "10.0.0.50:8080"
+  },
+  "preload":    [
+    {"src": "main.js", "type": "javascript"},
+    {"src": "main.css", "type": "stylesheet"}
+  ]
+}
+
+
+
