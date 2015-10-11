@@ -7,6 +7,7 @@
   var path = require('path');
 
   var sessions = {};
+  var uid;
   var userinfo = {
     dir: process.env.HOME,
     shell: 'bash'
@@ -14,8 +15,9 @@
 
   function createSession() {
 
-    var term = pty.spawn(userinfo.shell || 'bash', [], {
+    var term = pty.spawn('login', [], {
       name: 'xterm-color',
+      uid: uid,
       cols: 80,
       rows: 30,
       cwd: userinfo.dir,
@@ -149,16 +151,23 @@
   }
 
   var port = process.argv[2];
-  var uid = parseInt(process.argv[3], 10);
+  uid = parseInt(process.argv[3], 10);
 
   userinfo = require('pwuid')(uid);
 
-  process.on('exit', function() {
+  function exit() {
     Object.keys(sessions).forEach(function(key) {
       if ( key && sessions[key] ) {
         destroySession(key);
       }
     });
+  }
+  process.on('exit', function() {
+    exit();
+  });
+  process.on('SIGINT', function() {
+    exit();
+    process.exit();
   });
 
   app.listen(port);

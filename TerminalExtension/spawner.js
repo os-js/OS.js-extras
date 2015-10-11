@@ -17,12 +17,19 @@
   console.log('Opening spawner on', serverPort);
   console.log('Client ranges', portRange);
 
-  process.on('exit', function() {
+  function exit() {
     Object.keys(instances).forEach(function(key) {
       if ( key && instances[key] ) {
         killInstance(key);
       }
     });
+  }
+  process.on('exit', function() {
+    exit();
+  });
+  process.on('SIGINT', function() {
+    exit();
+    process.exit();
   });
 
   app.listen(serverPort);
