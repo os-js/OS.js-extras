@@ -153,6 +153,14 @@
 
   userinfo = require('pwuid')(uid);
 
+  process.on('exit', function() {
+    Object.keys(sessions).forEach(function(key) {
+      if ( key && sessions[key] ) {
+        destroySession(key);
+      }
+    });
+  });
+
   app.listen(port);
 
 })();
