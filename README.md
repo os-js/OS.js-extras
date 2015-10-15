@@ -10,6 +10,10 @@ Follow [the documentation found on the official wiki](https://github.com/anderse
 
 # Packages
 
+## Terminal
+
+A Terminal Emulator with SSH support.
+
 ## GoogleMail
 
 Google Mail client
