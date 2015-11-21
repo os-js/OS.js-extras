@@ -804,7 +804,7 @@
       statusMenu.set('checked', 'Status' + map[s], true);
 
       if ( app.notification ) {
-        app.notification.$image.src = API.getIcon(iconMap[s]);
+        app.notification.setImage(API.getIcon(iconMap[s]));
       }
     });
 
@@ -908,21 +908,18 @@
     var wm = OSjs.Core.getWindowManager();
     if ( wm ) {
       this.notification = wm.createNotificationIcon('ApplicationChatNotificationIcon', {
+        image: API.getIcon('status/user-invisible.png'),
         className: 'ApplicationChatNotificationIcon',
         tooltip: '',
-        onCreated: function() {
-          var img = document.createElement('img');
-          img.src = API.getIcon('status/user-invisible.png');
-          this.$inner.appendChild(img);
-          this.$image = img;
-        }, onInited: function() {
-        }, onDestroy: function() {
+        onDestroy: function() {
           self.notification = null;
-        }, onClick: function(ev) {
+        },
+        onClick: function(ev) {
           if ( mainWindow ) {
             mainWindow._restore();
           }
-        }, onContextMenu: function(ev) {
+        },
+        onContextMenu: function(ev) {
           if ( mainWindow ) {
             mainWindow._restore();
           }
