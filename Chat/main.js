@@ -850,7 +850,9 @@
       wm.removeNotificationIcon('ApplicationChatNotificationIcon');
     }
 
-    this.connection.destroy();
+    if ( this.connection ) {
+      this.connection.destroy();
+    }
 
     if ( this.notification ) {
       this.notification.destroy();
