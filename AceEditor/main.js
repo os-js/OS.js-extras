@@ -94,7 +94,7 @@
   };
 
   ApplicationAceEditorWindow.prototype.showFile = function(file, content) {
-    this.editor.setValue(content);
+    this.editor.setValue(content || '');
     DefaultApplicationWindow.prototype.showFile.apply(this, arguments);
   };
 
