@@ -10,6 +10,10 @@ Follow [the documentation found on the official wiki](https://github.com/anderse
 
 # Packages
 
+## Archiver
+
+ZIP Archive manipulation with zip.js
+
 ## Terminal
 
 A Terminal Emulator with SSH support.
@@ -48,7 +52,3 @@ RTC Group Video Conference (HTML5 API)
 ## Chat
 
 A XMPP client for Google Talk. Includes proxy for Apache (See INSTALL file)
-
-## Archiver
-
-ZIP Archive manipulation with zip.js

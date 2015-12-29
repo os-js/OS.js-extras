@@ -1,0 +1,37 @@
+<application-window data-id="ArchiverWindow">
+
+  <gui-vbox>
+    <!-- MENU BAR -->
+    <gui-vbox-container data-grow="0" data-shrink="1" data-basis="auto">
+      <gui-menu-bar data-id="MenuBar">
+
+        <gui-menu-bar-entry data-label="LBL_FILE">
+          <gui-menu data-id="SubmenuFile">
+            <gui-menu-entry data-id="MenuNew" data-label="LBL_NEW"></gui-menu-entry>
+            <gui-menu-entry data-id="MenuOpen" data-label="LBL_OPEN"></gui-menu-entry>
+            <gui-menu-entry data-id="MenuClose" data-label="LBL_CLOSE"></gui-menu-entry>
+          </gui-menu>
+        </gui-menu-bar-entry>
+        <gui-menu-bar-entry data-id="MenuAddFile" data-label="Add file" />
+        <!--
+        <gui-menu-bar-entry data-id="MenuAddDirectory" data-label="Add directory" />
+        <gui-menu-bar-entry data-id="MenuRemove" data-label="Remove" />
+        -->
+        <gui-menu-bar-entry data-id="MenuExtract" data-label="Extract archive" />
+
+      </gui-menu-bar>
+    </gui-vbox-container>
+
+    <gui-vbox-container data-grow="1" data-shrink="0" data-basis="auto" data-fill="true">
+      <gui-list-view data-id="FileView">
+      </gui-list-view>
+    </gui-vbox-container>
+
+
+    <gui-vbox-container data-grow="0" data-shrink="1" data-basis="auto">
+      <gui-statusbar data-id="Statusbar"></gui-statusbar>
+    </gui-vbox-container>
+  </gui-vbox>
+
+
+</application-window>
