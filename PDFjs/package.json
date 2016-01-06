@@ -16,6 +16,7 @@
   },
   "preload":    [
     {"src": "vendor/pdf.js/build/pdf.js", "type": "javascript"},
+    {"src": "vendor/pdf.js/src/worker_loader.js", "type": "javascript"},
     {"src": "main.js", "type": "javascript"},
     {"src": "main.css", "type": "stylesheet"}
   ]
