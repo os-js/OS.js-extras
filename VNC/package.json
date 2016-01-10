@@ -1,0 +1,26 @@
+{
+  "className":  "ApplicationVNC",
+  "name":       "noVNC v0.5",
+  "mime":       null,
+  "icon":       "apps/gnome-remote-desktop.png",
+  "category":   "network",
+  "preload":    [
+    {"src": "vendor/noVNC/include/util.js", "type": "javascript"},
+    {"src": "vendor/noVNC/include/webutil.js", "type": "javascript"},
+    {"src": "vendor/noVNC/include/base64.js", "type": "javascript"},
+    {"src": "vendor/noVNC/include/websock.js", "type": "javascript"},
+    {"src": "vendor/noVNC/include/des.js", "type": "javascript"},
+    {"src": "vendor/noVNC/include/keysymdef.js", "type": "javascript"},
+    {"src": "vendor/noVNC/include/keyboard.js", "type": "javascript"},
+    {"src": "vendor/noVNC/include/input.js", "type": "javascript"},
+    {"src": "vendor/noVNC/include/display.js", "type": "javascript"},
+    {"src": "vendor/noVNC/include/rfb.js", "type": "javascript"},
+    {"src": "vendor/noVNC/include/keysym.js", "type": "javascript"},
+    {"src": "vendor/noVNC/include/inflator.js", "type": "javascript"},
+    {"src": "main.js", "type": "javascript"},
+    {"src": "main.css", "type": "stylesheet"}
+  ]
+}
+
+
+

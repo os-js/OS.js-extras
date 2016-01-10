@@ -1,0 +1,205 @@
+<application-window data-id="VNCWindow">
+
+  <gui-vbox>
+    <!-- MENU BAR -->
+    <gui-vbox-container data-grow="0" data-shrink="1" data-basis="auto">
+      <gui-menu-bar>
+
+        <gui-menu-bar-entry data-label="LBL_FILE">
+          <gui-menu data-id="SubmenuFile">
+            <gui-menu-entry data-id="MenuConnect" data-label="LBL_CONNECT"></gui-menu-entry>
+            <gui-menu-entry data-id="MenuDisconnect" data-label="LBL_DISCONNECT"></gui-menu-entry>
+            <gui-menu-entry data-id="MenuClose" data-label="LBL_CLOSE"></gui-menu-entry>
+          </gui-menu>
+        </gui-menu-bar-entry>
+
+      </gui-menu-bar>
+    </gui-vbox-container>
+
+    <!-- CONTENT -->
+    <gui-vbox-container data-grow="1" data-shrink="0" data-basis="auto" data-fill="true">
+      <gui-scroll-container data-id="ScrollView">
+        <gui-canvas data-id="Canvas">
+        </gui-canvas>
+      </gui-scroll-container>
+    </gui-vbox-container>
+
+    <!-- STATUSBAR -->
+    <gui-vbox-container data-grow="0" data-shrink="1" data-basis="auto">
+      <gui-statusbar data-id="Statusbar">&nbsp;</gui-statusbar>
+    </gui-vbox-container>
+
+  </gui-vbox>
+
+
+</application-window>
+
+<application-window data-id="VNCDialog">
+  <gui-vbox>
+    <gui-vbox-container data-grow="1" data-shrink="0" data-fill="true">
+      <gui-hbox>
+        <gui-hbox-container data-grow="1" data-shrink="1" data-basis="60%" data-fill="true">
+          <gui-fragment data-fragment-id="FragmentConnection"></gui-fragment>
+        </gui-hbox-container>
+
+        <gui-hbox-container data-grow="1" data-shrink="1" data-basis="40%" data-fill="true">
+          <gui-fragment data-fragment-id="FragmentSettings"></gui-fragment>
+        </gui-hbox-container>
+      </gui-hbox>
+    </gui-vbox-container>
+
+    <gui-vbox-container data-shrink="1" data-align="end">
+      <gui-hbox>
+        <gui-hbox-container data-grow="0" data-shrink="1">
+          <gui-button data-id="ButtonOK">LBL_CONNECT</gui-button>
+          <gui-button data-id="ButtonCancel">LBL_CANCEL</gui-button>
+        </gui-hbox-container>
+      </gui-hbox>
+    </gui-vbox-container>
+  </gui-vbox>
+</application-window>
+
+<application-fragment data-id="FragmentConnection">
+  <gui-vbox>
+    <gui-vbox-container data-grow="0" data-shrink="1">
+      <gui-label>Host:</gui-label>
+    </gui-vbox-container>
+    <gui-vbox-container data-grow="0" data-shrink="1" data-expand="true">
+      <gui-text data-id="InputHost">localhost</gui-text>
+    </gui-vbox-container>
+
+    <gui-vbox-container data-grow="0" data-shrink="1">
+      <gui-label>Port:</gui-label>
+    </gui-vbox-container>
+    <gui-vbox-container data-grow="0" data-shrink="1" data-expand="true">
+      <gui-text data-id="InputPort">9501</gui-text>
+    </gui-vbox-container>
+
+    <gui-vbox-container data-grow="0" data-shrink="1">
+      <gui-label>Password:</gui-label>
+    </gui-vbox-container>
+    <gui-vbox-container data-grow="0" data-shrink="1" data-expand="true">
+      <gui-password data-id="InputPassword"></gui-password>
+    </gui-vbox-container>
+
+    <gui-vbox-container data-grow="0" data-shrink="1">
+      <gui-label>Token:</gui-label>
+    </gui-vbox-container>
+    <gui-vbox-container data-grow="0" data-shrink="1" data-expand="true">
+      <gui-text data-id="InputToken"></gui-text>
+    </gui-vbox-container>
+
+    <gui-vbox-container data-grow="0" data-shrink="1">
+      <gui-label>Connection Path:</gui-label>
+    </gui-vbox-container>
+    <gui-vbox-container data-grow="0" data-shrink="1" data-expand="true">
+      <gui-text data-id="InputPath" data-value="websockify"></gui-text>
+    </gui-vbox-container>
+
+    <gui-vbox-container data-grow="0" data-shrink="1">
+      <gui-label>Repeater ID:</gui-label>
+    </gui-vbox-container>
+    <gui-vbox-container data-grow="0" data-shrink="1" data-expand="true">
+      <gui-text data-id="InputRepeaterID"></gui-text>
+    </gui-vbox-container>
+  </gui-vbox>
+</application-fragment>
+
+<application-fragment data-id="FragmentSettings">
+  <gui-vbox>
+    <gui-vbox-container data-grow="0" data-shrink="1">
+      <gui-label>Scaling Mode:</gui-label>
+    </gui-vbox-container>
+    <gui-vbox-container data-grow="0" data-shrink="1" data-expand="true">
+      <gui-select data-id="InputScalingMode">
+        <gui-select-option data-value="off">None</gui-select-option>
+        <gui-select-option data-value="scale">Local scaling</gui-select-option>
+        <gui-select-option data-value="downscale">Local downscaling</gui-select-option>
+        <gui-select-option data-value="remote">Remote resizing</gui-select-option>
+      </gui-select>
+    </gui-vbox-container>
+
+    <gui-vbox-container data-grow="0" data-shrink="1">
+      <gui-label>Repeater ID:</gui-label>
+    </gui-vbox-container>
+    <gui-vbox-container data-grow="0" data-shrink="1" data-expand="true">
+      <gui-text data-id="InputRepeaterID"></gui-text>
+    </gui-vbox-container>
+
+
+    <gui-vbox-container data-grow="0" data-shrink="1">
+      <gui-hbox>
+        <gui-hbox-container data-grow="1" data-shrink="1" data-basis="50%">
+          <gui-vbox>
+            <gui-vbox-container data-grow="0" data-shrink="1">
+              <gui-label>Encrypt:</gui-label>
+            </gui-vbox-container>
+            <gui-vbox-container data-grow="0" data-shrink="1" data-expand="true">
+              <gui-switch data-id="ToggleEncrypt"></gui-switch>
+            </gui-vbox-container>
+          </gui-vbox>
+        </gui-hbox-container>
+        <gui-hbox-container data-grow="1" data-shrink="1" data-basis="50%">
+          <gui-vbox>
+            <gui-vbox-container data-grow="0" data-shrink="1">
+              <gui-label>True Color:</gui-label>
+            </gui-vbox-container>
+            <gui-vbox-container data-grow="0" data-shrink="1" data-expand="true">
+              <gui-switch data-id="ToggleTrueColor"></gui-switch>
+            </gui-vbox-container>
+          </gui-vbox>
+        </gui-hbox-container>
+      </gui-hbox>
+    </gui-vbox-container>
+
+    <gui-vbox-container data-grow="0" data-shrink="1">
+      <gui-hbox>
+        <gui-hbox-container data-grow="1" data-shrink="1" data-basis="50%">
+          <gui-vbox>
+            <gui-vbox-container data-grow="0" data-shrink="1">
+              <gui-label>Local Cursor:</gui-label>
+            </gui-vbox-container>
+            <gui-vbox-container data-grow="0" data-shrink="1" data-expand="true">
+              <gui-switch data-id="ToggleLocalCursor"></gui-switch>
+            </gui-vbox-container>
+          </gui-vbox>
+        </gui-hbox-container>
+        <gui-hbox-container data-grow="1" data-shrink="1" data-basis="50%">
+          <gui-vbox>
+            <gui-vbox-container data-grow="0" data-shrink="1">
+              <gui-label>Clip To Window:</gui-label>
+            </gui-vbox-container>
+            <gui-vbox-container data-grow="0" data-shrink="1" data-expand="true">
+              <gui-switch data-id="ToggleClipToWindow"></gui-switch>
+            </gui-vbox-container>
+          </gui-vbox>
+        </gui-hbox-container>
+      </gui-hbox>
+    </gui-vbox-container>
+
+    <gui-vbox-container data-grow="0" data-shrink="1">
+      <gui-hbox>
+        <gui-hbox-container data-grow="1" data-shrink="1" data-basis="50%">
+          <gui-vbox>
+            <gui-vbox-container data-grow="0" data-shrink="1">
+              <gui-label>Shared Mode:</gui-label>
+            </gui-vbox-container>
+            <gui-vbox-container data-grow="0" data-shrink="1" data-expand="true">
+              <gui-switch data-id="ToggleSharedMode"></gui-switch>
+            </gui-vbox-container>
+          </gui-vbox>
+        </gui-hbox-container>
+        <gui-hbox-container data-grow="1" data-shrink="1" data-basis="50%">
+          <gui-vbox>
+            <gui-vbox-container data-grow="0" data-shrink="1">
+              <gui-label>View Only:</gui-label>
+            </gui-vbox-container>
+            <gui-vbox-container data-grow="0" data-shrink="1" data-expand="true">
+              <gui-switch data-id="ToggleViewOnly"></gui-switch>
+            </gui-vbox-container>
+          </gui-vbox>
+        </gui-hbox-container>
+      </gui-hbox>
+    </gui-vbox-container>
+  </gui-vbox>
+</application-fragment>

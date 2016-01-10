@@ -38,6 +38,15 @@ Read PDF documents
 
 A code editor.
 
+## Chat
+
+A XMPP client for Google Talk. Includes proxy for Apache (See INSTALL file).
+
+Requires a twist server running on punjab and a HTTP proxy (Included in vendor files)
+
+## VNC
+
+A [noVNC](https://github.com/kanaka/noVNC) implementation.
 
 # CURRENTLY INCOMPATIBLE
 
@@ -48,7 +57,3 @@ Due to changes: https://github.com/andersevenrud/OS.js-v2/issues/136
 ## RTCGroupVideo
 
 RTC Group Video Conference (HTML5 API)
-
-## Chat
-
-A XMPP client for Google Talk. Includes proxy for Apache (See INSTALL file)

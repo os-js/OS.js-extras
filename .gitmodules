@@ -13,3 +13,6 @@
 [submodule "AceEditor/vendor/ace"]
 	path = AceEditor/vendor/ace
 	url = git://github.com/ajaxorg/ace.git
+[submodule "VNC/vendor/noVNC"]
+	path = VNC/vendor/noVNC
+	url = https://github.com/kanaka/noVNC.git
