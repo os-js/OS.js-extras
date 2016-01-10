@@ -2,7 +2,7 @@
 
 This repository contains Extra packages for [OS.js-v2](https://github.com/andersevenrud/OS.js-v2).
 
-Follow [the documentation found on the official wiki](https://github.com/andersevenrud/OS.js-v2/wiki/Installation-and-Configuration#packages)
+Follow [the official instructions](http://os.js.org/doc/manuals/man-package-manager.html) on how to add this repository.
 
 ## Archiver
 
