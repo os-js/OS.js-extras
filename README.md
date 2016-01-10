@@ -41,9 +41,3 @@ Requires a twist server running on punjab and a HTTP proxy (Included in vendor f
 ## VNC
 
 A [noVNC](https://github.com/kanaka/noVNC) implementation.
-
-## RTCGroupVideo
-
-RTC Group Video Conference (HTML5 API)
-
-**CURRENTLY INCOMPATIBLE**
