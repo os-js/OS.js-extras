@@ -2,5 +2,5 @@
   "name": "extras",
   "description": "OS.js-v2 Extra Packages",
   "maintainer": "Anders Evenrud <andersevenrud@gmail.com>",
-  "url": "https://github.com/andersevenrud/OS.js-v2-extras"
+  "url": "https://github.com/os-js/OS.js-extras"
 }
