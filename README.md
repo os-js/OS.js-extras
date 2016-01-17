@@ -1,6 +1,6 @@
 # OS.js-v2 Extra Packages
 
-This repository contains Extra packages for [OS.js-v2](https://github.com/andersevenrud/OS.js-v2).
+This repository contains Extra packages for [OS.js-v2](https://github.com/os-js/OS.js).
 
 Follow [the official instructions](http://os.js.org/doc/manuals/man-package-manager.html) on how to add this repository.
 
