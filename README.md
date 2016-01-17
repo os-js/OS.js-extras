@@ -1,4 +1,4 @@
-# OS.js-v2 Extra Packages
+# OS.js Extra Packages
 
 This repository contains Extra packages for [OS.js-v2](https://github.com/os-js/OS.js).
 
