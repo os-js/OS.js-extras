@@ -181,12 +181,21 @@
 
     if ( entries ) {
       filterListing(entries, root).forEach(function(e) {
+        var filename = Utils.filename(e.filename.replace(/\/$/, ''));
+
+        var fiter = {
+          type: e.directory ? 'dir' : 'file',
+          filename: filename,
+          path: Utils.dirname(e.filename.replace(/\/$/, '')),
+          mime: e.directory ? null : getMime(e)
+        };
+
         rows.push({
           value: e,
           columns: [
-            {label: Utils.filename(e.filename)},
+            {label: Utils.filename(e.filename), icon: API.getFileIcon(fiter)},
             {label: getMime(e), textalign: 'right'},
-            {label: String(e.uncompressedSize), textalign: 'right'}
+            {label: Utils.humanFileSize(e.uncompressedSize), textalign: 'right'}
           ]
         });
       });
