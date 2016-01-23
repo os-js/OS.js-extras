@@ -98,7 +98,11 @@
     scheme.render(this, 'ArchiverWindow', root);
 
     function getSelectedEntry() {
-      return scheme.find(self, 'FileView').get('selected');
+      var sel = scheme.find(self, 'FileView').get('selected');
+      if ( sel && sel.length ) {
+        return sel[0].data.filename;
+      }
+      return null;
     }
 
     scheme.find(this, 'MenuBar').on('select', function(ev) {
@@ -124,6 +128,8 @@
       }
     });
 
+    this.renderProgress(false);
+
     return root;
   };
 
@@ -138,6 +144,21 @@
 
   ApplicationArchiverWindow.prototype.getFileData = function() {
     return null;
+  };
+
+  ApplicationArchiverWindow.prototype.renderProgress = function(filename, index, total) {
+    var p = this._scheme.find(this, 'Progress');
+    var s = this._scheme.find(this, 'Statusbar');
+
+    if ( p && s ) {
+      if ( filename === true || filename === false ) {
+        p.hide().set('value', 0);
+        s.set('value', '');
+      } else {
+        p.show().set('value', Math.round((index / total) * 100));
+        s.set('value', 'Extracting: ' + filename);
+      }
+    }
   };
 
   ApplicationArchiverWindow.prototype.renderArchive = function(entries, root) {
@@ -224,6 +245,15 @@
     OSjs.Helpers.ZipArchiver.createInstance({}, function(err, inst) {
       win._toggleLoading(false);
 
+      if ( err ) {
+        API.createDialog('Error', {
+          title: 'Archiver error',
+          message: 'Cannot perform action',
+          error: 'No zip support: ' + err
+        }, function() {}, win);
+        return;
+      }
+
       if ( action === 'add' ) {
         self.openAddDialog(file, arg, function(result) {
           if ( result ) {
@@ -246,8 +276,17 @@
           if ( result ) {
             inst.extract(file, result.path, {
               oncomplete: function() {
-                win._toggleLoading(false);
-              }
+                if ( win ) {
+                  win._toggleLoading(false);
+                  win.renderProgress(false);
+                }
+              },
+              onprogress: function(filename, idx, total) {
+                if ( win ) {
+                  win.renderProgress(filename, idx, total);
+                }
+              },
+              app: self
             });
           } else {
             win._toggleLoading(false);
@@ -260,6 +299,7 @@
             alert(err);
           }
           win._toggleLoading(false);
+          self.action('open', file, self.currentPath);
         });
       } else if ( action === 'chdir' ) {
         self.action('open', self.currentArchive, arg || '/');
@@ -279,6 +319,7 @@
           win._toggleLoading(true);
           self.openCreateDialog(self.currentArchive, function(result) {
             if ( result ) {
+              result.mime = 'application/zip';
               self.currentArchive = result;
 
               inst.create(result, function() {
@@ -288,7 +329,7 @@
                 win.updateFile(result);
 
                 win.renderArchive([], self.currentPath);
-              });
+              }, self);
             } else {
               win._toggleLoading(false);
             }

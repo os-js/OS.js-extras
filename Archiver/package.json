@@ -1,10 +1,9 @@
 {
   "className":  "ApplicationArchiver",
-  "name":       "Archiver (EXPERIMENTAL)",
+  "name":       "Archiver",
   "mime":       ["application\/zip"],
   "icon":       "apps/system-software-install.png",
   "category":   "utilities",
-  "singular":   true,
   "compability":["file", "blob"],
   "preload":    [
     {"src": "main.js", "type": "javascript"},
