@@ -1,7 +1,6 @@
 # Setup
 
-In repository root:
-`git submodule init && git submodule update`
+Make sure you cloned this repository with submodules!
 
 Then:
 ```
