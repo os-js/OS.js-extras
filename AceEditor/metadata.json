@@ -9,7 +9,7 @@
   "build":      {
     "copy": [
       "ace-logo.png",
-      "package.json",
+      "metadata.json",
       "scheme.html",
       "main.css",
       "main.js",

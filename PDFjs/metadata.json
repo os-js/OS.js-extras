@@ -7,7 +7,7 @@
   "icon":       "mimetypes/gnome-mime-application-pdf.png",
   "build":      {
     "copy": [
-      "package.json",
+      "metadata.json",
       "scheme.html",
       "main.css",
       "main.js",

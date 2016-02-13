@@ -3,7 +3,7 @@
   "type": "extension",
   "build": {
     "copy" : [
-      "package.json",
+      "metadata.json",
       "extension.js",
       "node_modules/socket.io-client/socket.io.js",
       "node_modules/term.js/src/term.js"

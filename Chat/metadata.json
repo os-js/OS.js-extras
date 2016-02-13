@@ -9,7 +9,7 @@
   "splash":     true,
   "build":      {
     "copy": [
-      "package.json",
+      "metadata.json",
       "scheme.html",
       "user.png",
       "main.css",
