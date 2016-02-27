@@ -237,10 +237,10 @@
     return DefaultApplication.prototype.destroy.apply(this, arguments);
   };
 
-  ApplicationArchiver.prototype.init = function(settings, metadata, onInited) {
+  ApplicationArchiver.prototype.init = function(settings, metadata) {
     var self = this;
 
-    DefaultApplication.prototype.init.call(this, settings, metadata, onInited, function(scheme, file) {
+    DefaultApplication.prototype.init.call(this, settings, metadata, function(scheme, file) {
       self._addWindow(new ApplicationArchiverWindow(self, metadata, scheme, file));
     });
   };

@@ -178,7 +178,7 @@
   ApplicationTerminal.prototype = Object.create(Application.prototype);
   ApplicationTerminal.constructor = Application;
 
-  ApplicationTerminal.prototype.init = function(settings, metadata, onInited) {
+  ApplicationTerminal.prototype.init = function(settings, metadata) {
     Application.prototype.init.apply(this, arguments);
 
     var self = this;
@@ -187,7 +187,6 @@
 
     scheme.load(function(error, result) {
       self._addWindow(new ApplicationTerminalWindow(self, metadata, scheme));
-      onInited();
     });
 
     this._setScheme(scheme);

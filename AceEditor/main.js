@@ -185,7 +185,7 @@
   ApplicationAceEditor.prototype = Object.create(DefaultApplication.prototype);
   ApplicationAceEditor.constructor = DefaultApplication;
 
-  ApplicationAceEditor.prototype.init = function(settings, metadata, onInited) {
+  ApplicationAceEditor.prototype.init = function(settings, metadata) {
     var self = this;
 
     var path = API.getApplicationResource(this, 'vendor/ace/build/src');
@@ -196,7 +196,7 @@
     ace.config.set('themePath', '/path/to/src');
     */
 
-    DefaultApplication.prototype.init.call(this, settings, metadata, onInited, function(scheme, file) {
+    DefaultApplication.prototype.init.call(this, settings, metadata, function(scheme, file) {
       self._addWindow(new ApplicationAceEditorWindow(self, metadata, scheme, file));
     });
   };

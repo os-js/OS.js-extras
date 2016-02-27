@@ -291,7 +291,7 @@
     return Application.prototype.destroy.apply(this, arguments);
   };
 
-  ApplicationVNC.prototype.init = function(settings, metadata, onInited) {
+  ApplicationVNC.prototype.init = function(settings, metadata) {
     var self = this;
     Application.prototype.init.apply(this, arguments);
 
@@ -305,7 +305,6 @@
     var scheme = GUI.createScheme(url);
     scheme.load(function(error, result) {
       self._addWindow(new ApplicationVNCWindow(self, metadata, scheme));
-      onInited();
     });
 
     this._setScheme(scheme);

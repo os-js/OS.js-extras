@@ -225,7 +225,7 @@
 
   ApplicationGoogleContacts.prototype = Object.create(Application.prototype);
 
-  ApplicationGoogleContacts.prototype.init = function(settings, metadata, onInited) {
+  ApplicationGoogleContacts.prototype.init = function(settings, metadata) {
     Application.prototype.init.apply(this, arguments);
 
     var self = this;
@@ -234,8 +234,6 @@
     scheme.load(function(error, result) {
       self._addWindow(new ApplicationGoogleContactsWindow(self, metadata, scheme));
       self.sync();
-
-      onInited();
     });
 
     this._setScheme(scheme);

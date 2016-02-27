@@ -864,7 +864,7 @@
     return Application.prototype.destroy.apply(this, arguments);
   };
 
-  ApplicationChat.prototype.init = function(settings, metadata, onInited) {
+  ApplicationChat.prototype.init = function(settings, metadata) {
     Application.prototype.init.apply(this, arguments);
 
     var self = this;
@@ -940,8 +940,6 @@
       } else {
         self.openSettingsWindow();
       }
-
-      onInited();
     });
 
   };
