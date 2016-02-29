@@ -8,17 +8,23 @@ Follow [the official instructions](http://os.js.org/doc/manuals/man-package-mana
 
 ZIP Archive manipulation with zip.js
 
+![ScreenShot](https://raw.githubusercontent.com/os-js/OS.js-extras/master/doc/archiver.png)
+
 How to set up zip support: http://os.js.org/doc/manuals/man-zip.html
 
 ## Terminal
 
 A Terminal Emulator with SSH support.
 
+![ScreenShot](https://raw.githubusercontent.com/os-js/OS.js-extras/master/doc/terminal.png)
+
 How to set up: https://github.com/os-js/OS.js-extras/blob/master/Terminal/README.md
 
 ## GoogleMail and GoogleContacts
 
 Google Mail and Contacts clients
+
+![ScreenShot](https://raw.githubusercontent.com/os-js/OS.js-extras/master/doc/google.png)
 
 *Will be moved to OS.js master branch when done*
 
@@ -28,13 +34,19 @@ How to set up: http://os.js.org/doc/manuals/man-google-api.html
 
 Read PDF documents.
 
+![ScreenShot](https://raw.githubusercontent.com/os-js/OS.js-extras/master/doc/pdf.png)
+
 ## Ace Editor
 
 A code editor.
 
+![ScreenShot](https://raw.githubusercontent.com/os-js/OS.js-extras/master/doc/ace.png)
+
 ## Chat
 
 A XMPP client for Google Talk. Includes proxy for Apache (See INSTALL file).
+
+![ScreenShot](https://raw.githubusercontent.com/os-js/OS.js-extras/master/doc/chat.png)
 
 Requires a twist server running on punjab and a HTTP proxy (Included in vendor files)
 
@@ -43,6 +55,8 @@ How to set up: https://github.com/os-js/OS.js-extras/blob/master/Chat/README.md
 ## VNC
 
 A [noVNC](https://github.com/kanaka/noVNC) implementation.
+
+![ScreenShot](https://raw.githubusercontent.com/os-js/OS.js-extras/master/doc/vnc.png)
 
 Tested with OSX, Windows and Linux using *websockify* (included)
 
