@@ -6,39 +6,15 @@ This shows you how to set up the PTY/SSH terminal.
 
 **It takes the client username and uses it on the server, so your username has to match a system user**
 
-## Server
+## Install dependencies
 
-In `TerminalExtension`:
+In `TerminalExtension`, run `npm install`.
 
-```
-
-npm install
-node src/packages/extras/TerminalExtension/spawner.js
-
-```
-
-**The spawner must run with root privileges to spawn with correct uid**
-
-## Client
-
-
-In `TerminalExtension/package.json`:
-```
-
-{
-  ...
-  "enabled": true
-  ...
-}
-
-```
-
-
+## Configure
 
 In `Terminal/package.json`:
 
 ```
-
 {
   ...
   "enabled": true,
@@ -47,7 +23,25 @@ In `Terminal/package.json`:
   },
   ...
 }
-
 ```
 
-Run `grunt config manifest`.
+
+## Enable
+
+```
+grunt packages:enable:Terminal
+grunt packages:enable:TerminalExtension
+grunt config manifest
+```
+
+## Running backend server
+
+**The spawner must run with root privileges to spawn with correct uid**
+
+### Run automatically on node server start
+
+Enable `proxy.enable` in `TerminalExtension/metadata.json` and run grunt steps above.
+
+### Running manually
+
+Run `node src/packages/extras/TerminalExtension/spawner.js`

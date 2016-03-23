@@ -1,6 +1,11 @@
 {
   "className": "TerminalExtension",
   "type": "extension",
+  "spawn": {
+    "enabled": false,
+    "exec": "spawner.js"
+  },
+  "enabled": false,
   "build": {
     "copy" : [
       "metadata.json",

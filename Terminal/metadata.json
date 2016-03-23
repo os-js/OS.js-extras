@@ -5,6 +5,7 @@
   "icon":       "apps/gnome-terminal.png",
   "category":   "system",
   "singular":   false,
+  "enabled":    false,
   "config": {
     "host": "10.0.0.50:8080"
   },
