@@ -45,6 +45,7 @@
 
     this.previousTitle = null;
     this.terminal = new OSjs.Helpers.PTYTerminal(metadata.config.host);
+    this.inited = false;1
   }
 
   ApplicationTerminalWindow.prototype = Object.create(Window.prototype);
@@ -89,7 +90,8 @@
     });
 
     var size = this.getTerminalSize();
-    this.terminal.init(this._$root, {
+
+    this.inited = this.terminal.init(this._$root, {
       rows: size.rows,
       cols: size.cols
     });
@@ -100,7 +102,9 @@
   ApplicationTerminalWindow.prototype._inited = function() {
     Window.prototype._inited.apply(this, arguments);
 
-    this.terminal.connect();
+    if ( this.inited ) {
+      this.terminal.connect();
+    }
   };
 
   ApplicationTerminalWindow.prototype.destroy = function() {

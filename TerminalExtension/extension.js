@@ -164,6 +164,16 @@
       cols: 80
     });
 
+    if ( typeof window.Terminal === 'undefined' ) {
+      API.error('PTYTerminal', 'No Terminal support was found', 'This is most likely due to dependecies that failed to load (check your developer console).');
+      return false;
+    }
+
+    if ( typeof window.io === 'undefined' ) {
+      API.error('PTYTerminal', 'No IO support was found', 'This is most likely due to dependecies that failed to load (check your developer console).');
+      return false;
+    }
+
     var self = this;
     var term = new Terminal({
       cols: opts.cols,
@@ -197,6 +207,8 @@
     this.terminal = term;
 
     term.open(root);
+
+    return true;
   };
 
   /**
