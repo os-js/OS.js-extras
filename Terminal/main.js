@@ -44,8 +44,8 @@
     }, app, scheme]);
 
     this.previousTitle = null;
-    this.terminal = new OSjs.Helpers.PTYTerminal(metadata.config.host);
-    this.inited = false;1
+    this.terminal = new OSjs.Helpers.PTYTerminal(metadata.config.host.replace('%HOST%', window.location.hostname));
+    this.inited = false;
   }
 
   ApplicationTerminalWindow.prototype = Object.create(Window.prototype);

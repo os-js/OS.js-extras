@@ -12,7 +12,7 @@ In `TerminalExtension`, run `npm install`.
 
 ## Configure
 
-In `Terminal/package.json`:
+In `Terminal/package.json` you can change to a custom location (by default it will use the hostname from URL on port 8080)
 
 ```
 {
