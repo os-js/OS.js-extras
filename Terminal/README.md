@@ -10,6 +10,8 @@ This shows you how to set up the PTY/SSH terminal.
 
 In `TerminalExtension`, run `npm install`.
 
+Make sure your system has `bash` installed.
+
 ## Configure
 
 In `Terminal/package.json` you can change to a custom location (by default it will use the hostname from URL on port 8080)

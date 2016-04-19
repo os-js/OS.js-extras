@@ -77,6 +77,7 @@
         });
       }
 
+      /*
       var username = OSjs.Core.getHandler().userData.username;
       var handler = API.getConfig('Connection.Handler');
       if ( handler === 'demo' ) {
@@ -91,6 +92,9 @@
       } else {
         _conn(username);
       }
+    */
+
+      _conn(null);
     }
 
     if ( mainSocket ) {

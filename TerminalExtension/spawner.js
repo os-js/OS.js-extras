@@ -40,7 +40,7 @@
   function spawnInstance(uid, socket) {
     var p = path.join(__dirname, 'server.js');
     var child = spawn('node', [p, portIndex, uid], {
-      uid: uid,
+      //uid: uid,
       detached: true,
       stdio: [ 'ignore', out, err ]
     });
@@ -83,6 +83,7 @@
     socket.on('spawn', function(username, cb) {
       var uid = null;
 
+      /*
       console.log('  ->', 'username', username);
 
       try {
@@ -105,6 +106,7 @@
         console.warn('!!!', 'User not found', username);
         return;
       }
+      */
 
       var child = spawnInstance(uid, socket);
       instances[child.child.pid] = {
