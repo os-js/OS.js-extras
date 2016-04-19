@@ -44,6 +44,8 @@
   var mainSocket;
 
   function destroySessions() {
+    console.warn('PTY -> destroySessions()');
+
     Object.keys(sessions).forEach(function(k) {
       if ( k && sessions[k] ) {
         try {
@@ -64,14 +66,34 @@
   }
 
   function createSpawnConnection(host, cb) {
-    console.warn('OPENING SPAWNER CONNECTION ON', host);
+    console.warn('PTY -> createSpawnConnection()', 'host', host);
 
     function done() {
+
+      function _conn(un) {
+        console.warn('PTY -> createSpawnConnection()', 'username', un);
+        mainSocket.emit('spawn', un, function(_pid, _port) {
+          cb(_pid, _port);
+        });
+      }
+
       var username = OSjs.Core.getHandler().userData.username;
 
-      mainSocket.emit('spawn', username, function(_pid, _port) {
-        cb(_pid, _port);
-      });
+      _conn('anders');
+      return;
+      var handler = API.getConfig('Connection.Handler');
+      if ( handler === 'demo' ) {
+        API.createDialog('Input', {
+          message: 'Please input the username you want to connect with',
+          value: username
+        }, function(ev, btn, value) {
+          if ( btn === 'ok' ) {
+            _conn(value);
+          }
+        });
+      } else {
+        _conn(username);
+      }
     }
 
     if ( mainSocket ) {
@@ -85,14 +107,16 @@
     });
 
     mainSocket.on('warning', function(msg) {
-      console.warn('Failed to connect to spawner:', msg);
+      console.warn('PTY -> mainSocket', 'on()', 'warning', msg);
     });
 
     mainSocket.on('connect', function() {
+      console.warn('PTY -> mainSocket', 'on()', 'connect');
       done();
     });
 
-    mainSocket.on('disconnect', function() {
+    mainSocket.on('disconnect', function(ev) {
+      console.warn('PTY -> mainSocket', 'on()', 'disconnect', ev);
       destroySessions(null);
     });
   }
@@ -159,6 +183,8 @@
    * @return  void
    */
   PTYTerminal.prototype.init = function(root, opts) {
+    console.warn('PTYTerminal::init()');
+
     opts = Utils.argumentDefaults(opts, {
       rows: 24,
       cols: 80
@@ -218,7 +244,10 @@
    * @return  void
    */
   PTYTerminal.prototype.connect = function() {
+    console.warn('PTYTerminal::connect()');
+
     var self = this;
+    var recieved = 0;
 
     if ( this.terminal ) {
       this.terminal.startBlink();
@@ -233,12 +262,14 @@
         'force new connection': true
       });
 
-      socket.on('disconnect', function() {
+      socket.on('disconnect', function(ev) {
+        console.warn('PTYTerminal -> socket', 'on()', 'disconnect', ev);
         destroySessions();
         socket = null;
       });
 
       socket.on('connect', function() {
+        console.warn('PTYTerminal -> socket', 'on()', 'connect');
 
         socket.emit('spawn', function(id) {
           console.warn('SPAWNED TERMINAL ON SERVER WITH', id);
@@ -250,6 +281,11 @@
         });
 
         socket.on('kill', function(id) {
+          console.warn('PTYTerminal -> socket', 'on()', 'kill');
+          if ( recieved <= 2 ) {
+            return;
+          }
+
           var term = sessions[id];
           if ( term ) {
             term.destroy();
@@ -257,6 +293,8 @@
         });
 
         socket.on('data', function(id, data) {
+          recieved++;
+
           var term = sessions[id];
           if ( term ) {
             term.put(data);
@@ -337,6 +375,8 @@
    * @return  void
    */
   PTYTerminal.prototype.destroy = function() {
+    console.warn('PTYTerminal::destroy()');
+
     if ( this.destroyed ) {
       return;
     }

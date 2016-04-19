@@ -83,6 +83,8 @@
     socket.on('spawn', function(username, cb) {
       var uid = null;
 
+      console.log('  ->', 'username', username);
+
       try {
         if ( typeof username === 'number' ) {
           if ( userid.username(username) ) {
@@ -97,7 +99,7 @@
         return;
       }
 
-
+      console.log('  -->', 'uid', uid);
       if ( uid === null ) {
         socket.emit('warning', 'invalid user');
         console.warn('!!!', 'User not found', username);
@@ -114,6 +116,7 @@
     });
 
     socket.on('kill', function(pid) {
+      console.log('  ->', 'kill', pid);
       killInstance(pid);
     });
 
