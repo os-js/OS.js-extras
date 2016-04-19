@@ -78,9 +78,6 @@
       }
 
       var username = OSjs.Core.getHandler().userData.username;
-
-      _conn('anders');
-      return;
       var handler = API.getConfig('Connection.Handler');
       if ( handler === 'demo' ) {
         API.createDialog('Input', {
