@@ -90,6 +90,15 @@
         }
         self.sync();
       });
+
+      self._on('destroyWindow', function(obj) {
+        if ( obj._name === 'ApplicationGmailWindow' ) {
+          self.destroy();
+        }
+      });
+      self._on('attention', function(args) {
+        self.handleAction(args);
+      });
     }
 
     var url = API.getApplicationResource(this, './scheme.html');
@@ -101,16 +110,6 @@
     });
 
     this._setScheme(scheme);
-  };
-
-  ApplicationGmail.prototype._onMessage = function(obj, msg, args) {
-    Application.prototype._onMessage.apply(this, arguments);
-
-    if ( msg == 'destroyWindow' && obj._name === 'ApplicationGmailWindow' ) {
-      this.destroy();
-    } else if ( msg === 'attention' ) {
-      this.handleAction(args);
-    }
   };
 
   ApplicationGmail.prototype.handleAction = function(args) {
