@@ -65,15 +65,15 @@
       }
     }
 
-    this._addHook('resized', function() {
+    this._on('resized', function() {
       resize();
     });
 
-    this._addHook('maximize', function() {
+    this._on('maximize', function() {
       resize();
     });
 
-    this._addHook('restore', function() {
+    this._on('restore', function() {
       resize();
     });
 
