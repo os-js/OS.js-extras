@@ -220,6 +220,7 @@
     }, 1000);
 
     this.pingInterval = setInterval(function() {
+      console.warn("PING", self.socket, self.id);
       if ( self.socket && self.id ) {
         self.socket.emit('ping', self.id);
       }
@@ -286,6 +287,7 @@
           if ( recieved <= 2 ) {
             return;
           }
+          return;
 
           var term = sessions[id];
           if ( term ) {

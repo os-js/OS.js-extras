@@ -201,9 +201,9 @@
       });
 
       view.set('columns', [
-        {label: 'Name', basis: '100px', grow: 1, shrink: 1},
-        {label: 'Type', basis: '100px', grow: 0, shrink: 0, textalign: 'right'},
-        {label: 'Size', basis: '60px', grow: 0, shrink: 0, textalign: 'right'}
+        {label: 'Name', size: '100px'},
+        {label: 'Type', size: '100px', textalign: 'right'},
+        {label: 'Size', size: '60px', textalign: 'right'}
       ]);
     }
 
