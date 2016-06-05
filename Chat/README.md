@@ -12,9 +12,11 @@ cd Chat/vendor/punjab
 python setup.py build
 sudo python setup.py install
 
-# Start service
+# If you use apache as frontend, you'll need to enable the proxy module
 sudo a2enmod proxy_http
 sudo service apache2 restart
+
+# Start service
 sudo twistd punjab
 ```
 
