@@ -147,6 +147,10 @@
   };
 
   ApplicationArchiverWindow.prototype.renderProgress = function(filename, index, total) {
+    if ( !this._scheme ) {
+      return;
+    }
+
     var p = this._scheme.find(this, 'Progress');
     var s = this._scheme.find(this, 'Statusbar');
 
@@ -162,6 +166,10 @@
   };
 
   ApplicationArchiverWindow.prototype.renderArchive = function(entries, root) {
+    if ( !this._scheme ) {
+      return;
+    }
+
     var view = this._scheme.find(this, 'FileView');
     var rows = [];
 
