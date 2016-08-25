@@ -303,30 +303,36 @@
     scheme.find(this, 'Menubar').on('select', menuEvent);
 
     scheme.find(this, 'Folders').on('activate', function(ev) {
-      var item = ev.detail.entries[0].data;
-      app.setFolder(item);
+      if ( ev.detail.entries && ev.detail.entries.length ) {
+        var item = ev.detail.entries[0].data;
+        app.setFolder(item);
+      }
     }).on('contextmenu', function(ev) {
       folderMenu.show(ev);
     });
 
     messageView = scheme.find(this, 'Messages').on('select', function(ev) {
-      var item = ev.detail.entries[0].data;
-      app.setMessage(item.id);
+      if ( ev.detail.entries && ev.detail.entries.length ) {
+        var item = ev.detail.entries[0].data;
+        app.setMessage(item.id);
+      }
     }).on('render', function(ev) {
       var row = ev.detail.element;
       var iter = ev.detail.data;
       toggleMessageState(iter.id, iter.state, row, messageView);
     }).on('activate', function(ev) {
-      var item = ev.detail.entries[0].data;
+      if ( ev.detail.entries && ev.detail.entries.length ) {
+        var item = ev.detail.entries[0].data;
 
-      app.openMessageWindow({
-        id: item.id,
-        subject: item.subject,
-        sender: item.sender,
-        onRecieved: function() {
-          toggleReadState(item.id, messageView);
-        }
-      });
+        app.openMessageWindow({
+          id: item.id,
+          subject: item.subject,
+          sender: item.sender,
+          onRecieved: function() {
+            toggleReadState(item.id, messageView);
+          }
+        });
+      }
     }).on('contextmenu', function(ev) {
       messageMenu.show(ev);
     });
