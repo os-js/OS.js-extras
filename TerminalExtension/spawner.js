@@ -41,9 +41,11 @@
     var p = path.join(__dirname, 'server.js');
     var child = spawn('node', [p, portIndex, uid], {
       //uid: uid,
-      detached: true,
-      stdio: [ 'ignore', out, err ]
+      detached: true/*,
+      stdio: [ 'ignore', out, err ]*/
     });
+
+    child.stdout.pipe(process.stdout);
 
     console.log('---', 'Created instance pid', child.pid, '@', portIndex, 'on user', uid);
 

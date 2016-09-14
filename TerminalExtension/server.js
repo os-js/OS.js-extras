@@ -7,6 +7,8 @@
   var path = require('path');
 
   var sessions = {};
+  var timeouts = {};
+
   var uid;
   var userinfo = {
     dir: process.env.HOME,
@@ -67,6 +69,10 @@
       }
       delete sessions[id];
     }
+
+    if ( timeouts[id] ) {
+      timeouts[id] = clearInterval(timeouts[id]);
+    }
   };
 
   setInterval(function() {
@@ -116,15 +122,6 @@
       }
     });
 
-    socket.on('ping', function (id) {
-      var now = Date.now();
-      var term = sessions[id];
-      if ( term ) {
-        console.log('<<<', 'ping', id, now, '<-', term.ping);
-        term.ping = now;
-      }
-    });
-
     socket.on('destroy', function(id) {
       console.log('<<<', 'destroy', id);
       destroySession(id);
@@ -135,6 +132,12 @@
       var id = term.pty;
 
       console.log('>>>', 'spawn', id);
+
+      timeouts[id] = setInterval(function() {
+        if ( sessions[id] ) {
+          sessions[id].ping = Date.now();
+        }
+      }, 1000);
 
       sessions[id] = {
         ping: Date.now(),
