@@ -7,7 +7,6 @@
   var path = require('path');
 
   var sessions = {};
-  var timeouts = {};
 
   var uid;
   var userinfo = {
@@ -69,12 +68,9 @@
       }
       delete sessions[id];
     }
-
-    if ( timeouts[id] ) {
-      timeouts[id] = clearInterval(timeouts[id]);
-    }
   };
 
+  /*
   setInterval(function() {
     Object.keys(sessions).forEach(function(key) {
       var term = sessions[key];
@@ -88,6 +84,7 @@
       }
     });
   }, 1000);
+  */
 
   io.on('connection', function (socket) {
     console.log('Incoming connection');
@@ -132,12 +129,6 @@
       var id = term.pty;
 
       console.log('>>>', 'spawn', id);
-
-      timeouts[id] = setInterval(function() {
-        if ( sessions[id] ) {
-          sessions[id].ping = Date.now();
-        }
-      }, 1000);
 
       sessions[id] = {
         ping: Date.now(),
