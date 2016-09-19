@@ -1,7 +1,7 @@
 (function() {
   var portRange = [26490, 26999];
   var portIndex = portRange[0];
-  var serverPort= 8080;
+  var serverPort= parseInt(process.argv[2],10) || 8080;
   var instances = {};
 
   var fs = require('fs');
