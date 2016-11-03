@@ -31,9 +31,9 @@ In `Terminal/package.json` you can change to a custom location (by default it wi
 ## Enable
 
 ```
-grunt packages:enable:Terminal
-grunt packages:enable:TerminalExtension
-grunt config manifest
+grunt config:enable-package --name=OS.js-extras/Terminal
+grunt config:enable-package --name=OS.js-extras/TerminalExtension
+grunt manifest
 ```
 
 ## Running backend server
