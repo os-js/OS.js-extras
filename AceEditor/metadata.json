@@ -16,12 +16,22 @@
       "vendor/ace/build/src"
     ]
   },
+  "build": {
+
+    "scripts": {
+      "before": [
+        "(cd $OSJS_PACKAGE/vendor/ace && npm install)",
+        "(cd $OSJS_PACKAGE/vendor/ace && node ./Makefile.dryice.js)"
+      ]
+    }
+  },
   "preload":    [
     {"src": "vendor/ace/build/src/ace.js", "type": "javascript"},
     {"src": "main.js", "type": "javascript"},
-    {"src": "main.css", "type": "stylesheet"}
+    {"src": "main.css", "type": "stylesheet"},
+    {
+      "src": "scheme.html",
+      "type": "scheme"
+    }
   ]
 }
-
-
-

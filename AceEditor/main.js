@@ -52,7 +52,6 @@
 
   ApplicationAceEditorWindow.prototype.init = function(wmRef, app, scheme) {
     var root = DefaultApplicationWindow.prototype.init.apply(this, arguments);
-    var self = this;
 
     // Load and set up scheme (GUI) here
     scheme.render(this, 'AceEditorWindow', root);
@@ -185,8 +184,8 @@
   ApplicationAceEditor.prototype = Object.create(DefaultApplication.prototype);
   ApplicationAceEditor.constructor = DefaultApplication;
 
-  ApplicationAceEditor.prototype.init = function(settings, metadata) {
-    var self = this;
+  ApplicationAceEditor.prototype.init = function(settings, metadata, scheme) {
+    Application.prototype.init.call(this, settings, metadata, scheme);
 
     var path = API.getApplicationResource(this, 'vendor/ace/build/src');
     ace.config.set('basePath', path);
@@ -196,9 +195,8 @@
     ace.config.set('themePath', '/path/to/src');
     */
 
-    DefaultApplication.prototype.init.call(this, settings, metadata, function(scheme, file) {
-      self._addWindow(new ApplicationAceEditorWindow(self, metadata, scheme, file));
-    });
+    var file = this._getArgument('file');
+    this._addWindow(new ApplicationAceEditorWindow(this, metadata, scheme, file));
   };
 
   /////////////////////////////////////////////////////////////////////////////
