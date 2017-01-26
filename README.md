@@ -39,6 +39,8 @@ How to set up: https://os.js.org/doc/manuals/man-google-api.html
 
 Read PDF documents.
 
+Requires `gulp` to build.
+
 ![ScreenShot](https://raw.githubusercontent.com/os-js/OS.js-extras/master/doc/pdf.png)
 
 ## Ace Editor

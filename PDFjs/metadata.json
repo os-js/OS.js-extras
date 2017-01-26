@@ -12,7 +12,13 @@
       "main.css",
       "main.js",
       "vendor/pdf.js"
-    ]
+    ],
+    "scripts": {
+      "before": [
+        "(cd $OSJS_PACKAGE/vendor/pdf.js && npm install)",
+        "(cd $OSJS_PACKAGE/vendor/pdf.js && gulp generic)"
+      ]
+    }
   },
   "preload":    [
     {"src": "vendor/pdf.js/build/pdf.js", "type": "javascript"},

@@ -17,7 +17,6 @@
     ]
   },
   "build": {
-
     "scripts": {
       "before": [
         "(cd $OSJS_PACKAGE/vendor/ace && npm install)",
