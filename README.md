@@ -2,7 +2,7 @@
 
 This repository contains Extra packages for [OS.js](https://github.com/os-js/OS.js).
 
-Follow [the official instructions](https://os.js.org/doc/manuals/man-package-manager.html) on how to add this repository.
+Follow [the official instructions](https://os-js.org/doc/manuals/man-package-manager.html) on how to add this repository.
 
 [![Gitter](https://img.shields.io/gitter/room/nwjs/nw.js.svg)](https://gitter.im/os-js/OS.js?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge)
 [![Tips](https://img.shields.io/gratipay/os-js.svg)](https://gratipay.com/os-js/)
@@ -15,7 +15,7 @@ ZIP Archive manipulation with zip.js
 
 ![ScreenShot](https://raw.githubusercontent.com/os-js/OS.js-extras/master/doc/archiver.png)
 
-How to set up zip support: https://os.js.org/doc/manuals/man-zip.html
+How to set up zip support: https://os-js.org/doc/manuals/man-zip.html
 
 ## Terminal
 
@@ -33,7 +33,7 @@ Google Mail and Contacts clients
 
 *Will be moved to OS.js master branch when done*
 
-How to set up: https://os.js.org/doc/manuals/man-google-api.html
+How to set up: https://os-js.org/doc/manuals/man-google-api.html
 
 ## PDFjs
 
