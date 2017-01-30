@@ -15,8 +15,7 @@
     ],
     "scripts": {
       "before": [
-        "(cd $OSJS_PACKAGE/vendor/pdf.js && npm install)",
-        "(cd $OSJS_PACKAGE/vendor/pdf.js && gulp generic)"
+        "(cd $OSJS_PACKAGE && ./build.sh)"
       ]
     }
   },
