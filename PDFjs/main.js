@@ -61,16 +61,16 @@
     // Load and set up scheme (GUI) here
     scheme.render(this, 'PDFWindow', root);
 
-    scheme.find(this, 'Prev').on('click', function() {
+    this._find('Prev').on('click', function() {
       self.prevPage();
     });
-    scheme.find(this, 'Next').on('click', function() {
+    this._find('Next').on('click', function() {
       self.nextPage();
     });
-    scheme.find(this, 'In').on('click', function() {
+    this._find('In').on('click', function() {
       self.zoomIn();
     });
-    scheme.find(this, 'Out').on('click', function() {
+    this._find('Out').on('click', function() {
       self.zoomOut();
     });
 
@@ -92,13 +92,13 @@
       return;
     }
 
-    var container = this._scheme.find(this, 'Content').$element;
+    var container = this._this._find('Content').$element;
     Utils.$empty(container);
 
     this.pageIndex = pageNum;
 
     var statustext = Utils.format('Page {0}/{1} - {2}%', this.pageIndex, this.pageCount, this.currentScale*100);
-    this._scheme.find(this, 'Statusbar').set('value', statustext);
+    this._this._find('Statusbar').set('value', statustext);
 
     this.pdf.getPage(this.pageIndex).then(function getPageHelloWorld(page) {
       var scale = self.currentScale;
@@ -140,7 +140,7 @@
 
   ApplicationPDFjsWindow.prototype.showFile = function(file, result) {
     var self = this;
-    var container = this._scheme.find(this, 'Content').$element;
+    var container = this._this._find('Content').$element;
 
     Utils.$empty(container);
 
@@ -173,11 +173,10 @@
   ApplicationPDFjs.prototype = Object.create(DefaultApplication.prototype);
   ApplicationPDFjs.constructor = DefaultApplication;
 
-  ApplicationPDFjs.prototype.init = function(settings, metadata) {
-    var self = this;
-    DefaultApplication.prototype.init.call(this, settings, metadata, function(scheme, file) {
-      self._addWindow(new ApplicationPDFjsWindow(self, metadata, scheme, file));
-    });
+  ApplicationPDFjs.prototype.init = function(settings, metadata, scheme) {
+    DefaultApplication.prototype.init.call(this, settings, metadata, scheme);
+    var file = this._getArgument('file');
+    this._addWindow(new ApplicationPDFjsWindow(this, metadata, scheme, file));
   };
 
   /////////////////////////////////////////////////////////////////////////////
