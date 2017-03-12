@@ -92,13 +92,13 @@
       return;
     }
 
-    var container = this._this._find('Content').$element;
+    var container = this._find('Content').$element;
     Utils.$empty(container);
 
     this.pageIndex = pageNum;
 
     var statustext = Utils.format('Page {0}/{1} - {2}%', this.pageIndex, this.pageCount, this.currentScale*100);
-    this._this._find('Statusbar').set('value', statustext);
+    this._find('Statusbar').set('value', statustext);
 
     this.pdf.getPage(this.pageIndex).then(function getPageHelloWorld(page) {
       var scale = self.currentScale;
@@ -140,7 +140,7 @@
 
   ApplicationPDFjsWindow.prototype.showFile = function(file, result) {
     var self = this;
-    var container = this._this._find('Content').$element;
+    var container = this._find('Content').$element;
 
     Utils.$empty(container);
 
