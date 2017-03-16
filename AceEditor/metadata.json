@@ -19,8 +19,7 @@
   "build": {
     "scripts": {
       "before": [
-        "(cd $OSJS_PACKAGE/vendor/ace && npm install)",
-        "(cd $OSJS_PACKAGE/vendor/ace && node ./Makefile.dryice.js)"
+        "(cd $OSJS_PACKAGE && ./build.sh)"
       ]
     }
   },
