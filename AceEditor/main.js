@@ -89,7 +89,9 @@
 
   ApplicationAceEditorWindow.prototype.updateFile = function(file) {
     DefaultApplicationWindow.prototype.updateFile.apply(this, arguments);
-    this.editor.focus();
+    if ( this.editor ) {
+      this.editor.focus();
+    }
   };
 
   ApplicationAceEditorWindow.prototype.showFile = function(file, content) {
