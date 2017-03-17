@@ -57,59 +57,48 @@
     return Application.prototype.destroy.apply(this, arguments);
   };
 
-  ApplicationGmail.prototype.init = function(settings, metadata) {
+  ApplicationGmail.prototype.init = function(settings, metadata, scheme) {
     var self = this;
 
     Application.prototype.init.apply(this, arguments);
     var defaultSettings = metadata.settings || {};
     settings = Utils.argumentDefaults(settings, defaultSettings);
 
-    function onloaded() {
-      if ( !self._getArgument('__resume__') ) {
-        var action = self._getArgument('action');
-        if ( action ) {
-          self.handleAction(self._getArguments());
-        }
+    this.mainWindow = this._addWindow(new OSjs.Applications.ApplicationGmail.MainWindow(this, metadata, scheme, settings));
+    if ( !this._getArgument('__resume__') ) {
+      var action = self._getArgument('action');
+      if ( action ) {
+        self.handleAction(self._getArguments());
       }
-
-      self.mailer = new OSjs.Applications.ApplicationGmail.GoogleMail({
-        maxPages: settings.maxPages,
-        onAbortStart: function() {
-          if ( self.mainWindow ) {
-            self.mainWindow._toggleLoading(true);
-          }
-        },
-        onAbortEnd: function() {
-          if ( self.mainWindow ) {
-            self.mainWindow._toggleLoading(false);
-          }
-        }
-      }, function(error, result) {
-        if ( self.mainWindow && self.mailer.user ) {
-          self.mainWindow.updateTitleBar(self.mailer.user);
-        }
-        self.sync();
-      });
-
-      self._on('destroyWindow', function(obj) {
-        if ( obj._name === 'ApplicationGmailWindow' ) {
-          self.destroy();
-        }
-      });
-      self._on('attention', function(args) {
-        self.handleAction(args);
-      });
     }
 
-    var url = API.getApplicationResource(this, './scheme.html');
-
-    var scheme = GUI.createScheme(url);
-    scheme.load(function(error, result) {
-      self.mainWindow = self._addWindow(new OSjs.Applications.ApplicationGmail.MainWindow(self, metadata, scheme, settings));
-      onloaded();
+    this.mailer = new OSjs.Applications.ApplicationGmail.GoogleMail({
+      maxPages: settings.maxPages,
+      onAbortStart: function() {
+        if ( self.mainWindow ) {
+          self.mainWindow._toggleLoading(true);
+        }
+      },
+      onAbortEnd: function() {
+        if ( self.mainWindow ) {
+          self.mainWindow._toggleLoading(false);
+        }
+      }
+    }, function(error, result) {
+      if ( self.mainWindow && self.mailer.user ) {
+        self.mainWindow.updateTitleBar(self.mailer.user);
+      }
+      self.sync();
     });
 
-    this._setScheme(scheme);
+    this._on('destroyWindow', function(obj) {
+      if ( obj._name === 'ApplicationGmailWindow' ) {
+        self.destroy();
+      }
+    });
+    this._on('attention', function(args) {
+      self.handleAction(args);
+    });
   };
 
   ApplicationGmail.prototype.handleAction = function(args) {

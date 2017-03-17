@@ -19,6 +19,7 @@
     {"src": "vendor/noVNC/core/input/keysymdef.js", "type": "javascript"},
     {"src": "vendor/noVNC/core/input/util.js", "type": "javascript"},
     {"src": "vendor/noVNC/core/input/xtscancodes.js", "type": "javascript"},
+    {"src": "scheme.html", "type": "scheme"},
     {"src": "main.js", "type": "javascript"},
     {"src": "main.css", "type": "stylesheet"}
   ]

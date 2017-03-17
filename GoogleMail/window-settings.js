@@ -51,7 +51,7 @@
     var root = Window.prototype.init.apply(this, arguments);
 
     // Load and set up scheme (GUI) here
-    scheme.render(this, 'GmailSettingsWindow', root);
+    this._render('GmailSettingsWindow');
 
     function save(maxPages) {
       if ( maxPages && self._appRef ) {
@@ -68,12 +68,12 @@
       self._close();
     }
 
-    var maxPages = scheme.find(this, 'MaxPages').set('value', this.currentMaxPages);
+    var maxPages = this._find('MaxPages').set('value', this.currentMaxPages);
 
-    scheme.find(this, 'ButtonClose').on('click', function() {
+    this._find('ButtonClose').on('click', function() {
       save(false);
     });
-    scheme.find(this, 'ButtonSave').on('click', function() {
+    this._find('ButtonSave').on('click', function() {
       save(maxPages.get('value'));
     });
 

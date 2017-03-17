@@ -54,10 +54,11 @@
     var root = DefaultApplicationWindow.prototype.init.apply(this, arguments);
 
     // Load and set up scheme (GUI) here
-    scheme.render(this, 'AceEditorWindow', root);
-    var statusbar = scheme.find(this, 'Statusbar');
+    this._render('AceEditorWindow');
 
-    var container = scheme.find(this, 'AceContainer').$element;
+    var statusbar = this._find('Statusbar');
+
+    var container = this._find('AceContainer').$element;
     var id = 'AceEditor' + globalCounter.toString();
 
     container.id = id;
@@ -112,7 +113,6 @@
     }
     return false;
   };
-
 
   ApplicationAceEditorWindow.prototype._blur = function() {
     if ( DefaultApplicationWindow.prototype._blur.apply(this, arguments) ) {

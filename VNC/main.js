@@ -210,39 +210,39 @@
 
     function getSettings() {
       return {
-        host: scheme.find(self, 'InputHost').get('value'),
-        port: scheme.find(self, 'InputPort').get('value'),
-        token: scheme.find(self, 'InputToken').get('value'),
-        password: scheme.find(self, 'InputPassword').get('value'),
-        path: scheme.find(self, 'InputPath').get('value'),
-        repeaterid: scheme.find(self, 'InputRepeaterID').get('value'),
-        encrypt: scheme.find(self, 'ToggleEncrypt').get('value'),
-        truecolor: scheme.find(self, 'ToggleTrueColor').get('value'),
-        shared: scheme.find(self, 'ToggleSharedMode').get('value'),
-        viewonly: scheme.find(self, 'ToggleViewOnly').get('value'),
-        localcursor: scheme.find(self, 'ToggleLocalCursor').get('value'),
-        scaling: scheme.find(self, 'InputScalingMode').get('value')
+        host: self._find('InputHost').get('value'),
+        port: self._find('InputPort').get('value'),
+        token: self._find('InputToken').get('value'),
+        password: self._find('InputPassword').get('value'),
+        path: self._find('InputPath').get('value'),
+        repeaterid: self._find('InputRepeaterID').get('value'),
+        encrypt: self._find('ToggleEncrypt').get('value'),
+        truecolor: self._find('ToggleTrueColor').get('value'),
+        shared: self._find('ToggleSharedMode').get('value'),
+        viewonly: self._find('ToggleViewOnly').get('value'),
+        localcursor: self._find('ToggleLocalCursor').get('value'),
+        scaling: self._find('InputScalingMode').get('value')
       };
     }
 
-    scheme.find(this, 'InputHost').set('value', app.connectionSettings.host || 'localhost');
-    scheme.find(this, 'InputPort').set('value', app.connectionSettings.port || 5900);
-    scheme.find(this, 'InputToken').set('value', app.connectionSettings.token || '');
-    scheme.find(this, 'InputPassword').set('value', app.connectionSettings.password || '');
-    scheme.find(this, 'InputPath').set('value', app.connectionSettings.path || 'websockify');
-    scheme.find(this, 'InputRepeaterID').set('value', app.connectionSettings.repeaterid || '');
-    scheme.find(this, 'ToggleEncrypt').set('value', app.connectionSettings.encrypt);
-    scheme.find(this, 'ToggleTrueColor').set('value', app.connectionSettings.truecolor);
-    scheme.find(this, 'ToggleSharedMode').set('value', app.connectionSettings.shared);
-    scheme.find(this, 'ToggleViewOnly').set('value', app.connectionSettings.viewonly);
-    scheme.find(this, 'ToggleLocalCursor').set('value', app.connectionSettings.localcursor);
-    scheme.find(this, 'InputScalingMode').set('value', app.connectionSettings.scaling || 'off');
+    this._find('InputHost').set('value', app.connectionSettings.host || 'localhost');
+    this._find('InputPort').set('value', app.connectionSettings.port || 5900);
+    this._find('InputToken').set('value', app.connectionSettings.token || '');
+    this._find('InputPassword').set('value', app.connectionSettings.password || '');
+    this._find('InputPath').set('value', app.connectionSettings.path || 'websockify');
+    this._find('InputRepeaterID').set('value', app.connectionSettings.repeaterid || '');
+    this._find('ToggleEncrypt').set('value', app.connectionSettings.encrypt);
+    this._find('ToggleTrueColor').set('value', app.connectionSettings.truecolor);
+    this._find('ToggleSharedMode').set('value', app.connectionSettings.shared);
+    this._find('ToggleViewOnly').set('value', app.connectionSettings.viewonly);
+    this._find('ToggleLocalCursor').set('value', app.connectionSettings.localcursor);
+    this._find('InputScalingMode').set('value', app.connectionSettings.scaling || 'off');
 
-    scheme.find(this, 'ButtonOK').on('click', function() {
+    this._find('ButtonOK').on('click', function() {
       self._close('ok', getSettings());
     });
 
-    scheme.find(this, 'ButtonCancel').on('click', function() {
+    this._find('ButtonCancel').on('click', function() {
       self._close();
     });
 
@@ -291,7 +291,7 @@
     return Application.prototype.destroy.apply(this, arguments);
   };
 
-  ApplicationVNC.prototype.init = function(settings, metadata) {
+  ApplicationVNC.prototype.init = function(settings, metadata, scheme) {
     var self = this;
     Application.prototype.init.apply(this, arguments);
 
@@ -301,13 +301,7 @@
       });
     }
 
-    var url = API.getApplicationResource(this, './scheme.html');
-    var scheme = GUI.createScheme(url);
-    scheme.load(function(error, result) {
-      self._addWindow(new ApplicationVNCWindow(self, metadata, scheme));
-    });
-
-    this._setScheme(scheme);
+    this._addWindow(new ApplicationVNCWindow(this, metadata, scheme));
   };
 
   ApplicationVNC.prototype.onUpdateState = function(rfb, state, oldstate, msg) {
@@ -334,7 +328,7 @@
   ApplicationVNC.prototype.onFBResize = function(rfb, width, height) {
     var win = this._getMainWindow();
     if ( win ) {
-      var container = win._scheme.find(win, 'ScrollView').$element;
+      var container = win._find('ScrollView').$element;
       win._resize(width+40, height+80, true); // FIXME
     }
   };

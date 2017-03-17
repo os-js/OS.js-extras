@@ -150,12 +150,12 @@
     var self = this;
 
     // Load and set up scheme (GUI) here
-    scheme.render(this, 'ApplicationGoogleContactsWindow', root);
+    this._render('ApplicationGoogleContactsWindow');
 
-    scheme.find(this, 'View').on('activate', function(ev) {
+    this._find('View').on('activate', function(ev) {
       self.activateContact(ev.detail.entries[0].data);
     });
-    scheme.find(this, 'Refresh').on('select', function() {
+    this._find('Refresh').on('select', function() {
       app.sync();
     });
 
@@ -176,7 +176,7 @@
       });
     });
 
-    var view = this._scheme.find(this, 'View');
+    var view = this._find('View');
     view.clear().add(rows);
   };
 
@@ -225,18 +225,11 @@
 
   ApplicationGoogleContacts.prototype = Object.create(Application.prototype);
 
-  ApplicationGoogleContacts.prototype.init = function(settings, metadata) {
+  ApplicationGoogleContacts.prototype.init = function(settings, metadata, scheme) {
     Application.prototype.init.apply(this, arguments);
 
-    var self = this;
-    var url = API.getApplicationResource(this, './scheme.html');
-    var scheme = GUI.createScheme(url);
-    scheme.load(function(error, result) {
-      self._addWindow(new ApplicationGoogleContactsWindow(self, metadata, scheme));
-      self.sync();
-    });
-
-    this._setScheme(scheme);
+    this._addWindow(new ApplicationGoogleContactsWindow(this, metadata, scheme));
+    this.sync();
   };
 
   ApplicationGoogleContacts.prototype.sync = function() {

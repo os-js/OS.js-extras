@@ -50,11 +50,11 @@
     var root = Window.prototype.init.apply(this, arguments);
 
     // Load and set up scheme (GUI) here
-    scheme.render(this, 'GmailMessageWindow', root);
+    this._render('GmailMessageWindow');
 
-    var input = scheme.find(this, 'Input');
-    var subject = scheme.find(this, 'Subject').set('value', this.mailArgs.subject || '');
-    var to = scheme.find(this, 'To').set('value', this.mailArgs.to || '');
+    var input = this._find('Input');
+    var subject = this._find('Subject').set('value', this.mailArgs.subject || '');
+    var to = this._find('To').set('value', this.mailArgs.to || '');
 
     var menuMap = {
       MenuClose: function() {
@@ -84,19 +84,19 @@
     }
 
     if ( this.mailArgs && this.mailArgs.id ) {
-      scheme.find(this, 'ViewInput').hide();
-      scheme.find(this, 'EntrySubject').hide();
-      scheme.find(this, 'EntryTo').hide();
+      this._find('ViewInput').hide();
+      this._find('EntrySubject').hide();
+      this._find('EntryTo').hide();
 
-      scheme.find(this, 'Send').set('disabled', true);
+      this._find('Send').set('disabled', true);
     } else {
-      scheme.find(this, 'ViewMessage').hide();
-      scheme.find(this, 'Attachments').set('disabled', true);
-      scheme.find(this, 'Reply').set('disabled', true);
+      this._find('ViewMessage').hide();
+      this._find('Attachments').set('disabled', true);
+      this._find('Reply').set('disabled', true);
     }
 
-    scheme.find(this, 'SubmenuFile').on('select', menuEvent);
-    scheme.find(this, 'Menubar').on('select', menuEvent);
+    this._find('SubmenuFile').on('select', menuEvent);
+    this._find('Menubar').on('select', menuEvent);
 
     return root;
   };
@@ -111,7 +111,7 @@
 
   ApplicationGmailMessageWindow.prototype.onPrepareReceive = function() {
     this._toggleLoading(true);
-    this._scheme.find(this, 'Statusbar').set('value', 'Preparing to receive email...');
+    this._find('Statusbar').set('value', 'Preparing to receive email...');
   };
 
   ApplicationGmailMessageWindow.prototype.onEndReceive = function(parsed) {
@@ -141,13 +141,13 @@
     this.attachmentMenu = items;
 
     var text = 'Message downloaded (' + l + ' attachments)';
-    this._scheme.find(this, 'Statusbar').set('value', text);
-    this._scheme.find(this, 'Message').set('value', parsed.raw);
+    this._find('Statusbar').set('value', text);
+    this._find('Message').set('value', parsed.raw);
   };
 
   ApplicationGmailMessageWindow.prototype.onPrepareSend = function() {
     this._toggleLoading(true);
-    this._scheme.find(this, 'Statusbar').set('value', 'Preparing to send email...');
+    this._find('Statusbar').set('value', 'Preparing to send email...');
   };
 
   ApplicationGmailMessageWindow.prototype.onEndSend = function(result, error) {
@@ -156,7 +156,7 @@
     if ( result ) {
       this._close();
     } else {
-      this._scheme.find(this, 'Statusbar').set('value', 'FAILED TO SEND MESSAGE: ' + error);
+      this._find('Statusbar').set('value', 'FAILED TO SEND MESSAGE: ' + error);
     }
   };
 

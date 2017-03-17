@@ -11,6 +11,7 @@
     "maxPages": 2
   },
   "preload":    [
+    {"src": "scheme.html", "type": "scheme"},
     {"src": "mailer.js", "type": "javascript"},
     {"src": "window-main.js", "type": "javascript"},
     {"src": "window-message.js", "type": "javascript"},

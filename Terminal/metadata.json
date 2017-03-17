@@ -10,6 +10,7 @@
     "host": "%HOST%:8080"
   },
   "preload":    [
+    {"src": "scheme.html", "type": "scheme"},
     {"src": "main.js", "type": "javascript"},
     {"src": "main.css", "type": "stylesheet"}
   ]

@@ -95,17 +95,17 @@
     var self = this;
 
     // Load and set up scheme (GUI) here
-    scheme.render(this, 'ArchiverWindow', root);
+    this._render('ArchiverWindow');
 
     function getSelectedEntry() {
-      var sel = scheme.find(self, 'FileView').get('selected');
+      var sel = self._find('FileView').get('selected');
       if ( sel && sel.length ) {
         return sel[0].data.filename;
       }
       return null;
     }
 
-    scheme.find(this, 'MenuBar').on('select', function(ev) {
+    this._find('MenuBar').on('select', function(ev) {
       if ( ev.detail.id === 'MenuExtract' ) {
         app.action('extract');
       } else if ( ev.detail.id === 'MenuRemove' ) {
@@ -117,11 +117,13 @@
       }
     });
 
-    scheme.find(this, 'FileView').on('select', function(ev) {
+    /*
+    this._find('FileView').on('select', function(ev) {
       var selected = ev.detail.entries[0].data;
     });
+    */
 
-    scheme.find(this, 'FileView').on('activate', function(ev) {
+    this._find('FileView').on('activate', function(ev) {
       var selected = ev.detail.entries[0].data;
       if ( selected.directory ) {
         app.action('chdir', '/' + selected.filename);
@@ -151,8 +153,8 @@
       return;
     }
 
-    var p = this._scheme.find(this, 'Progress');
-    var s = this._scheme.find(this, 'Statusbar');
+    var p = this._find('Progress');
+    var s = this._find('Statusbar');
 
     if ( p && s ) {
       if ( filename === true || filename === false ) {
@@ -170,7 +172,7 @@
       return;
     }
 
-    var view = this._scheme.find(this, 'FileView');
+    var view = this._find('FileView');
     var rows = [];
 
     if ( root !== '/' ) {
@@ -245,12 +247,11 @@
     return DefaultApplication.prototype.destroy.apply(this, arguments);
   };
 
-  ApplicationArchiver.prototype.init = function(settings, metadata) {
-    var self = this;
+  ApplicationArchiver.prototype.init = function(settings, metadata, scheme) {
+    Application.prototype.init.call(this, settings, metadata, scheme);
 
-    DefaultApplication.prototype.init.call(this, settings, metadata, function(scheme, file) {
-      self._addWindow(new ApplicationArchiverWindow(self, metadata, scheme, file));
-    });
+    var file = this._getArgument('file');
+    this._addWindow(new ApplicationArchiverWindow(this, metadata, scheme, file));
   };
 
   ApplicationArchiver.prototype.action = function(action, arg, arg2) {

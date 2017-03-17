@@ -501,10 +501,10 @@
     scheme.render(this, 'SettingsWindow', root);
 
     var acc = app._getSetting('account') || {};
-    var username = scheme.find(this, 'Username').set('value', acc.username || '');
-    var password = scheme.find(this, 'Password').set('value', acc.password || '');
+    var username = this._find('Username').set('value', acc.username || '');
+    var password = this._find('Password').set('value', acc.password || '');
 
-    scheme.find(this, 'ButtonSave').on('click', function() {
+    this._find('ButtonSave').on('click', function() {
       app._setSetting('account', {
         username: username.get('value'),
         password: password.get('value')
@@ -515,7 +515,7 @@
       self._close();
     });
 
-    scheme.find(this, 'ButtonClose').on('click', function() {
+    this._find('ButtonClose').on('click', function() {
       self._close();
     });
 
@@ -553,7 +553,7 @@
     // Load and set up scheme (GUI) here
     scheme.render(this, 'ConversationWindow', root);
 
-    scheme.find(this, 'Input').on('enter', function(ev) {
+    this._find('Input').on('enter', function(ev) {
       var msg = {
         jid: self._id,
         message: ev.detail
@@ -572,7 +572,7 @@
     var now = new OSjs.Helpers.Date();
     var text = msg.message;
 
-    var root = this._scheme.find(this, 'Conversation');
+    var root = this._find('Conversation');
     var container = document.createElement('li');
     container.className = myself ? 'self' : 'remote';
 
@@ -603,7 +603,7 @@
     }, 100);
 
     if ( myself ) {
-      var input = this._scheme.find(this, 'Input');
+      var input = this._find('Input');
       setTimeout(function() {
         input.set('value', '');
       }, 10);
@@ -611,7 +611,7 @@
   };
 
   ApplicationConversationWindow.prototype.compose = function(cmp, jid) {
-    var statusbar = this._scheme.find(this, 'Statusbar');
+    var statusbar = this._find('Statusbar');
 
     this._timeout = clearTimeout(this._timeout);
     this._timeout = setTimeout(function() {
@@ -652,9 +652,9 @@
     var self = this;
 
     // Load and set up scheme (GUI) here
-    scheme.render(this, 'ChatWindow', root);
+    this._render('ChatWindow');
 
-    var statusMenu = scheme.find(this, 'SubmenuStatus');
+    var statusMenu = this._find('SubmenuStatus');
 
     var menuMap = {
       MenuClose: function() {
@@ -702,12 +702,12 @@
       }
     }
 
-    scheme.find(this, 'SubmenuFile').on('select', menuEvent);
-    scheme.find(this, 'SubmenuAccount').on('select', menuEvent);
-    scheme.find(this, 'SubmenuStatus').on('select', menuEvent);
+    this._find('SubmenuFile').on('select', menuEvent);
+    this._find('SubmenuAccount').on('select', menuEvent);
+    this._find('SubmenuStatus').on('select', menuEvent);
 
-    var statusbar = scheme.find(this, 'Statusbar');
-    var view = scheme.find(this, 'Contacts');
+    var statusbar = this._find('Statusbar');
+    var view = this._find('Contacts');
 
     view.on('activate', function(ev) {
       if ( ev.detail.entries.length ) {
@@ -736,9 +736,9 @@
     }
 
     function setConnected(online) {
-      scheme.find(self, 'MenuStatus').set('disabled', !online);
-      scheme.find(self, 'AccountConnect').set('disabled', online);
-      scheme.find(self, 'AccountDisconnect').set('disabled', !online);
+      self._find('MenuStatus').set('disabled', !online);
+      self._find('AccountConnect').set('disabled', online);
+      self._find('AccountDisconnect').set('disabled', !online);
     }
 
     app.connection.on('error', function() {
@@ -864,12 +864,10 @@
     return Application.prototype.destroy.apply(this, arguments);
   };
 
-  ApplicationChat.prototype.init = function(settings, metadata) {
+  ApplicationChat.prototype.init = function(settings, metadata, scheme) {
     Application.prototype.init.apply(this, arguments);
 
     var self = this;
-    var url = API.getApplicationResource(this, './scheme.html');
-    var scheme = GUI.createScheme(url);
     var mainWindow = null;
 
     this.connection.on('message', function(msg) {
@@ -929,19 +927,14 @@
       });
     }
 
+    mainWindow = this._addWindow(new ApplicationChatWindow(this, metadata, scheme));
+
     var acc = this._getSetting('account') || {};
-    scheme.load(function(error, result) {
-      self._setScheme(scheme);
-
-      mainWindow = self._addWindow(new ApplicationChatWindow(self, metadata, scheme));
-
-      if ( acc.username && acc.password ) {
-        self.connection.connect();
-      } else {
-        self.openSettingsWindow();
-      }
-    });
-
+    if ( acc.username && acc.password ) {
+      this.connection.connect();
+    } else {
+      this.openSettingsWindow();
+    }
   };
 
   ApplicationChat.prototype.openChatWindow = function(id, cb, check) {

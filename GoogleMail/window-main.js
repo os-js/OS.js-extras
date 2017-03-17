@@ -190,7 +190,7 @@
     var self = this;
 
     // Load and set up scheme (GUI) here
-    scheme.render(this, 'GmailWindow', root);
+    this._render( 'GmailWindow');
 
     var messageView;
 
@@ -295,14 +295,14 @@
       }
     }
 
-    scheme.find(this, 'SubmenuFile').on('select', menuEvent);
-    var folderMenu = scheme.find(this, 'SubmenuFolder').on('select', menuEvent);
-    var messageMenu = scheme.find(this, 'SubmenuMessage').on('select', menuEvent);
-    scheme.find(this, 'SubmenuMarkAs').on('select', menuEvent);
-    scheme.find(this, 'SubmenuOptions').on('select', menuEvent);
-    scheme.find(this, 'Menubar').on('select', menuEvent);
+    this._find('SubmenuFile').on('select', menuEvent);
+    var folderMenu = this._find('SubmenuFolder').on('select', menuEvent);
+    var messageMenu = this._find('SubmenuMessage').on('select', menuEvent);
+    this._find('SubmenuMarkAs').on('select', menuEvent);
+    this._find('SubmenuOptions').on('select', menuEvent);
+    this._find('Menubar').on('select', menuEvent);
 
-    scheme.find(this, 'Folders').on('activate', function(ev) {
+    this._find('Folders').on('activate', function(ev) {
       if ( ev.detail.entries && ev.detail.entries.length ) {
         var item = ev.detail.entries[0].data;
         app.setFolder(item);
@@ -311,7 +311,7 @@
       folderMenu.show(ev);
     });
 
-    messageView = scheme.find(this, 'Messages').on('select', function(ev) {
+    messageView = this._find('Messages').on('select', function(ev) {
       if ( ev.detail.entries && ev.detail.entries.length ) {
         var item = ev.detail.entries[0].data;
         app.setMessage(item.id);
@@ -346,10 +346,10 @@
     var percentage = typeof args.progress === 'undefined' ? -1 : args.progress;
     var message = args.message || '';
 
-    var statusbar = this._scheme.find(this, 'Statusbar');
+    var statusbar = this._find('Statusbar');
     statusbar.set('value', message);
 
-    var progressBar = this._scheme.find(this, 'Progressbar');
+    var progressBar = this._find('Progressbar');
     progressBar.set('value', percentage);
     if ( percentage < 0 ) {
       progressBar.hide();
@@ -378,21 +378,21 @@
       });
     });
 
-    var view = this._scheme.find(this, 'Messages');
+    var view = this._find('Messages');
     view.clear();
     view.add(list);
     view.set('value', current);
   };
 
   ApplicationGmailWindow.prototype.renderFolders = function(folders, current) {
-    var view = this._scheme.find(this, 'Folders');
+    var view = this._find('Folders');
     view.clear();
     view.add(resolveFolders(folders, current));
     view.set('value', current);
   };
 
   ApplicationGmailWindow.prototype.setSelectedFolder = function(id) {
-    var view = this._scheme.find(this, 'Folders');
+    var view = this._find('Folders');
     view.set('value', id);
   };
 
