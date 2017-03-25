@@ -2,7 +2,7 @@
   "className":  "ApplicationTerminal",
   "name":       "SSH Terminal",
   "mime":       null,
-  "icon":       "apps/gnome-terminal.png",
+  "icon":       "apps/utilities-terminal.png",
   "category":   "system",
   "singular":   false,
   "enabled":    false,

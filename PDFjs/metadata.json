@@ -4,7 +4,7 @@
   "description":"PDF Viewer",
   "mime":       ["application\/pdf"],
   "category":   "office",
-  "icon":       "mimetypes/gnome-mime-application-pdf.png",
+  "icon":       "mimetypes/x-office-document.png",
   "build":      {
     "copy": [
       "metadata.json",

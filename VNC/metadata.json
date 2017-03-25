@@ -2,7 +2,7 @@
   "className":  "ApplicationVNC",
   "name":       "noVNC v0.5",
   "mime":       null,
-  "icon":       "apps/gnome-remote-desktop.png",
+  "icon":       "apps/preferences-desktop-remote-desktop.png",
   "category":   "network",
   "preload":    [
     {"src": "vendor/noVNC/app/webutil.js", "type": "javascript"},
