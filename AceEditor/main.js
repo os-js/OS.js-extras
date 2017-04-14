@@ -91,6 +91,8 @@
   ApplicationAceEditorWindow.prototype.updateFile = function(file) {
     DefaultApplicationWindow.prototype.updateFile.apply(this, arguments);
     if ( this.editor ) {
+      this.setSyntaxMode(file);
+
       this.editor.focus();
     }
   };
@@ -98,10 +100,34 @@
   ApplicationAceEditorWindow.prototype.showFile = function(file, content) {
     this.editor.setValue(content || '');
     DefaultApplicationWindow.prototype.showFile.apply(this, arguments);
+
+    this.setSyntaxMode(file);
   };
 
   ApplicationAceEditorWindow.prototype.getFileData = function() {
     return this.editor.getValue();
+  };
+
+  ApplicationAceEditorWindow.prototype.setSyntaxMode = function(file) {
+    if ( !this.editor || !file ) {
+      return;
+    }
+
+    var mode = 'text';
+    if ( file.filename.match(/\.js$/i) ) {
+      mode = 'javascript';
+    } else if ( file.filename.match(/\.py$/i) ) {
+      mode = 'python';
+    } else if ( file.filename.match(/\.css$/i) ) {
+      mode = 'css';
+    } else if ( file.filename.match(/\.x?html?$/i) ) {
+      mode = 'html';
+    }
+
+    this.editor.session.setMode({
+      path: 'ace/mode/' + mode,
+      v: Date.now()
+    });
   };
 
   ApplicationAceEditorWindow.prototype._resize = function() {
