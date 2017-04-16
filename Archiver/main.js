@@ -259,8 +259,16 @@
     var win = this._getMainWindow();
     var file = this.currentArchive;
 
+    if ( !win ) {
+      return;
+    }
+
     win._toggleLoading(true);
     OSjs.Helpers.ZipArchiver.createInstance({}, function(err, inst) {
+      if ( !win ) {
+        return;
+      }
+
       win._toggleLoading(false);
 
       if ( err ) {
@@ -359,39 +367,36 @@
   };
 
   ApplicationArchiver.prototype.openCreateDialog = function(file, cb) {
-    var win = this._getMainWindow();
-    win._toggleDisabled(true);
-
     API.createDialog('File', {
       filename: 'New Archive.zip',
       type: 'save'
     }, function(ev, btn, result) {
-      win._toggleDisabled(false);
       cb(btn === 'ok' ? result : null);
+    }, {
+      parent: this._getMainWindow(),
+      modal: true
     });
   };
 
   ApplicationArchiver.prototype.openExtractDialog = function(file, cb) {
-    var win = this._getMainWindow();
-    win._toggleDisabled(true);
-
     API.createDialog('File', {
       select: 'dir'
     }, function(ev, btn, result) {
-      win._toggleDisabled(false);
       cb(btn === 'ok' ? result : null);
+    }, {
+      parent: this._getMainWindow(),
+      modal: true
     });
   };
 
   ApplicationArchiver.prototype.openAddDialog = function(file, type, cb) {
-    var win = this._getMainWindow();
-    win._toggleDisabled(true);
-
     API.createDialog('File', {
       select: type
     }, function(ev, btn, result) {
-      win._toggleDisabled(false);
       cb(btn === 'ok' ? result : null);
+    }, {
+      parent: this._getMainWindow(),
+      modal: true
     });
   };
 
