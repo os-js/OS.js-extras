@@ -3,16 +3,16 @@
  *
  * Copyright (c) 2011-2017, Anders Evenrud <andersevenrud@gmail.com>
  * All rights reserved.
- * 
+ *
  * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions are met: 
- * 
+ * modification, are permitted provided that the following conditions are met:
+ *
  * 1. Redistributions of source code must retain the above copyright notice, this
- *    list of conditions and the following disclaimer. 
+ *    list of conditions and the following disclaimer.
  * 2. Redistributions in binary form must reproduce the above copyright notice,
  *    this list of conditions and the following disclaimer in the documentation
- *    and/or other materials provided with the distribution. 
- * 
+ *    and/or other materials provided with the distribution.
+ *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
  * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
  * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
@@ -46,9 +46,9 @@
       key_capture: true // IMPORTANT
     }, app, scheme]);
 
-    this.connectionDialog;
-    this.lastKeyboardinput;
-    this.resizeTimeout;
+    this.connectionDialog = null;
+    this.lastKeyboardinput = null;
+    this.resizeTimeout = null;
   }
 
   ApplicationVNCWindow.prototype = Object.create(Window.prototype);
@@ -63,13 +63,21 @@
 
     var canvas = scheme.find(this, 'Canvas').$element.children[0];
     var menuMap = {
-      MenuConnect: function() { app.connect(self, canvas); },
-      MenuDisconnect: function() { app.disconnect(self); },
-      MenuClose:  function() { self._close(); }
+      MenuConnect: function() {
+        app.connect(self, canvas);
+      },
+      MenuDisconnect: function() {
+        app.disconnect(self);
+      },
+      MenuClose: function() {
+        self._close();
+      }
     };
 
     this._scheme.find(this, 'SubmenuFile').on('select', function(ev) {
-      if ( menuMap[ev.detail.id] ) { menuMap[ev.detail.id](); }
+      if ( menuMap[ev.detail.id] ) {
+        menuMap[ev.detail.id]();
+      }
     });
 
     return root;
@@ -112,7 +120,6 @@
   };
 
   ApplicationVNCWindow.prototype._resize = function() {
-    var self = this;
 
     if ( Window.prototype._resize.apply(this, arguments) ) {
       if ( this._app && this._app.rfb && this._scheme ) {
@@ -163,7 +170,11 @@
     if ( msg ) {
       value += ': ' + msg;
     }
-    this._scheme.find(this, 'Statusbar').set('value', value);
+
+    var statusBar = this._scheme.find(this, 'Statusbar');
+    if ( statusBar ) {
+      statusBar.set('value', value);
+    }
   };
 
   ApplicationVNCWindow.prototype.openConnectionDialog = function(cb) {
@@ -328,8 +339,7 @@
   ApplicationVNC.prototype.onFBResize = function(rfb, width, height) {
     var win = this._getMainWindow();
     if ( win ) {
-      var container = win._find('ScrollView').$element;
-      win._resize(width+40, height+80, true); // FIXME
+      win._resize(width + 40, height + 80, true); // FIXME
     }
   };
 
@@ -344,7 +354,7 @@
     var self = this;
 
     function initRFB() {
-      self.rfb = new RFB({
+      self.rfb = new window.RFB({
         target: canvas,
         onUpdateState: function() {
           self.onUpdateState.apply(self, arguments);
