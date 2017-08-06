@@ -1,0 +1,7 @@
+{
+  "name": "osjs-ace-editor",
+  "dependencies": {
+    "ace-builds": "^1.2.8",
+    "webpack": "^3.4.1"
+  }
+}

@@ -27,37 +27,51 @@
  * @author  Anders Evenrud <andersevenrud@gmail.com>
  * @licence Simplified BSD License
  */
-(function(DefaultApplication, DefaultApplicationWindow, Application, Window, Utils, API, VFS, GUI) {
-  'use strict';
-  var globalCounter = 0;
+const ace = window.ace || {};
 
-  /////////////////////////////////////////////////////////////////////////////
-  // WINDOWS
-  /////////////////////////////////////////////////////////////////////////////
+const DefaultApplication = OSjs.require('helpers/default-application');
+const DefaultApplicationWindow = OSjs.require('helpers/default-application-window');
+const Utils = OSjs.require('utils/misc');
 
-  function ApplicationAceEditorWindow(app, metadata, scheme, file) {
-    DefaultApplicationWindow.apply(this, ['ApplicationAceEditorWindow', {
+var globalCounter = 0;
+
+class ApplicationAceEditorWindow extends DefaultApplicationWindow {
+  constructor(app, metadata, file) {
+    super('ApplicationAceEditorWindow', {
       allow_drop: true,
       icon: metadata.icon,
       title: metadata.name,
       width: 500,
       height: 500
-    }, app, scheme, file]);
+    }, app, file);
 
     this.editor = null;
+    this._on('destroy', () => (this.editor = null));
+    this._on('resize', () => {
+      if ( this.editor ) {
+        this.editor.resize();
+      }
+    });
+    this._on('blur', () => {
+      if ( this.editor ) {
+        this.editor.blur();
+      }
+    });
+    this._on('focus', () => {
+      if ( this.editor ) {
+        this.editor.focus();
+      }
+    });
   }
 
-  ApplicationAceEditorWindow.prototype = Object.create(DefaultApplicationWindow.prototype);
-  ApplicationAceEditorWindow.constructor = DefaultApplicationWindow.prototype;
-
-  ApplicationAceEditorWindow.prototype.init = function(wmRef, app, scheme) {
-    var root = DefaultApplicationWindow.prototype.init.apply(this, arguments);
+  init(wmRef, app, scheme) {
+    const root = super.init(...arguments);
 
     // Load and set up scheme (GUI) here
-    this._render('AceEditorWindow');
+    this._render('AceEditorWindow', require('osjs-scheme-loader!scheme.html'));
 
+    var editor;
     var statusbar = this._find('Statusbar');
-
     var container = this._find('AceContainer').$element;
     var id = 'AceEditor' + globalCounter.toString();
 
@@ -70,7 +84,7 @@
       statusbar.set('value', txt);
     }
 
-    var editor = this.editor = ace.edit(id);
+    editor = this.editor = ace.edit(id);
     this.editor.setTheme('ace/theme/monokai');
     this.editor.getSession().setMode('ace/mode/javascript');
     this.editor.getSession().selection.on('changeCursor', function(e) {
@@ -81,34 +95,29 @@
     globalCounter++;
 
     return root;
-  };
+  }
 
-  ApplicationAceEditorWindow.prototype.destroy = function() {
-    this.editor = null;
-    Window.prototype.destroy.apply(this, arguments);
-  };
-
-  ApplicationAceEditorWindow.prototype.updateFile = function(file) {
-    DefaultApplicationWindow.prototype.updateFile.apply(this, arguments);
+  updateFile(file) {
+    super.updateFile(...arguments);
     if ( this.editor ) {
       this.setSyntaxMode(file);
 
       this.editor.focus();
     }
-  };
+  }
 
-  ApplicationAceEditorWindow.prototype.showFile = function(file, content) {
+  showFile(file, content) {
     this.editor.setValue(content || '');
-    DefaultApplicationWindow.prototype.showFile.apply(this, arguments);
+    super.showFile(...arguments);
 
     this.setSyntaxMode(file);
-  };
+  }
 
-  ApplicationAceEditorWindow.prototype.getFileData = function() {
+  getFileData() {
     return this.editor.getValue();
-  };
+  }
 
-  ApplicationAceEditorWindow.prototype.setSyntaxMode = function(file) {
+  setSyntaxMode(file) {
     if ( !this.editor || !file ) {
       return;
     }
@@ -128,44 +137,14 @@
       path: 'ace/mode/' + mode,
       v: Date.now()
     });
-  };
+  }
 
-  ApplicationAceEditorWindow.prototype._resize = function() {
-    if ( DefaultApplicationWindow.prototype._resize.apply(this, arguments) ) {
-      if ( this.editor ) {
-        this.editor.resize();
-      }
-      return true;
-    }
-    return false;
-  };
+}
 
-  ApplicationAceEditorWindow.prototype._blur = function() {
-    if ( DefaultApplicationWindow.prototype._blur.apply(this, arguments) ) {
-      if ( this.editor ) {
-        this.editor.blur();
-      }
-      return true;
-    }
-    return false;
-  };
+class ApplicationAceEditor extends DefaultApplication {
 
-  ApplicationAceEditorWindow.prototype._focus = function() {
-    if ( DefaultApplicationWindow.prototype._focus.apply(this, arguments) ) {
-      if ( this.editor ) {
-        this.editor.focus();
-      }
-      return true;
-    }
-    return false;
-  };
-
-  /////////////////////////////////////////////////////////////////////////////
-  // APPLICATION
-  /////////////////////////////////////////////////////////////////////////////
-
-  function ApplicationAceEditor(args, metadata) {
-    DefaultApplication.apply(this, ['ApplicationAceEditor', args, metadata, {
+  constructor(args, metadata) {
+    super('ApplicationAceEditor', args, metadata, {
       extension: 'txt',
       mime: 'text/plain',
       filename: 'New ace file.txt',
@@ -206,16 +185,13 @@
           extension: 'php'
         }
       ]
-    }]);
+    });
   }
 
-  ApplicationAceEditor.prototype = Object.create(DefaultApplication.prototype);
-  ApplicationAceEditor.constructor = DefaultApplication;
+  init(settings, metadata) {
+    super.init(...arguments);
 
-  ApplicationAceEditor.prototype.init = function(settings, metadata, scheme) {
-    Application.prototype.init.call(this, settings, metadata, scheme);
-
-    var path = API.getApplicationResource(this, 'vendor/ace/build/src');
+    const path = this._getResource('ace');
     ace.config.set('basePath', path);
     /*
     ace.config.set('modePath', '/path/to/src');
@@ -223,16 +199,10 @@
     ace.config.set('themePath', '/path/to/src');
     */
 
-    var file = this._getArgument('file');
-    this._addWindow(new ApplicationAceEditorWindow(this, metadata, scheme, file));
-  };
+    const file = this._getArgument('file');
+    this._addWindow(new ApplicationAceEditorWindow(this, metadata, file));
+  }
+}
 
-  /////////////////////////////////////////////////////////////////////////////
-  // EXPORTS
-  /////////////////////////////////////////////////////////////////////////////
+OSjs.Applications.ApplicationAceEditor = ApplicationAceEditor;
 
-  OSjs.Applications = OSjs.Applications || {};
-  OSjs.Applications.ApplicationAceEditor = OSjs.Applications.ApplicationAceEditor || {};
-  OSjs.Applications.ApplicationAceEditor.Class = ApplicationAceEditor;
-
-})(OSjs.Helpers.DefaultApplication, OSjs.Helpers.DefaultApplicationWindow, OSjs.Core.Application, OSjs.Core.Window, OSjs.Utils, OSjs.API, OSjs.VFS, OSjs.GUI);
