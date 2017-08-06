@@ -64,7 +64,7 @@ class ApplicationAceEditorWindow extends DefaultApplicationWindow {
     });
   }
 
-  init(wmRef, app, scheme) {
+  init(wmRef, app) {
     const root = super.init(...arguments);
 
     // Load and set up scheme (GUI) here
