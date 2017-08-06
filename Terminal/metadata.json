@@ -5,12 +5,14 @@
   "icon":       "apps/utilities-terminal.png",
   "category":   "system",
   "singular":   false,
-  "enabled":    false,
+  "spawn": {
+    "enabled": false,
+    "exec": "spawner.js"
+  },
   "config": {
     "host": "%HOST%:8080"
   },
   "preload":    [
-    {"src": "scheme.html", "type": "scheme"},
     {"src": "main.js", "type": "javascript"},
     {"src": "main.css", "type": "stylesheet"}
   ]

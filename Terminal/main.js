@@ -27,36 +27,34 @@
  * @author  Anders Evenrud <andersevenrud@gmail.com>
  * @licence Simplified BSD License
  */
-(function(Application, Window, Utils, API, VFS, GUI) {
-  'use strict';
+import PTYTerminal from './pty.js';
 
-  /////////////////////////////////////////////////////////////////////////////
-  // WINDOWS
-  /////////////////////////////////////////////////////////////////////////////
+const Utils = OSjs.require('utils/misc');
+const Window = OSjs.require('core/window');
+const Application = OSjs.require('core/application');
 
-  function ApplicationTerminalWindow(app, metadata, scheme) {
-    Window.apply(this, ['ApplicationTerminalWindow', {
+class ApplicationTerminalWindow extends Window {
+
+  constructor(app, metadata) {
+    super('ApplicationTerminalWindow', {
       icon: metadata.icon,
       title: metadata.name,
       width: 960,
       height: 288,
       key_capture : true
-    }, app, scheme]);
+    }, app);
 
     this.previousTitle = null;
-    this.terminal = new OSjs.Helpers.PTYTerminal(metadata.config.host.replace('%HOST%', window.location.hostname));
+    this.terminal = new PTYTerminal(metadata.config.host.replace('%HOST%', window.location.hostname));
     this.inited = false;
   }
 
-  ApplicationTerminalWindow.prototype = Object.create(Window.prototype);
-  ApplicationTerminalWindow.constructor = Window.prototype;
-
-  ApplicationTerminalWindow.prototype.init = function(wmRef, app, scheme) {
-    var root = Window.prototype.init.apply(this, arguments);
+  init(wmRef, app) {
+    var root = super.init(...arguments);
     var self = this;
 
     // Load and set up scheme (GUI) here
-    this._render('TerminalWindow');
+    this._render('TerminalWindow', require('osjs-scheme-loader!scheme.html'));
 
     function resize() {
       var size = self.getTerminalSize();
@@ -97,18 +95,18 @@
     });
 
     return root;
-  };
+  }
 
-  ApplicationTerminalWindow.prototype._inited = function() {
-    Window.prototype._inited.apply(this, arguments);
+  _inited() {
+    super._inited(...arguments);
 
     if ( this.inited ) {
       this.terminal.connect();
     }
-  };
+  }
 
-  ApplicationTerminalWindow.prototype.destroy = function() {
-    if ( Window.prototype.destroy.apply(this, arguments) ) {
+  destroy() {
+    if ( super.destroy(...arguments) ) {
       if ( this.terminal ) {
         this.terminal.destroy();
       }
@@ -117,30 +115,30 @@
     }
 
     return false;
-  };
+  }
 
-  ApplicationTerminalWindow.prototype.blur = function() {
-    if ( Window.prototype.blur.apply(this, arguments) ) {
+  blur() {
+    if ( super.blur(...arguments) ) {
       if ( this.terminal ) {
         this.terminal.blur();
       }
       return true;
     }
     return false;
-  };
+  }
 
-  ApplicationTerminalWindow.prototype.focus = function() {
-    if ( Window.prototype.focus.apply(this, arguments) ) {
+  focus() {
+    if ( super.focus(...arguments) ) {
       if ( this.terminal ) {
         this.terminal.focus();
       }
       return true;
     }
     return false;
-  };
+  }
 
-  ApplicationTerminalWindow.prototype._onKeyEvent = function(ev, type) {
-    Window.prototype._onKeyEvent.apply(this, arguments);
+  _onKeyEvent(ev, type) {
+    super._onKeyEvent(...arguments);
 
     if ( this.terminal ) {
       this.terminal.event(type, ev);
@@ -148,9 +146,9 @@
     }
 
     return true;
-  };
+  }
 
-  ApplicationTerminalWindow.prototype.setTitle = function(t) {
+  setTitle(t) {
     var title = t;
     if ( this.terminal ) {
       var s = this.getTerminalSize();
@@ -162,38 +160,28 @@
     }
 
     this.previousTitle = title;
-  };
+  }
 
-  ApplicationTerminalWindow.prototype.getTerminalSize = function() {
+  getTerminalSize() {
     return {
       cols: parseInt(Math.max(this._dimension.w / 7), 10),
       rows: parseInt(Math.min(this._dimension.h / 14), 10)
     };
-  };
+  }
+}
 
-  /////////////////////////////////////////////////////////////////////////////
-  // APPLICATION
-  /////////////////////////////////////////////////////////////////////////////
+class ApplicationTerminal extends Application {
 
-  function ApplicationTerminal(args, metadata) {
-    Application.apply(this, ['ApplicationTerminal', args, metadata]);
+  constructor(args, metadata) {
+    super('ApplicationTerminal', args, metadata);
   }
 
-  ApplicationTerminal.prototype = Object.create(Application.prototype);
-  ApplicationTerminal.constructor = Application;
+  init(settings, metadata) {
+    super.init(...arguments);
 
-  ApplicationTerminal.prototype.init = function(settings, metadata, scheme) {
-    Application.prototype.init.apply(this, arguments);
+    this._addWindow(new ApplicationTerminalWindow(this, metadata));
+  }
+}
 
-    this._addWindow(new ApplicationTerminalWindow(this, metadata, scheme));
-  };
+OSjs.Applications.ApplicationTerminal = ApplicationTerminal;
 
-  /////////////////////////////////////////////////////////////////////////////
-  // EXPORTS
-  /////////////////////////////////////////////////////////////////////////////
-
-  OSjs.Applications = OSjs.Applications || {};
-  OSjs.Applications.ApplicationTerminal = OSjs.Applications.ApplicationTerminal || {};
-  OSjs.Applications.ApplicationTerminal.Class = ApplicationTerminal;
-
-})(OSjs.Core.Application, OSjs.Core.Window, OSjs.Utils, OSjs.API, OSjs.VFS, OSjs.GUI);

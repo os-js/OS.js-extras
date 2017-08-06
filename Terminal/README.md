@@ -6,20 +6,25 @@ This shows you how to set up the PTY/SSH terminal.
 
 **It takes the client username and uses it on the server, so your username has to match a system user**
 
-## Install dependencies
+If you get this error then pty.js probably crashed. I'm looking at replacing it with another library.
 
-In `TerminalExtension`, run `npm install`.
+```
+Error creating PTY session { Error: read EIO
+  at exports._errnoException (util.js:1024:11)
+  at Pipe.onread (net.js:610:25) code: 'EIO', errno: 'EIO', syscall: 'read' }
+```
+
+## Install dependencies
 
 Make sure your system has `bash` installed.
 
 ## Configure
 
-In `Terminal/package.json` you can change to a custom location (by default it will use the hostname from URL on port 8080)
+In `metadata.json` you can change to a custom location (by default it will use the hostname from URL on port 8080)
 
 ```
 {
   ...
-  "enabled": true,
   "config": {
     "host": "YOUR.IP.ADDRESS.HERE:8080"
   },
@@ -27,23 +32,8 @@ In `Terminal/package.json` you can change to a custom location (by default it wi
 }
 ```
 
+### Running spawner
 
-## Enable
+Enabling in `metadata.json` only allows to spawn terminals under the user OS.js server runs as. At the moment there is no system service, so you can launch it manually:
 
-```
-grunt config:enable-package --name=OS.js-extras/Terminal
-grunt config:enable-package --name=OS.js-extras/TerminalExtension
-grunt manifest
-```
-
-## Running backend server
-
-**The spawner must run with root privileges to spawn with correct uid**
-
-### Run automatically on node server start
-
-Enable `proxy.enable` in `TerminalExtension/metadata.json` and run grunt steps above.
-
-### Running manually
-
-Run `node src/packages/extras/TerminalExtension/spawner.js`
+`node spawner.js`
