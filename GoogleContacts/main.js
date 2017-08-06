@@ -27,142 +27,145 @@
  * @author  Anders Evenrud <andersevenrud@gmail.com>
  * @licence Simplified BSD License
  */
-(function(Application, Window, GUI, Dialogs, Utils, API, VFS) {
+import Promise from 'bluebird';
+import jsonp from 'then-jsonp';
 
-  var pullContacts = (function() {
-    var ginst;
-    function connect(cb) {
-      if ( ginst ) {
-        cb(false, true);
+const Window = OSjs.require('core/window');
+const Application = OSjs.require('core/application');
+const GoogleAPI = OSjs.require('helpers/google-api');
+
+var pullContacts = (function() {
+  var ginst;
+  function connect(cb) {
+    if ( ginst ) {
+      cb(false, true);
+      return;
+    }
+
+    var scope = ['https://www.googleapis.com/auth/contacts.readonly'];
+    GoogleAPI.create({scope: scope}, function(error, result, inst) {
+      ginst = inst;
+      cb(error, error ? false : true);
+    });
+  }
+
+  function parseContacts(list) {
+    var parsed = [];
+    var entries = list.feed ? list.feed.entry : [];
+    entries.forEach(function(e) {
+      var emails = [];
+      var name = e.gd$name || {};
+
+      (e.gd$email || []).forEach(function(ee) {
+        emails.push(ee.address);
+      });
+
+      if ( emails.length ) {
+        var item = {
+          id: e.id.$t,
+          title: e.title.$t,
+          emails: emails,
+          names: {
+            givenName: name.gd$givenName ? name.gd$givenName.$t : '',
+            familyName: name.gd$familyName ? name.gd$familyName.$t : '',
+            additionalName: name.gd$additionalName ? name.gd$additionalName.$t : '',
+            fullName: name.gd$fullName ? name.gd$fullName.$t : ''
+          }
+        };
+
+        if ( !item.title && item.names.fullName ) {
+          item.title = item.names.fullName;
+        }
+        if ( !item.title && item.names.givenName ) {
+          item.title = item.names.givenName;
+        }
+
+        parsed.push(item);
+      }
+    });
+
+    parsed.sort(function(a, b) {
+      var keyA = a.title; //new Date(a.date),
+      var keyB = b.title; //new Date(b.date);
+      return (keyA < keyB) ? -1 : ((keyA > keyB) ? 1 : 0);
+    });
+
+    return parsed;
+  }
+
+  function getContacts(win, cb) {
+    var t = (ginst || {}).accessToken;
+    if ( !ginst || !t ) {
+      cb('Google API instance was not created or invalid token!');
+      return;
+    }
+
+    win._toggleLoading(true);
+
+    Promise.resolve(jsonp('GET', 'https://www.google.com/m8/feeds/contacts/default/full', {
+      qs: {
+        alt: 'json',
+        access_token: t,
+        'max-results': 700,
+        v: '3.0'
+      }
+    })).then((data) => {
+      return cb(false, parseContacts(data));
+    }).catch((err) => {
+      cb('Failed to fetch contacts from google: ' + err);
+    }).finally(() => {
+      win._toggleLoading(false);
+    });
+  }
+
+  return function(win, callback) {
+    win._toggleLoading(true);
+
+    connect(function(error) {
+      if ( error ) {
+        callback(error);
         return;
       }
 
-      var scope = ['https://www.googleapis.com/auth/contacts.readonly'];
-      OSjs.Helpers.GoogleAPI.createInstance({scope: scope}, function(error, result, inst) {
-        ginst = inst;
-        cb(error, error ? false : true);
+      getContacts(win, function(error, result) {
+        callback(error, result);
       });
-    }
+    });
+  };
+})();
 
-    function parseContacts(list) {
-      var parsed = [];
-      var entries = list.feed ? list.feed.entry : [];
-      entries.forEach(function(e) {
-        var emails = [];
-        var name = e.gd$name || {};
-
-        (e.gd$email || []).forEach(function(ee) {
-          emails.push(ee.address);
-        });
-
-        if ( emails.length ) {
-          var item = {
-            id: e.id.$t,
-            title: e.title.$t,
-            emails: emails,
-            names: {
-              givenName: name.gd$givenName ? name.gd$givenName.$t : '',
-              familyName: name.gd$familyName ? name.gd$familyName.$t : '',
-              additionalName: name.gd$additionalName ? name.gd$additionalName.$t : '',
-              fullName: name.gd$fullName ? name.gd$fullName.$t : ''
-            }
-          };
-
-          if ( !item.title && item.names.fullName ) {
-            item.title = item.names.fullName;
-          }
-          if ( !item.title && item.names.givenName ) {
-            item.title = item.names.givenName;
-          }
-
-          parsed.push(item);
-        }
-      });
-
-      parsed.sort(function(a, b){
-        var keyA = a.title, //new Date(a.date),
-            keyB = b.title; //new Date(b.date);
-
-        if(keyA < keyB) return -1;
-        if(keyA > keyB) return 1;
-        return 0;
-      });
-
-      return parsed;
-    }
-
-    function getContacts(cb) {
-      var t = (ginst||{}).accessToken;
-      if ( !ginst || !t ) {
-        cb('Google API instance was not created or invalid token!');
-        return;
-      }
-
-      var cbName = 'googleplugin_callback';
-      window[cbName] = function(data) {
-        delete window[cbName];
-        cb(false, parseContacts(data));
-      };
-
-      Utils.ajax({
-        url: 'https://www.google.com/m8/feeds/contacts/default/full?alt=json&access_token=' + t + '&max-results=700&v=3.0&callback=' + cbName,
-        jsonp: true,
-        onerror: function() {
-          cb('Failed to fetch contacts from google');
-        }
-      });
-    }
-
-    return function(callback) {
-      connect(function(error) {
-        if ( error ) {
-          callback(error);
-          return;
-        }
-
-        getContacts(function(error, result) {
-          callback(error, result);
-        });
-      });
-    };
-  })();
-
-  /////////////////////////////////////////////////////////////////////////////
-  // WINDOWS
-  /////////////////////////////////////////////////////////////////////////////
-
-  /**
-   * Main Window Constructor
-   */
-  var ApplicationGoogleContactsWindow = function(app, metadata, scheme) {
-    Window.apply(this, ['ApplicationGoogleContactsWindow', {
+class ApplicationGoogleContactsWindow extends Window {
+  constructor(app, metadata) {
+    super('ApplicationGoogleContactsWindow', {
       icon: metadata.icon,
       title: metadata.name,
       width: 400,
       height: 200
-    }, app, scheme]);
-  };
+    }, app);
+  }
 
-  ApplicationGoogleContactsWindow.prototype = Object.create(Window.prototype);
-
-  ApplicationGoogleContactsWindow.prototype.init = function(wmRef, app, scheme) {
-    var root = Window.prototype.init.apply(this, arguments);
+  init(wmRef, app) {
+    var root = super.init(...arguments);
     var self = this;
 
     // Load and set up scheme (GUI) here
-    this._render('ApplicationGoogleContactsWindow');
+    this._render('ApplicationGoogleContactsWindow', require('osjs-scheme-loader!scheme.html'));
 
     this._find('View').on('activate', function(ev) {
       self.activateContact(ev.detail.entries[0].data);
     });
-    this._find('Refresh').on('select', function() {
-      app.sync();
+    this._find('SubmenuFile').on('select', function(ev) {
+      if ( ev.detail.id === 'MenuRefresh' ) {
+        app.sync();
+      } else if ( ev.detail.id === 'MenuClose' ) {
+        self._close();
+      }
     });
 
     return root;
-  };
+  }
 
-  ApplicationGoogleContactsWindow.prototype.renderGoogleContacts = function(contacts) {
+  renderGoogleContacts(contacts) {
     contacts = contacts || [];
 
     var rows = [];
@@ -178,84 +181,79 @@
 
     var view = this._find('View');
     view.clear().add(rows);
-  };
+  }
 
-  ApplicationGoogleContactsWindow.prototype.editContact = function(contact) {
-    if ( !contact ) { return; }
+  editContact(contact) {
+    if ( !contact ) {
+      return;
+    }
     console.debug('editContact', contact);
-  };
+  }
 
-  ApplicationGoogleContactsWindow.prototype.deleteContact = function(contact) {
-    if ( !contact ) { return; }
+  deleteContact(contact) {
+    if ( !contact ) {
+      return;
+    }
     console.debug('deleteContact', contact);
-  };
+  }
 
-  ApplicationGoogleContactsWindow.prototype.createContact = function() {
+  createContact() {
     console.debug('createContact');
-  };
+  }
 
-  ApplicationGoogleContactsWindow.prototype.activateContact = function(contact) {
-    if ( !contact ) { return; }
+  activateContact(contact) {
+    if ( !contact && !contact.emails.length ) {
+      return;
+    }
+
     console.debug('activateContact', contact);
-    if ( !contact.emails.length ) { return; }
 
-    API.launch('ApplicationGmail', {
+    Application.create('ApplicationGmail', {
       action: 'create',
       title: contact.title,
       email: contact.emails[0]
     });
-  };
+  }
 
-  ApplicationGoogleContactsWindow.prototype.getSelectedContact = function() {
+  getSelectedContact() {
     var view = this.contactView;
     if ( view ) {
       return view.getSelected();
     }
 
     return false;
-  };
+  }
+}
 
-  /////////////////////////////////////////////////////////////////////////////
-  // APPLICATION
-  /////////////////////////////////////////////////////////////////////////////
+class ApplicationGoogleContacts extends Application {
 
-  function ApplicationGoogleContacts(args, metadata) {
-    Application.apply(this, ['ApplicationGoogleContacts', args, metadata]);
+  constructor(args, metadata) {
+    super('ApplicationGoogleContacts', args, metadata);
   }
 
-  ApplicationGoogleContacts.prototype = Object.create(Application.prototype);
+  init(settings, metadata) {
+    super.init(...arguments);
 
-  ApplicationGoogleContacts.prototype.init = function(settings, metadata, scheme) {
-    Application.prototype.init.apply(this, arguments);
-
-    this._addWindow(new ApplicationGoogleContactsWindow(this, metadata, scheme));
+    this._addWindow(new ApplicationGoogleContactsWindow(this, metadata));
     this.sync();
-  };
+  }
 
-  ApplicationGoogleContacts.prototype.sync = function() {
+  sync() {
     var mainWindow = this.__windows[0];
 
-    mainWindow._toggleLoading(true);
-    pullContacts(function(error, result) {
+    pullContacts(mainWindow, function(error, result) {
       if ( error ) {
-        API.error('Google Calendar Error', 'An error occured while getting contacts', error);
+        OSjs.error('Google Calendar Error', 'An error occured while getting contacts', error);
       }
 
       if ( mainWindow ) {
-        mainWindow._toggleLoading(false);
         if ( result ) {
           mainWindow.renderGoogleContacts(result);
         }
       }
     });
-  };
+  }
+}
 
-  /////////////////////////////////////////////////////////////////////////////
-  // EXPORTS
-  /////////////////////////////////////////////////////////////////////////////
+OSjs.Applications.ApplicationGoogleContacts = ApplicationGoogleContacts;
 
-  OSjs.Applications = OSjs.Applications || {};
-  OSjs.Applications.ApplicationGoogleContacts = OSjs.Applications.ApplicationGoogleContacts || {};
-  OSjs.Applications.ApplicationGoogleContacts.Class = ApplicationGoogleContacts;
-
-})(OSjs.Core.Application, OSjs.Core.Window, OSjs.GUI, OSjs.Dialogs, OSjs.Utils, OSjs.API, OSjs.VFS);
