@@ -27,337 +27,341 @@
  * @author  Anders Evenrud <andersevenrud@gmail.com>
  * @licence Simplified BSD License
  */
-(function(Application, Window, GUI, Dialogs, Utils, API, VFS) {
-  'use strict';
+const FS = OSjs.require('utils/fs');
+const Utils = OSjs.require('utils/misc');
+const GoogleAPI = OSjs.require('helpers/google-api');
+const Notification = OSjs.require('gui/notification');
+const PackageManager = OSjs.require('core/package-manager');
 
-  var ENABLE_NOTIFICATIONS = false;
+var ENABLE_NOTIFICATIONS = false;
 
-  var MAX_PAGES = 10;
+var MAX_PAGES = 10;
 
-  var INTERVAL_FOLDER    = (30 * 1000);
-  var INTERVAL_MESSAGES  = (30 * 1000);
-  var CONNECTION_TIMEOUT = 600 * 1000;
+//var INTERVAL_FOLDER    = (30 * 1000);
+//var INTERVAL_MESSAGES  = (30 * 1000);
+var CONNECTION_TIMEOUT = 600 * 1000;
 
-  var STATE_EMPTY   = 0;
-  var STATE_CREATED = 1;
-  var STATE_UNREAD  = 2;
-  var STATE_STARRED = 4;
-  var STATE_TRASHED = 8;
+var STATE_EMPTY   = 0;
+var STATE_CREATED = 1;
+var STATE_UNREAD  = 2;
+var STATE_STARRED = 4;
+var STATE_TRASHED = 8;
 
-  /*
-   * https://developer.mozilla.org/en-US/docs/Web/API/IndexedDB_API/Using_IndexedDB
-   * https://developers.google.com/gmail/api/v1/reference/users/messages/list
-   * https://developers.google.com/gmail/api/v1/reference/users/labels
-   *
-   * TODO:
-   * - Clean up events
-   * - Check if sync is required
-   * - Option to pull messages every X seconds (60 minimum)
-   * - Create HTML Mail
-   * - Send Attachments
-   * - Settings/Options
-   * - Trashing support
-   * - Drafting support
-   * - Searching
-   * - Nested folder view
-   * - Better error handling and display
-   * - Folder Cache (just as with messages)
-   */
+/*
+ * https://developer.mozilla.org/en-US/docs/Web/API/IndexedDB_API/Using_IndexedDB
+ * https://developers.google.com/gmail/api/v1/reference/users/messages/list
+ * https://developers.google.com/gmail/api/v1/reference/users/labels
+ *
+ * TODO:
+ * - Clean up events
+ * - Check if sync is required
+ * - Option to pull messages every X seconds (60 minimum)
+ * - Create HTML Mail
+ * - Send Attachments
+ * - Settings/Options
+ * - Trashing support
+ * - Drafting support
+ * - Searching
+ * - Nested folder view
+ * - Better error handling and display
+ * - Folder Cache (just as with messages)
+ */
 
-  var indexedDB = window.indexedDB || window.mozIndexedDB || window.webkitIndexedDB || window.msIndexedDB;
-  var IDBTransaction = window.IDBTransaction || window.webkitIDBTransaction || window.msIDBTransaction;
-  var IDBKeyRange = window.IDBKeyRange || window.webkitIDBKeyRange || window.msIDBKeyRange;
-  var gapi = window.gapi || {};
+var indexedDB = window.indexedDB || window.mozIndexedDB || window.webkitIndexedDB || window.msIndexedDB;
+//var IDBTransaction = window.IDBTransaction || window.webkitIDBTransaction || window.msIDBTransaction;
+//var IDBKeyRange = window.IDBKeyRange || window.webkitIDBKeyRange || window.msIDBKeyRange;
+var gapi = window.gapi || {};
 
-  /////////////////////////////////////////////////////////////////////////////
-  // MESSAGE STORAGE
-  /////////////////////////////////////////////////////////////////////////////
+/////////////////////////////////////////////////////////////////////////////
+// MESSAGE STORAGE
+/////////////////////////////////////////////////////////////////////////////
 
-  function GoogleMailStorage(callback) {
-    this.db = null;
-    this.lastMessage = null;
+function GoogleMailStorage(callback) {
+  this.db = null;
+  this.lastMessage = null;
 
-    var self = this;
+  var self = this;
 
-    function done(ev) {
-      self.db = ev.target.result;
-      callback(false, true, self);
-    }
+  function done(ev) {
+    self.db = ev.target.result;
+    callback(false, true, self);
+  }
 
-    function create(ev) {
-      var db = ev.target.result;
+  function create(ev) {
+    var db = ev.target.result;
 
-      try {
-        db.deleteObjectStore('messages');
-      } catch ( e ) {}
+    try {
+      db.deleteObjectStore('messages');
+    } catch ( e ) {}
 
-      var objectStore = db.createObjectStore('messages', { keyPath: 'id' });
-      objectStore.createIndex('sender', 'sender', { unique: false });
-      objectStore.createIndex('subject', 'subject', { unique: false });
-      objectStore.createIndex('date', 'date', { unique: false });
-      objectStore.createIndex('threadId', 'threadId', { unique: false });
-      objectStore.createIndex('state', 'state', { unique: false });
-      objectStore.createIndex('attachments', 'attachments', { unique: false });
+    var objectStore = db.createObjectStore('messages', {keyPath: 'id'});
+    objectStore.createIndex('sender', 'sender', {unique: false});
+    objectStore.createIndex('subject', 'subject', {unique: false});
+    objectStore.createIndex('date', 'date', {unique: false});
+    objectStore.createIndex('threadId', 'threadId', {unique: false});
+    objectStore.createIndex('state', 'state', {unique: false});
+    objectStore.createIndex('attachments', 'attachments', {unique: false});
 
-      objectStore.transaction.oncomplete = function(evt) {
-        done(ev);
-      };
-      objectStore.transaction.onerror = function(evt) {
-        //console.warn("ERROR", evt);
-      };
-    }
-
-    console.log('GoogleMailStorage::construct()');
-
-    var request = indexedDB.open('GoogleMailStorage', 1);
-    request.onerror = function(ev) {
-      callback(ev.target.error.message, false, self);
-    };
-    request.onsuccess = function(ev) {
+    objectStore.transaction.oncomplete = function(evt) {
       done(ev);
     };
-    request.onupgradeneeded = function(ev) {
-      create(ev);
+    objectStore.transaction.onerror = function(evt) {
+      //console.warn("ERROR", evt);
     };
   }
 
-  GoogleMailStorage.prototype.addMessage = function(args, callback, put) {
-    if ( !this.db ) {
-      callback('No database connection');
-      return;
+  console.log('GoogleMailStorage::construct()');
+
+  var request = indexedDB.open('GoogleMailStorage', 1);
+  request.onerror = function(ev) {
+    callback(ev.target.error.message, false, self);
+  };
+  request.onsuccess = function(ev) {
+    done(ev);
+  };
+  request.onupgradeneeded = function(ev) {
+    create(ev);
+  };
+}
+
+GoogleMailStorage.prototype.addMessage = function(args, callback, put) {
+  if ( !this.db ) {
+    callback('No database connection');
+    return;
+  }
+
+  //console.debug('GoogleMailStorage::addMessage()', args);
+
+  var store = this.db.transaction('messages', 'readwrite').objectStore('messages');
+  var request = store[put ? 'put' : 'add'](args);
+  request.onsuccess = function(ev) {
+    callback(false, ev.result || true);
+  };
+  request.onerror = function(ev) {
+    callback(ev.target.error.message, false);
+  };
+};
+
+GoogleMailStorage.prototype.getMessage = function(id, callback) {
+  if ( !this.db ) {
+    callback('No database connection');
+    return;
+  }
+
+  //console.debug('GoogleMailStorage::getMessage()', id);
+
+  var transaction = this.db.transaction(['messages'], 'readwrite');
+  var objectStore = transaction.objectStore('messages');
+  var request = objectStore.get(id);
+
+  request.onsuccess = function(ev) {
+    callback(false, ev.target.result || null, objectStore);
+  };
+  request.onerror = function(ev) {
+    callback(ev.target.error.message, false);
+  };
+};
+
+GoogleMailStorage.prototype.removeMessage = function(id, callback) {
+  if ( !this.db ) {
+    callback('No database connection');
+    return;
+  }
+
+  var request = this.db.transaction(['messages'], 'readwrite')
+    .objectStore('messages')
+    .delete(id);
+
+  request.onsuccess = function(ev) {
+    callback(false, ev.result || true);
+  };
+  request.onerror = function(ev) {
+    callback(ev.target.error.message, false);
+  };
+};
+
+/////////////////////////////////////////////////////////////////////////////
+// HELPERS
+/////////////////////////////////////////////////////////////////////////////
+
+function checkIfInternal(name) {
+  return name.match(/^(\[Imap\]|CATEGORY_|CHAT|DRAFT|UNREAD|INBOX|TRASH|IMPORTANT|STARRED|SPAM|SENT)/);
+}
+
+function createInboxNotification(folder, unreadCount) {
+  if ( !folder || !unreadCount ) {
+    return;
+  }
+
+  Notification.create({
+    icon: PackageManager.getPackageResource('ApplicationGmail', './icon.png'),
+    title: 'Google Mail',
+    message: Utils.format('{0} has {1} unread message(s)', folder, unreadCount)
+  });
+}
+
+/**
+ * Check if required argumets is set
+ */
+function checkArguments(args, check, cb) {
+  var result = true;
+
+  check.forEach(function(c) {
+    if ( result === false ) {
+      return false;
     }
 
-    //console.debug('GoogleMailStorage::addMessage()', args);
-
-    var store = this.db.transaction('messages', 'readwrite').objectStore('messages');
-    var request = store[put ? 'put' : 'add'](args);
-    request.onsuccess = function(ev) {
-      callback(false, ev.result || true);
-    };
-    request.onerror = function(ev) {
-      callback(ev.target.error.message, false);
-    };
-  };
-
-  GoogleMailStorage.prototype.getMessage = function(id, callback) {
-    if ( !this.db ) {
-      callback('No database connection');
-      return;
+    if ( !args[c] ) {
+      result = false;
+      cb('You have to specify argument: ' + c);
     }
 
-    //console.debug('GoogleMailStorage::getMessage()', id);
+    return true;
+  });
 
-    var transaction = this.db.transaction(['messages'], 'readwrite');
-    var objectStore = transaction.objectStore('messages');
-    var request = objectStore.get(id);
+  return result;
+}
 
-    request.onsuccess = function(ev) {
-      callback(false, ev.target.result || null, objectStore);
-    };
-    request.onerror = function(ev) {
-      callback(ev.target.error.message, false);
-    };
+/**
+ * Parses a Folder response
+ */
+function parseFolderResponse(resp) {
+  var folders = [];
+  (resp.labels || []).forEach(function(i) {
+    folders.push({
+      name: i.name,
+      id: i.id
+    });
+  });
+  return folders;
+}
+
+/**
+ * Parses a Message raw response
+ */
+function parseMessageDataResponse(messageId, payload) {
+  var parsed = {
+    raw: '',
+    text: [],
+    html: [],
+    attachments: []
   };
 
-  GoogleMailStorage.prototype.removeMessage = function(id, callback) {
-    if ( !this.db ) {
-      callback('No database connection');
-      return;
-    }
+  function parse(load) {
 
-    var request = this.db.transaction(['messages'], 'readwrite')
-      .objectStore('messages')
-      .delete(id);
-
-    request.onsuccess = function(ev) {
-      callback(false, ev.result || true);
-    };
-    request.onerror = function(ev) {
-      callback(ev.target.error.message, false);
-    };
-  };
-
-  /////////////////////////////////////////////////////////////////////////////
-  // HELPERS
-  /////////////////////////////////////////////////////////////////////////////
-
-  function checkIfInternal(name) {
-    return name.match(/^(\[Imap\]|CATEGORY_|CHAT|DRAFT|UNREAD|INBOX|TRASH|IMPORTANT|STARRED|SPAM|SENT)/);
-  }
-
-  function createInboxNotification(folder, unreadCount) {
-    var wm = OSjs.Core.getWindowManager();
-    if ( !wm || !folder || !unreadCount ) { return; }
-
-    wm.notification({
-      icon: API.getApplicationResource('ApplicationGmail', './icon.png'),
-      title: 'Google Mail',
-      message: Utils.format('{0} has {1} unread message(s)', folder, unreadCount)
-    });
-  }
-
-  /**
-   * Check if required argumets is set
-   */
-  function checkArguments(args, check, cb) {
-    var result = true;
-
-    check.forEach(function(c) {
-      if ( result === false ) return false;
-
-      if ( !args[c] ) {
-        result = false;
-        cb('You have to specify argument: ' + c);
-      }
-
-      return true;
-    });
-
-    return result;
-  }
-
-  /**
-   * Parses a Folder response
-   */
-  function parseFolderResponse(resp) {
-    var folders = [];
-    (resp.labels || []).forEach(function(i) {
-      folders.push({
-        name: i.name,
-        id: i.id
-      });
-    });
-    return folders;
-  }
-
-  /**
-   * Parses a Message raw response
-   */
-  function parseMessageDataResponse(messageId, payload) {
-    var parsed = {
-      raw: '',
-      text: [],
-      html: [],
-      attachments: []
-    };
-
-    function parse(load) {
-
-      if ( load.body ) {
-        if ( load.filename ) {
-          parsed.attachments.push({
-            mime: load.mimeType,
-            size: load.body.size,
-            filename: load.filename,
-            messageId: messageId,
-            id: load.body.attachmentId
-          });
-        }
-
-        var data = '';
-        if ( load.mimeType.match(/^text/) ) {
-          data = Utils.atobUrlsafe(load.body.data);
-          if ( load.mimeType.match(/^text\/html/) ) {
-            parsed.text.push(data);
-          } else {
-            parsed.html.push(data);
-          }
-        }
-
-        parsed.raw += data;
-      }
-
-      if ( load.parts ) {
-        load.parts.forEach(function(part) {
-          parse(part);
+    if ( load.body ) {
+      if ( load.filename ) {
+        parsed.attachments.push({
+          mime: load.mimeType,
+          size: load.body.size,
+          filename: load.filename,
+          messageId: messageId,
+          id: load.body.attachmentId
         });
       }
-    }
 
-    parse(payload);
-
-    return parsed;
-  }
-
-  /**
-   * Parses a Message metadata response
-   */
-  function parseMessageResponse(resp) {
-    var data = {
-      id: resp.id,
-      subject: resp.snippet,
-      state: STATE_CREATED
-    };
-
-    if ( resp.labelIds ) {
-      if ( resp.labelIds.indexOf('UNREAD') !== -1 ) {
-        data.state |= STATE_UNREAD;
-      }
-      if ( resp.labelIds.indexOf('STARRED') !== -1 ) {
-        data.state |= STATE_STARRED;
-      }
-      if ( resp.labelIds.indexOf('TRASH') !== -1 ) {
-        data.state |= STATE_STARRED;
-      }
-    }
-
-    if ( resp.payload && resp.payload.headers ) {
-      resp.payload.headers.forEach(function(header) {
-        var name = header.name.toLowerCase();
-        var map = {from: 'sender'};
-        if ( ['from', 'date', 'subject'].indexOf(name) !== -1 ) {
-          data[map[name] || name] = header.value;
+      var data = '';
+      if ( load.mimeType.match(/^text/) ) {
+        data = FS.atobUrlsafe(load.body.data);
+        if ( load.mimeType.match(/^text\/html/) ) {
+          parsed.text.push(data);
+        } else {
+          parsed.html.push(data);
         }
-      });
+      }
+
+      parsed.raw += data;
     }
 
-    return data;
-  }
-
-  /**
-   * Parses a Page response
-   */
-  function parsePageResponse(resp) {
-    var messages = [];
-    (resp.messages || []).forEach(function(i) {
-      messages.push({
-        id: i.id,
-        threadId: i.threadId,
-        sender: null,
-        subject: null,
-        date: null,
-        state: 0
+    if ( load.parts ) {
+      load.parts.forEach(function(part) {
+        parse(part);
       });
+    }
+  }
+
+  parse(payload);
+
+  return parsed;
+}
+
+/**
+ * Parses a Message metadata response
+ */
+function parseMessageResponse(resp) {
+  var data = {
+    id: resp.id,
+    subject: resp.snippet,
+    state: STATE_CREATED
+  };
+
+  if ( resp.labelIds ) {
+    if ( resp.labelIds.indexOf('UNREAD') !== -1 ) {
+      data.state |= STATE_UNREAD;
+    }
+    if ( resp.labelIds.indexOf('STARRED') !== -1 ) {
+      data.state |= STATE_STARRED;
+    }
+    if ( resp.labelIds.indexOf('TRASH') !== -1 ) {
+      data.state |= STATE_STARRED;
+    }
+  }
+
+  if ( resp.payload && resp.payload.headers ) {
+    resp.payload.headers.forEach(function(header) {
+      var name = header.name.toLowerCase();
+      var map = {from: 'sender'};
+      if ( ['from', 'date', 'subject'].indexOf(name) !== -1 ) {
+        data[map[name] || name] = header.value;
+      }
     });
-    return messages;
   }
 
-  /**
-   * Generates the raw data required to send a message
-   */
-  function generateRawData(user, to, subject, message) {
-    var from = '"' + user.name + '" <' + user.email + '>';
-    var lines = [];
-    lines.push('From: ' + from);
-    lines.push('To: ' + to);
-    lines.push('Content-type: text/html;charset=iso8859-1');
-    lines.push('MIME-Version: 1.0');
-    lines.push('Subject: ' + subject);
-    lines.push('');
-    lines.push(message);
+  return data;
+}
 
-    var raw = lines.join('\r\n');
-    return Utils.btoaUrlsafe(raw);
-  }
+/**
+ * Parses a Page response
+ */
+function parsePageResponse(resp) {
+  var messages = [];
+  (resp.messages || []).forEach(function(i) {
+    messages.push({
+      id: i.id,
+      threadId: i.threadId,
+      sender: null,
+      subject: null,
+      date: null,
+      state: 0
+    });
+  });
+  return messages;
+}
 
-  /////////////////////////////////////////////////////////////////////////////
-  // MAILER
-  /////////////////////////////////////////////////////////////////////////////
+/**
+ * Generates the raw data required to send a message
+ */
+function generateRawData(user, to, subject, message) {
+  var from = '"' + user.name + '" <' + user.email + '>';
+  var lines = [];
+  lines.push('From: ' + from);
+  lines.push('To: ' + to);
+  lines.push('Content-type: text/html;charset=iso8859-1');
+  lines.push('MIME-Version: 1.0');
+  lines.push('Subject: ' + subject);
+  lines.push('');
+  lines.push(message);
 
-  /**
-   * Google Mail Class
-   */
-  function GoogleMail(args, cb) {
+  var raw = lines.join('\r\n');
+  return FS.btoaUrlsafe(raw);
+}
+
+/////////////////////////////////////////////////////////////////////////////
+// MAILER
+/////////////////////////////////////////////////////////////////////////////
+
+export class GoogleMail {
+  constructor(args, cb) {
     var self = this;
 
     //console.clear();
@@ -365,11 +369,11 @@
 
     this.destroy();
 
-    this.args = Utils.argumentDefaults(args || {}, {
+    this.args = Object.assign({
       maxPages: MAX_PAGES,
       onAbortStart: function() {},
       onAbortEnd: function() {}
-    });
+    }, args || {});
 
     if ( args.maxPages > MAX_PAGES ) {
       args.maxPages = MAX_PAGES;
@@ -387,7 +391,7 @@
     });
   }
 
-  GoogleMail.prototype.destroy = function() {
+  destroy() {
     this.args = {};
     this.busy = false;
     this.aborting = false;
@@ -404,12 +408,12 @@
       name: 'osjs',
       email: 'osjs@osjs'
     };
-  };
+  }
 
   /**
    * Loads and initializes the Google API
    */
-  GoogleMail.prototype._connect = function(cb) {
+  _connect(cb) {
     if ( this.lastConnection ) {
       var now = new Date();
       if ( now - this.lastConnection < CONNECTION_TIMEOUT ) {
@@ -433,7 +437,7 @@
 
     console.log('GoogleMail::_connect()');
 
-    OSjs.Helpers.GoogleAPI.createInstance({load: load, scope: scope, client: true}, function(error, result, inst) {
+    GoogleAPI.create({load: load, scope: scope, client: true}, function(error, result, inst) {
       if ( !inst ) {
         cb('Failed to load Google API');
         return;
@@ -451,12 +455,12 @@
         cb(err, true);
       });
     });
-  };
+  }
 
   /**
    * Pull user information about used account
    */
-  GoogleMail.prototype._getUserInfo = function(cb) {
+  _getUserInfo(cb) {
     console.log('GoogleMail::_getUserInfo()');
 
     if ( this.user.id !== null ) {
@@ -496,12 +500,12 @@
         cb(user ? false : 'Failed to fetch user information.', user);
       });
     });
-  };
+  }
 
   /**
    * Check if connection is established etc.
    */
-  GoogleMail.prototype._checkConnection = function(cb) {
+  _checkConnection(cb) {
     cb = cb || function() {};
     if ( !this.ginst ) {
       cb('No Google API instance');
@@ -512,7 +516,7 @@
       return false;
     }
     return true;
-  };
+  }
 
   //
   // FOLDERS
@@ -521,18 +525,18 @@
   /**
    * Gets all folders
    */
-  GoogleMail.prototype.getFolders = function(args, cb) {
+  getFolders(args, cb) {
     cb = cb || function() {};
     if ( !this._checkConnection(cb) ) {
       return;
     }
 
     var self = this;
-    args = Utils.argumentDefaults(args, {
+    args = Object.assign({
       cache: false,
       onStart: function() {},
       onEnd: function() {}
-    });
+    }, args);
 
     console.log('GoogleMail::getFolders()', args);
 
@@ -573,20 +577,19 @@
         self.lastFolderSync = new Date();
       });
     });
-  };
+  }
 
   /**
    * Creates a folder
    */
-  GoogleMail.prototype.createFolder = function(args, cb) {
-    var self = this;
+  createFolder(args, cb) {
     cb = cb || function() {};
     if ( !this._checkConnection(cb) ) {
       return;
     }
-    args = Utils.argumentDefaults(args, {
+    args = Object.assign({
       name: null
-    });
+    }, args);
 
     console.log('GoogleMail::createFolder()', args);
     if ( !checkArguments(args, ['name'], cb) ) {
@@ -606,21 +609,20 @@
       var error = !resp || !resp.result ? 'Failed to rename folder' : false;
       cb(error, !!error);
     });
-  };
+  }
 
   /**
    * Renames a folder
    */
-  GoogleMail.prototype.renameFolder = function(args, cb) {
-    var self = this;
+  renameFolder(args, cb) {
     cb = cb || function() {};
     if ( !this._checkConnection(cb) ) {
       return;
     }
-    args = Utils.argumentDefaults(args, {
+    args = Object.assign({
       id: null,
       name: null
-    });
+    }, args);
 
     console.log('GoogleMail::renameFolder()', args);
     if ( !checkArguments(args, ['id', 'name'], cb) ) {
@@ -641,20 +643,19 @@
       var error = !resp || !resp.result ? 'Failed to rename folder' : false;
       cb(error, !!error);
     });
-  };
+  }
 
   /**
    * Removes a folder
    */
-  GoogleMail.prototype.removeFolder = function(args, cb) {
-    var self = this;
+  removeFolder(args, cb) {
     cb = cb || function() {};
     if ( !this._checkConnection(cb) ) {
       return;
     }
-    args = Utils.argumentDefaults(args, {
+    args = Object.assign({
       id: null
-    });
+    }, args);
 
     console.log('GoogleMail::removeFolder()', args);
     if ( !checkArguments(args, ['id'], cb) ) {
@@ -674,20 +675,19 @@
     request.execute(function(resp) {
       cb(resp ? 'Failed to delete folder' : false, !resp);
     });
-  };
+  }
 
   /**
    * Gets a folders information
    */
-  GoogleMail.prototype._getFolder = function(args, cb) {
-    var self = this;
+  _getFolder(args, cb) {
     cb = cb || function() {};
     if ( !this._checkConnection(cb) ) {
       return;
     }
-    args = Utils.argumentDefaults(args, {
+    args = Object.assign({
       id: null
-    });
+    }, args);
 
     console.log('GoogleMail::_getFolder()', args);
     if ( !checkArguments(args, ['id'], cb) ) {
@@ -704,7 +704,7 @@
       console.log('GoogleMail::_getFolder()', '=>', data);
       cb(data ? false : 'Failed to get folder', data);
     });
-  };
+  }
 
   //
   // ATTACHMENTS
@@ -713,7 +713,7 @@
   /**
    * Get a Message Attachment
    */
-  GoogleMail.prototype.downloadAttachment = function(args, cb) {
+  downloadAttachment(args, cb) {
     cb = cb || function() {};
     function _download(data) {
       var blob = new Blob([data], {type: args.mime});
@@ -726,12 +726,12 @@
       document.body.removeChild(a);
     }
 
-    args = Utils.argumentDefaults(args, {
+    args = Object.assign({
       id: null,
       mime: null,
       filename: null,
       attachmentId: null
-    });
+    }, args);
 
     console.log('GoogleMail::attachment()', args);
     if ( !checkArguments(args, ['id', 'mime', 'filename', 'attachmentId'], cb) ) {
@@ -741,12 +741,12 @@
     var request = gapi.client.gmail.users.messages.attachments.get({
       'userId': 'me',
       'messageId': args.id,
-      'id': args.attachmentId,
+      'id': args.attachmentId
     });
 
     request.execute(function(resp) {
       if ( resp.data ) {
-        _download(Utils.atobUrlsafe(resp.data));
+        _download(FS.atobUrlsafe(resp.data));
 
         cb(false, true);
         return;
@@ -754,7 +754,7 @@
 
       cb('Failed to fetch attachment');
     });
-  };
+  }
 
   //
   // MESSAGES
@@ -763,7 +763,7 @@
   /**
    * Gets all messages in a folder
    */
-  GoogleMail.prototype.getMessages = function(args, callback) {
+  getMessages(args, callback) {
     callback = callback || function() {};
     var self = this;
 
@@ -771,14 +771,14 @@
       return;
     }
 
-    args = Utils.argumentDefaults(args, {
+    args = Object.assign({
       force: false,
       folder: null,
       onPageAdvance: function() {},
       onMessageQueue: function() {},
       onStart: function() {},
       onEnd: function() {}
-    });
+    }, args);
 
     if ( this.aborting ) {
       console.warn('I AM BUSY ABORTING. YOU SHOULD MAKE YOUR UI DISABLE WHEN THIS HAPPENS');
@@ -790,7 +790,9 @@
     var refresh = this.lastFolderId && this.lastFolderId === args.folder;
 
     function resumeNext() {
-      if ( aborted ) { return; }
+      if ( aborted ) {
+        return;
+      }
 
       aborted = true;
       self.args.onAbortEnd();
@@ -836,7 +838,6 @@
         createInboxNotification(args.folder, unreadCount);
       }
 
-
       args.onEnd();
       callback.apply(null, arguments);
     }
@@ -855,7 +856,6 @@
       return;
     }
     */
-
 
     var maxPages = this.args.maxPages;
     var pageCurrent = 0;
@@ -879,7 +879,9 @@
       var messages = [];
 
       function _next() {
-        if ( checkAbortion(finished) ) { return; }
+        if ( checkAbortion(finished) ) {
+          return;
+        }
 
         if ( current >= queue.length ) {
           finished(false, messages, nextPage);
@@ -898,7 +900,9 @@
         });
 
         self._getMessage(queue[current], function(error, result, fromCache) {
-          if ( checkAbortion(finished) ) { return; }
+          if ( checkAbortion(finished) ) {
+            return;
+          }
 
           //console.debug('  =', fromCache);
           messagesCaught++;
@@ -957,13 +961,19 @@
         messages: resultList
       });
 
-      if ( checkAbortion(done) ) { return; }
+      if ( checkAbortion(done) ) {
+        return;
+      }
 
       fetchPageMessages(args.folder, function(err, result) {
-        if ( checkAbortion(done) ) { return; }
+        if ( checkAbortion(done) ) {
+          return;
+        }
 
         runMessageQueue(result.queue, result.nextPageToken, function(error, messages, nextPage) {
-          if ( checkAbortion(done) ) { return; }
+          if ( checkAbortion(done) ) {
+            return;
+          }
 
           if ( messages ) {
             resultList = resultList.concat(messages);
@@ -992,7 +1002,9 @@
       }
 
       self._getFolder({id: args.folder}, function(error, folder) {
-        if ( checkAbortion(cb) ) { return; }
+        if ( checkAbortion(cb) ) {
+          return;
+        }
 
         if ( !folder ) {
           cb('Cannot get messages: ' + error);
@@ -1017,17 +1029,17 @@
         });
       });
     });
-  };
+  }
 
   /**
    * Gets a message (either from cache or google)
    */
-  GoogleMail.prototype._getMessage = function(args, cb, forceFetch) {
+  _getMessage(args, cb, forceFetch) {
     cb = cb || function() {};
 
-    args = Utils.argumentDefaults(args, {
+    args = Object.assign({
       id: null
-    });
+    }, args);
 
     //console.group('GoogleMail::_getMessage()', args);
 
@@ -1085,20 +1097,20 @@
 
       finished(res ? false : 'Failed to fetch message from cache', res, fromCache);
     });
-  };
+  }
 
   /**
    * Send a Message
    */
-  GoogleMail.prototype.sendMessage = function(args, cb) {
+  sendMessage(args, cb) {
     cb = cb || function() {};
     var self = this;
 
-    args = Utils.argumentDefaults(args, {
+    args = Object.assign({
       to: null,
       subject: null,
       message: null
-    });
+    }, args);
 
     console.log('GoogleMail::send()', args);
     if ( !checkArguments(args, ['to', 'subject', 'message'], cb) ) {
@@ -1114,19 +1126,19 @@
       var result = resp && resp.id ? resp : false;
       cb(!result ? 'Failed to send' : false, result);
     });
-  };
+  }
 
   /**
    * Mark a message
    */
-  GoogleMail.prototype.markMessage = function(args, cb) {
+  markMessage(args, cb) {
     var self = this;
     cb = cb || function() {};
 
-    args = Utils.argumentDefaults(args, {
+    args = Object.assign({
       markAs: null,
       id: null
-    });
+    }, args);
 
     console.log('GoogleMail::mark()', args);
     if ( !checkArguments(args, ['id', 'markAs'], cb) ) {
@@ -1139,13 +1151,13 @@
     };
 
     if ( args.markAs === 'read' ) {
-      rargs.removeLabelIds = ['UNREAD']
+      rargs.removeLabelIds = ['UNREAD'];
     } else if ( args.markAs === 'unread' ) {
-      rargs.addLabelIds = ['UNREAD']
+      rargs.addLabelIds = ['UNREAD'];
     } else if ( args.markAs === 'starred' ) {
-      rargs.addLabelIds = ['STARRED']
+      rargs.addLabelIds = ['STARRED'];
     } else if ( args.markAs === 'unstar' ) {
-      rargs.removeLabelIds = ['STARRED']
+      rargs.removeLabelIds = ['STARRED'];
     }
 
     var request = gapi.client.gmail.users.messages.modify(rargs);
@@ -1184,19 +1196,19 @@
         }, true);
       });
     });
-  };
+  }
 
   /**
    * Recieve a Message
    */
-  GoogleMail.prototype.recieveMessage = function(args, cb) {
+  recieveMessage(args, cb) {
     var self = this;
     cb = cb || function() {};
-    args = Utils.argumentDefaults(args, {
+    args = Object.assign({
       id: null,
       returnFull: false,
       markRead: false
-    });
+    }, args);
 
     console.log('GoogleMail::recieve()', args);
     if ( !checkArguments(args, ['id'], cb) ) {
@@ -1226,20 +1238,18 @@
         cb(message ? false : 'Failed to fetch message data', message);
       }
     });
-  };
+  }
 
   /**
    * Move a Message
    */
-  GoogleMail.prototype.moveMessage = function(args, cb) {
-    var self = this;
-
+  moveMessage(args, cb) {
     cb = cb || function() {};
-    args = Utils.argumentDefaults(args, {
+    args = Object.assign({
       id: null,
       from: null,
       to: null
-    });
+    }, args);
 
     console.log('GoogleMail::move()', args);
     if ( !checkArguments(args, ['id', 'from', 'to'], cb) ) {
@@ -1267,18 +1277,18 @@
       }
       cb(false, true);
     });
-  };
+  }
 
   /**
    * Delete a Message
    */
-  GoogleMail.prototype.removeMessage = function(args, cb) {
+  removeMessage(args, cb) {
     var self = this;
 
     cb = cb || function() {};
-    args = Utils.argumentDefaults(args, {
+    args = Object.assign({
       id: null
-    });
+    }, args);
 
     console.log('GoogleMail::remove()', args);
     if ( !checkArguments(args, ['id'], cb) ) {
@@ -1313,25 +1323,18 @@
       console.warn('Failed to delete google message');
       cb('Failed to delete google message');
     });
-  };
+  }
 
-  GoogleMail.prototype.setMaxPages = function(p) {
+  setMaxPages(p) {
     this.args.maxPages = parseInt(p, 10) || MAX_PAGES;
-  };
+  }
+}
 
-  /////////////////////////////////////////////////////////////////////////////
-  // EXPORTS
-  /////////////////////////////////////////////////////////////////////////////
+export const MessageStates = {
+  EMPTY: STATE_EMPTY,
+  CREATED: STATE_CREATED,
+  UNREAD: STATE_UNREAD,
+  STARRED: STATE_STARRED,
+  TRASHED: STATE_TRASHED
+};
 
-  OSjs.Applications = OSjs.Applications || {};
-  OSjs.Applications.ApplicationGmail = OSjs.Applications.ApplicationGmail || {};
-  OSjs.Applications.ApplicationGmail.GoogleMail = GoogleMail;
-  OSjs.Applications.ApplicationGmail.MessageStates = {
-    EMPTY: STATE_EMPTY,
-    CREATED: STATE_CREATED,
-    UNREAD: STATE_UNREAD,
-    STARRED: STATE_STARRED,
-    TRASHED: STATE_TRASHED,
-  };
-
-})(OSjs.Core.Application, OSjs.Core.Window, OSjs.GUI, OSjs.Dialogs, OSjs.Utils, OSjs.API, OSjs.VFS);

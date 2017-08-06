@@ -27,15 +27,91 @@
  * @author  Anders Evenrud <andersevenrud@gmail.com>
  * @licence Simplified BSD License
  */
-(function(Application, Window, GUI, Dialogs, Utils, API, VFS) {
+import {MessageStates} from './mailer.js';
+const Window = OSjs.require('core/window');
+const Theme = OSjs.require('core/theme');
+const Menu = OSjs.require('gui/menu');
+const DOM = OSjs.require('utils/dom');
 
-  /////////////////////////////////////////////////////////////////////////////
-  // HELPERS
-  /////////////////////////////////////////////////////////////////////////////
+function _sort(a, b) {
+  var keyA = a.title;
+  var keyB = b.title;
+  return (keyA < keyB) ? -1 : (keyA < keyB ? -1 : (keyA > keyB ? 1 : 0));
+}
 
-  function resolveFolders(folders, current) {
+function resolveFolders(folders, current) {
+  var fiters = [];
+  var items = [];
+
+  folders.forEach(function(i) {
+    if ( i.name.match(/^CATEGORY_/) ) {
+      return;
+    }
+
+    if ( i.name.match(/^(\[Imap\]|CHAT|DRAFT|UNREAD|INBOX|TRASH|IMPORTANT|STARRED|SPAM|SENT)/) ) {
+      items.push({
+        label: i.name,
+        value: i.id,
+        icon: Theme.getIcon('places/folder.png')
+      });
+    } else {
+      fiters.push({
+        label: i.name,
+        value: i.id,
+        icon: Theme.getIcon('places/folder.png')
+      });
+    }
+  });
+
+  items.sort(_sort);
+  fiters.sort(_sort);
+
+  fiters.unshift({
+    label: '[Google]',
+    value: null,
+    icon: Theme.getIcon('places/folder.png'),
+    entries: items
+  });
+
+  return fiters;
+}
+
+function toggleReadState(id, messageView) {
+  if ( messageView ) {
+    var el = messageView.get('entry', id, 'id');
+    if ( el ) {
+      DOM.$removeClass(el, 'unread');
+    }
+  }
+}
+
+function toggleMessageState(id, state, row, messageView) {
+  if ( messageView ) {
+    var states = MessageStates;
+    if ( row ) {
+      DOM.$removeClass(row, 'unread');
+      DOM.$removeClass(row, 'starred');
+
+      if ( state & states.UNREAD ) {
+        DOM.$addClass(row, 'unread');
+      }
+      if ( state & states.STARRED ) {
+        DOM.$addClass(row, 'starred');
+      }
+    }
+  }
+}
+
+function createMoveMenu(app, ev) {
+  function resolveMenu(folders) {
     var fiters = [];
     var items = [];
+
+    function cb(id) {
+      app.moveMessage(self, id, function() {
+        app.sync(self);
+      });
+    }
 
     folders.forEach(function(i) {
       if ( i.name.match(/^CATEGORY_/) ) {
@@ -44,165 +120,75 @@
 
       if ( i.name.match(/^(\[Imap\]|CHAT|DRAFT|UNREAD|INBOX|TRASH|IMPORTANT|STARRED|SPAM|SENT)/) ) {
         items.push({
-          label: i.name,
-          value: i.id,
-          icon: OSjs.API.getIcon('places/folder.png')
+          title: i.name,
+          onClick: function() {
+            cb(i.id);
+          }
         });
       } else {
         fiters.push({
-          label: i.name,
-          value: i.id,
-          icon: OSjs.API.getIcon('places/folder.png')
+          title: i.name,
+          onClick: function() {
+            cb(i.id);
+          }
         });
       }
     });
-
-    function _sort(a, b) {
-      var keyA = a.title;
-          keyB = b.title;
-
-      if(keyA < keyB) return -1;
-      if(keyA > keyB) return 1;
-      return 0;
-    }
 
     items.sort(_sort);
     fiters.sort(_sort);
 
     fiters.unshift({
-      label: '[Google]',
-      value: null,
-      icon: OSjs.API.getIcon('places/folder.png'),
-      entries: items
+      title: '[Google]',
+      menu: items
     });
 
     return fiters;
   }
 
-  function toggleReadState(id, messageView) {
-    if ( messageView ) {
-      var el = messageView.get('entry', id, 'id');
-      if ( el ) {
-        Utils.$removeClass(el, 'unread');
-      }
-    }
+  if ( app ) {
+    app.getFolderCache(function(error, list) {
+      setTimeout(function() {
+        Menu.create(resolveMenu(list), {x: ev.clientX, y: ev.clientY});
+      }, 100);
+    });
   }
+}
 
-  function toggleMessageState(id, state, row, messageView) {
-    if ( messageView ) {
-      var states = OSjs.Applications.ApplicationGmail.MessageStates;
-      if ( row ) {
-        Utils.$removeClass(row, 'unread');
-        Utils.$removeClass(row, 'starred');
-
-        if ( state & states.UNREAD ) {
-          Utils.$addClass(row, 'unread');
-        }
-        if ( state & states.STARRED ) {
-          Utils.$addClass(row, 'starred');
-        }
-      }
-    }
-  }
-
-  function createMoveMenu(ev) {
-    function resolveMenu(folders) {
-      var fiters = [];
-      var items = [];
-
-      function cb(id) {
-        app.moveMessage(self, id, function() {
-          app.sync(self);
-        });
-      }
-
-      folders.forEach(function(i) {
-        if ( i.name.match(/^CATEGORY_/) ) {
-          return;
-        }
-
-        if ( i.name.match(/^(\[Imap\]|CHAT|DRAFT|UNREAD|INBOX|TRASH|IMPORTANT|STARRED|SPAM|SENT)/) ) {
-          items.push({
-            title: i.name,
-            onClick: function() {
-              cb(i.id);
-            }
-          });
-        } else {
-          fiters.push({
-            title: i.name,
-            onClick: function() {
-              cb(i.id);
-            }
-          });
-        }
-      });
-
-      function _sort(a, b) {
-        var keyA = a.title;
-            keyB = b.title;
-
-        if(keyA < keyB) return -1;
-        if(keyA > keyB) return 1;
-        return 0;
-      }
-
-      items.sort(_sort);
-      fiters.sort(_sort);
-
-      fiters.unshift({
-        title: '[Google]',
-        menu: items
-      });
-
-      return fiters;
-    }
-
-    if ( app ) {
-      app.getFolderCache(function(error, list) {
-        setTimeout(function() {
-          OSjs.API.createMenu(resolveMenu(list), {x: ev.clientX, y: ev.clientY});
-        }, 100);
-      });
-    }
-  }
-
-
-  /////////////////////////////////////////////////////////////////////////////
-  // WINDOW
-  /////////////////////////////////////////////////////////////////////////////
-
-  var ApplicationGmailWindow = function(app, metadata, scheme, settings) {
-    Window.apply(this, ['ApplicationGmailWindow', {
+export default class ApplicationGmailWindow extends Window {
+  constructor(app, metadata, settings) {
+    super('ApplicationGmailWindow', {
       icon: metadata.icon,
       title: metadata.name + ' v0.5',
       min_width: 500,
       min_height: 400,
       width: 600,
       height: 400
-    }, app, scheme]);
-  };
+    }, app);
+  }
 
-  ApplicationGmailWindow.prototype = Object.create(Window.prototype);
-
-  ApplicationGmailWindow.prototype.init = function(wmRef, app, scheme) {
-    var root = Window.prototype.init.apply(this, arguments);
+  init(wmRef, app) {
+    var root = super.init(...arguments);
     var self = this;
 
     // Load and set up scheme (GUI) here
-    this._render( 'GmailWindow');
+    this._render('GmailWindow', require('osjs-scheme-loader!scheme.html'));
 
     var messageView;
 
     var menuMap = {
-      MenuClose:        function() { self._close(); },
+      MenuClose: function() {
+        self._close();
+      },
       MenuFolderNew: function() {
         app.createFolder(self);
       },
-      MenuFolderRename: function() {
+      MenuFolderRename: function(ev) {
+        const sel = ev.detail;
         app.renameFolder(self, sel.id, sel.title);
       },
-      MenuFolderDelete: function() {
+      MenuFolderDelete: function(ev) {
+        const sel = ev.detail;
         app.removeFolder(self, sel.id, sel.title);
       },
       MessageNew: function() {
@@ -225,9 +211,9 @@
           });
         }
       },
-      MessageMove: function() {
+      MessageMove: function(ev) {
         if ( app && app.currentMessage ) {
-          createMoveMenu(ev);
+          createMoveMenu(app, ev);
         }
       },
 
@@ -338,9 +324,9 @@
     });
 
     return root;
-  };
+  }
 
-  ApplicationGmailWindow.prototype.updateStatusBar = function(args) {
+  updateStatusBar(args) {
     args = args || {};
 
     var percentage = typeof args.progress === 'undefined' ? -1 : args.progress;
@@ -356,14 +342,14 @@
     } else {
       progressBar.show();
     }
-  };
+  }
 
-  ApplicationGmailWindow.prototype.updateTitleBar = function(args) {
+  updateTitleBar(args) {
     args = args || {};
     this._setTitle(this._opts.title + ' - ' + args.name);
-  };
+  }
 
-  ApplicationGmailWindow.prototype.renderMessages = function(messages, current) {
+  renderMessages(messages, current) {
     var list = [];
     (messages || []).forEach(function(i) {
       list.push({
@@ -382,26 +368,18 @@
     view.clear();
     view.add(list);
     view.set('value', current);
-  };
+  }
 
-  ApplicationGmailWindow.prototype.renderFolders = function(folders, current) {
+  renderFolders(folders, current) {
     var view = this._find('Folders');
     view.clear();
     view.add(resolveFolders(folders, current));
     view.set('value', current);
-  };
+  }
 
-  ApplicationGmailWindow.prototype.setSelectedFolder = function(id) {
+  setSelectedFolder(id) {
     var view = this._find('Folders');
     view.set('value', id);
-  };
+  }
 
-  /////////////////////////////////////////////////////////////////////////////
-  // EXPORTS
-  /////////////////////////////////////////////////////////////////////////////
-
-  OSjs.Applications = OSjs.Applications || {};
-  OSjs.Applications.ApplicationGmail = OSjs.Applications.ApplicationGmail || {};
-  OSjs.Applications.ApplicationGmail.MainWindow = ApplicationGmailWindow;
-
-})(OSjs.Core.Application, OSjs.Core.Window, OSjs.GUI, OSjs.Dialogs, OSjs.Utils, OSjs.API, OSjs.VFS);
+}

@@ -27,10 +27,12 @@
  * @author  Anders Evenrud <andersevenrud@gmail.com>
  * @licence Simplified BSD License
  */
-(function(Application, Window, GUI, Dialogs, Utils, API, VFS) {
+const Window = OSjs.require('core/window');
 
-  var ApplicationGmailSettingsWindow = function(app, metadata, maxPages, scheme) {
-    Window.apply(this, ['ApplicationGmailSettingsWindow', {
+export default class ApplicationGmailSettingsWindow extends Window {
+
+  constructor(app, metadata, maxPages) {
+    super('ApplicationGmailSettingsWindow', {
       icon: metadata.icon,
       title: metadata.name + ' - Settings',
       allow_session: false,
@@ -38,20 +40,18 @@
       allow_maximize: false,
       width: 400,
       height: 200
-    }, app, scheme]);
+    }, app);
 
     this.defaultMaxPages = metadata.settings ? metadata.settings.maxPages : 10;
     this.currentMaxPages = maxPages || this.defaultMaxPages;
-  };
+  }
 
-  ApplicationGmailSettingsWindow.prototype = Object.create(Window.prototype);
-
-  ApplicationGmailSettingsWindow.prototype.init = function(wmRef, app, scheme) {
+  init(wmRef, app) {
     var self = this;
-    var root = Window.prototype.init.apply(this, arguments);
+    var root = super.init(...arguments);
 
     // Load and set up scheme (GUI) here
-    this._render('GmailSettingsWindow');
+    this._render('GmailSettingsWindow', require('osjs-scheme-loader!scheme.html'));
 
     function save(maxPages) {
       if ( maxPages && self._appRef ) {
@@ -78,14 +78,6 @@
     });
 
     return root;
-  };
+  }
+}
 
-  /////////////////////////////////////////////////////////////////////////////
-  // EXPORTS
-  /////////////////////////////////////////////////////////////////////////////
-
-  OSjs.Applications = OSjs.Applications || {};
-  OSjs.Applications.ApplicationGmail = OSjs.Applications.ApplicationGmail || {};
-  OSjs.Applications.ApplicationGmail.SettingsWindow = ApplicationGmailSettingsWindow;
-
-})(OSjs.Core.Application, OSjs.Core.Window, OSjs.GUI, OSjs.Dialogs, OSjs.Utils, OSjs.API, OSjs.VFS);

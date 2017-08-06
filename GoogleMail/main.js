@@ -27,44 +27,43 @@
  * @author  Anders Evenrud <andersevenrud@gmail.com>
  * @licence Simplified BSD License
  */
-(function(Application, Window, GUI, Dialogs, Utils, API, VFS) {
+import MainWindow from './window-main.js';
+import MessageWindow from './window-message.js';
+import SettingsWindow from './window-settings.js';
+import {GoogleMail} from './mailer.js';
 
-  function safeName(str) {
-    return (str || '').replace(/[^A-z0-9\s\+\-_\&]/g, '');
-  }
+const Utils = OSjs.require('utils/misc');
+const Application = OSjs.require('core/application');
 
-  /////////////////////////////////////////////////////////////////////////////
-  // APPLICATION
-  /////////////////////////////////////////////////////////////////////////////
+function safeName(str) {
+  return (str || '').replace(/[^A-z0-9\s\+\-_\&]/g, '');
+}
 
-  /**
-   * Application constructor
-   */
-  var ApplicationGmail = function(args, metadata) {
-    Application.apply(this, ['ApplicationGmail', args, metadata]);
+class ApplicationGmail extends Application {
+  constructor(args, metadata) {
+    super('ApplicationGmail', args, metadata);
 
     this.mainWindow = null;
     this.currentFolder = 'INBOX';
     this.currentMessage = null;
-  };
+  }
 
-  ApplicationGmail.prototype = Object.create(Application.prototype);
-
-  ApplicationGmail.prototype.destroy = function() {
+  destroy() {
     if ( this.mailer ) {
       this.mailer.destroy();
     }
-    return Application.prototype.destroy.apply(this, arguments);
-  };
+    return super.destroy(...arguments);
+  }
 
-  ApplicationGmail.prototype.init = function(settings, metadata, scheme) {
+  init(settings, metadata) {
     var self = this;
 
-    Application.prototype.init.apply(this, arguments);
+    super.init(...arguments);
+
     var defaultSettings = metadata.settings || {};
     settings = Utils.argumentDefaults(settings, defaultSettings);
 
-    this.mainWindow = this._addWindow(new OSjs.Applications.ApplicationGmail.MainWindow(this, metadata, scheme, settings));
+    this.mainWindow = this._addWindow(new MainWindow(this, metadata, settings));
     if ( !this._getArgument('__resume__') ) {
       var action = self._getArgument('action');
       if ( action ) {
@@ -72,7 +71,7 @@
       }
     }
 
-    this.mailer = new OSjs.Applications.ApplicationGmail.GoogleMail({
+    this.mailer = new GoogleMail({
       maxPages: settings.maxPages,
       onAbortStart: function() {
         if ( self.mainWindow ) {
@@ -99,23 +98,25 @@
     this._on('attention', function(args) {
       self.handleAction(args);
     });
-  };
+  }
 
-  ApplicationGmail.prototype.handleAction = function(args) {
+  handleAction(args) {
     args = args || {};
     if ( args.action ) {
       if ( args.action === 'create' && args.email ) {
         this.openMessageWindow({to: args.email});
       }
     }
-  };
+  }
 
-  ApplicationGmail.prototype.openMessageWindow = function(args) {
-    this._addWindow(new OSjs.Applications.ApplicationGmail.MessageWindow(this, this.__metadata, args, this.__scheme));
-  };
+  openMessageWindow(args) {
+    this._addWindow(new MessageWindow(this, this.__metadata, args));
+  }
 
-  ApplicationGmail.prototype.openSettingsWindow = function() {
-    if ( !this.mailer ) return;
+  openSettingsWindow() {
+    if ( !this.mailer ) {
+      return;
+    }
 
     var win = this._getWindowByName('ApplicationGmailSettingsWindow');
     if ( win ) {
@@ -124,21 +125,20 @@
     }
 
     var maxPages = this.mailer.args.maxPages;
-    win = this._addWindow(new OSjs.Applications.ApplicationGmail.SettingsWindow(this, this.__metadata, maxPages, this.__scheme));
+    win = this._addWindow(new SettingsWindow(this, this.__metadata, maxPages));
     win._focus();
-  };
+  }
 
-  ApplicationGmail.prototype.openContacts = function(win) {
-    API.launch('ApplicationGoogleContacts', {
-    });
-  };
+  openContacts(win) {
+    Application.create('ApplicationGoogleContacts');
+  }
 
-  ApplicationGmail.prototype.replyToMessage = function(id, cb) {
+  replyToMessage(id, cb) {
     var self = this;
 
     this.mailer.recieveMessage({
       id: id,
-      returnFull: true,
+      returnFull: true
     }, function(error, parsed) {
       if ( parsed && parsed.data ) {
         self.openMessageWindow({
@@ -150,9 +150,9 @@
 
       cb();
     });
-  };
+  }
 
-  ApplicationGmail.prototype.downloadAttachment = function(win, att) {
+  downloadAttachment(win, att) {
     if ( !this.mailer ) {
       return;
     }
@@ -162,16 +162,17 @@
       filename: att.filename,
       attachmentId: att.id
     });
-  };
+  }
 
-  ApplicationGmail.prototype.moveMessage = function(win, moveTo, cb) {
-    var self = this;
+  moveMessage(win, moveTo, cb) {
     cb = cb || function() {};
     if ( !this.mailer ) {
       return;
     }
 
-    if ( win ) { win._toggleLoading(true); }
+    if ( win ) {
+      win._toggleLoading(true);
+    }
 
     var id = this.currentMessage;
     var folder = this.currentFolder;
@@ -180,62 +181,76 @@
       to: moveTo,
       from: folder
     }, function(error, result) {
-      if ( win ) { win._toggleLoading(false); }
+      if ( win ) {
+        win._toggleLoading(false);
+      }
       cb();
     });
-  };
+  }
 
-  ApplicationGmail.prototype.markMessage = function(markAs, win, cb) {
+  markMessage(markAs, win, cb) {
     cb = cb || function() {};
     if ( !this.mailer ) {
       return;
     }
 
-    if ( win ) { win._toggleLoading(true); }
+    if ( win ) {
+      win._toggleLoading(true);
+    }
 
     var id = this.currentMessage;
     this.mailer.markMessage({
       markAs: markAs,
       id: id
     }, function(error, result, id, state) {
-      if ( win ) { win._toggleLoading(false); }
+      if ( win ) {
+        win._toggleLoading(false);
+      }
       cb(error, result, id, state);
     });
-  };
+  }
 
-  ApplicationGmail.prototype.removeMessage = function(win, cb) {
+  removeMessage(win, cb) {
     cb = cb || function() {};
     if ( !this.mailer ) {
       return;
     }
 
-    if ( win ) { win._toggleLoading(true); }
+    if ( win ) {
+      win._toggleLoading(true);
+    }
 
     var id = this.currentMessage;
     this.mailer.removeMessage({
       id: id
     }, function(error, result) {
-      if ( win ) { win._toggleLoading(false); }
+      if ( win ) {
+        win._toggleLoading(false);
+      }
       cb();
     });
-  };
+  }
 
-  ApplicationGmail.prototype.recieveMessage = function(win, id) {
+  recieveMessage(win, id) {
     if ( !this.mailer ) {
       return;
     }
 
-    if ( win ) { win.onPrepareReceive(); }
+    if ( win ) {
+      win.onPrepareReceive();
+    }
 
     this.mailer.recieveMessage({
       id: id,
       markRead: true
     }, function(error, result) {
-      if ( win ) { win.onEndReceive(result); }
+      if ( win ) {
+        win.onEndReceive(result);
+      }
     });
-  };
+  }
 
-  ApplicationGmail.prototype.sendMessage = function(win, to, subject, message) {
+  sendMessage(win, to, subject, message) {
     if ( !this.mailer ) {
       return;
     }
@@ -249,16 +264,15 @@
         win._close();
       }
     });
-  };
+  }
 
-  ApplicationGmail.prototype.getFolderCache = function(cb) {
+  getFolderCache(cb) {
     this.mailer.getFolders({cache: true}, function(error, result) {
       cb(false, result || []);
     });
-  };
+  }
 
-  ApplicationGmail.prototype.forceSync = function(win) {
-    var self = this;
+  forceSync(win) {
     win = win || this.mainWindow;
 
     if ( !this.mailer ) {
@@ -266,9 +280,9 @@
     }
 
     this.sync(win, true);
-  };
+  }
 
-  ApplicationGmail.prototype.sync = function(win, force, onlyFolders) {
+  sync(win, force, onlyFolders) {
     force = force === true;
 
     var self = this;
@@ -315,12 +329,12 @@
           if ( win ) {
             var per = json.messageCurrent / json.messagesTotal * 100;
             var msg = Utils.format('Fetching message (batch {0}/{1}, message {2}/{3}, index {4}) in {5}',
-              json.pageCurrent,
-              json.pagesTotal,
-              json.messageCurrent,
-              json.messagesTotal,
-              json.messageIndex,
-              json.folder
+                                   json.pageCurrent,
+                                   json.pagesTotal,
+                                   json.messageCurrent,
+                                   json.messagesTotal,
+                                   json.messageIndex,
+                                   json.folder
             );
             if ( force ) {
               msg += ' (Forced)';
@@ -345,67 +359,97 @@
         }
       });
     });
-  };
+  }
 
-  ApplicationGmail.prototype.createFolder = function(win) {
+  createFolder(win) {
     var self = this;
     win = win || this.mainWindow;
-    if ( !win || !this.mailer ) return;
+    if ( !win || !this.mailer ) {
+      return;
+    }
 
     win._toggleDisabled(true);
     var msg = 'Enter a name for the folder';
     this._createDialog('Input', [msg, '', function(btn, input) {
-      if ( win ) { win._toggleDisabled(false); }
-      if ( !input || btn !== 'ok' ) return;
-      if ( win ) { win._toggleLoading(true); }
+      if ( win ) {
+        win._toggleDisabled(false);
+      }
+      if ( !input || btn !== 'ok' ) {
+        return;
+      }
+      if ( win ) {
+        win._toggleLoading(true);
+      }
       input = safeName(input);
 
       self.mailer.createFolder({
         name: input
       }, function() {
-        if ( win ) { win._toggleLoading(false); }
+        if ( win ) {
+          win._toggleLoading(false);
+        }
         self.sync(null, false, true);
       });
     }]);
-  };
+  }
 
-  ApplicationGmail.prototype.renameFolder = function(win, id, title) {
+  renameFolder(win, id, title) {
     var self = this;
     win = win || this.mainWindow;
-    if ( !win || !this.mailer ) return;
+    if ( !win || !this.mailer ) {
+      return;
+    }
 
     win._toggleDisabled(true);
     var msg = 'Enter a name for the folder';
     this._createDialog('Input', [msg, title, function(btn, input) {
-      if ( win ) { win._toggleDisabled(false); }
-      if ( !input || btn !== 'ok' ) return;
-      if ( win ) { win._toggleLoading(true); }
+      if ( win ) {
+        win._toggleDisabled(false);
+      }
+      if ( !input || btn !== 'ok' ) {
+        return;
+      }
+      if ( win ) {
+        win._toggleLoading(true);
+      }
       input = safeName(input);
 
       self.mailer.renameFolder({
         id: id,
         name: input
       }, function() {
-        if ( win ) { win._toggleLoading(false); }
+        if ( win ) {
+          win._toggleLoading(false);
+        }
         self.sync(null, false, true);
       });
     }]);
-  };
+  }
 
-  ApplicationGmail.prototype.removeFolder = function(win, id, title) {
+  removeFolder(win, id, title) {
     var self = this;
     win = win || this.mainWindow;
-    if ( !win || !this.mailer ) return;
+    if ( !win || !this.mailer ) {
+      return;
+    }
 
     win._toggleDisabled(true);
     var msg = 'Are you sure you want to delete this folder (' + title + ')?';
     this._createDialog('Confirm', [msg, function(btn) {
-      if ( win ) { win._toggleDisabled(false); }
-      if ( btn !== 'ok' ) return;
-      if ( win ) { win._toggleLoading(true); }
+      if ( win ) {
+        win._toggleDisabled(false);
+      }
+      if ( btn !== 'ok' ) {
+        return;
+      }
+      if ( win ) {
+        win._toggleLoading(true);
+      }
 
       self.mailer.removeFolder({id: id}, function() {
-        if ( win ) { win._toggleLoading(false); }
+        if ( win ) {
+          win._toggleLoading(false);
+        }
         if ( self.currentFolder === id ) {
           self.setFolder('INBOX', true);
           return;
@@ -414,13 +458,13 @@
         self.sync(null, false, true);
       });
     }]);
-  };
+  }
 
-  ApplicationGmail.prototype.setMessage = function(msg) {
+  setMessage(msg) {
     this.currentMessage = msg;
-  };
+  }
 
-  ApplicationGmail.prototype.setFolder = function(folder, setUI) {
+  setFolder(folder, setUI) {
     if ( folder && folder !== this.currentFolder || setUI ) {
       this.currentFolder = folder;
       this.currentMessage = null;
@@ -429,24 +473,17 @@
       }
       this.sync();
     }
-  };
+  }
 
-  ApplicationGmail.prototype._setSetting = function(k, v, save, saveCallback) {
+  _setSetting(k, v, save, saveCallback) {
     var self = this;
-    Application.prototype._setSetting.call(this, k, v, save, function() {
+    super._setSetting(k, v, save, function() {
       if ( self.mailer && k === 'maxPages' ) {
         self.mailer.setMaxPages(v);
       }
       (saveCallback || function() {}).apply(this, arguments);
     });
-  };
+  }
+}
 
-  /////////////////////////////////////////////////////////////////////////////
-  // EXPORTS
-  /////////////////////////////////////////////////////////////////////////////
-
-  OSjs.Applications = OSjs.Applications || {};
-  OSjs.Applications.ApplicationGmail = OSjs.Applications.ApplicationGmail || {};
-  OSjs.Applications.ApplicationGmail.Class = ApplicationGmail;
-
-})(OSjs.Core.Application, OSjs.Core.Window, OSjs.GUI, OSjs.Dialogs, OSjs.Utils, OSjs.API, OSjs.VFS);
+OSjs.Applications.ApplicationGmail = ApplicationGmail;

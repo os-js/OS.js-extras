@@ -27,30 +27,32 @@
  * @author  Anders Evenrud <andersevenrud@gmail.com>
  * @licence Simplified BSD License
  */
-(function(Application, Window, GUI, Dialogs, Utils, API, VFS) {
+const Window = OSjs.require('core/window');
+const Menu = OSjs.require('gui/menu');
+const DOM = OSjs.require('utils/dom');
 
-  var ApplicationGmailMessageWindow = function(app, metadata, mailArgs, scheme) {
+export default class ApplicationGmailMessageWindow extends Window {
+
+  constructor(app, metadata, mailArgs) {
     mailArgs = mailArgs || {};
-    Window.apply(this, ['ApplicationGmailMessageWindow', {
+    super('ApplicationGmailMessageWindow', {
       icon: metadata.icon,
       title: metadata.name + ': ' + (mailArgs.to || mailArgs.subject || '<new message>'),
       allow_session: false,
       width: 500,
       height: 400
-    }, app, scheme]);
+    }, app);
 
     this.mailArgs = mailArgs;
     this.attachmentMenu = [];
-  };
+  }
 
-  ApplicationGmailMessageWindow.prototype = Object.create(Window.prototype);
-
-  ApplicationGmailMessageWindow.prototype.init = function(wmRef, app, scheme) {
+  init(wmRef, app) {
     var self = this;
-    var root = Window.prototype.init.apply(this, arguments);
+    var root = super.init(...arguments);
 
     // Load and set up scheme (GUI) here
-    this._render('GmailMessageWindow');
+    this._render('GmailMessageWindow', require('osjs-scheme-loader!scheme.html'));
 
     var input = this._find('Input');
     var subject = this._find('Subject').set('value', this.mailArgs.subject || '');
@@ -72,8 +74,8 @@
         app.sendMessage(self, to.get('value'), subject.get('value'), input.get('value'));
       },
       Attachments: function(ev) {
-        var pos = Utils.$position(ev.target);
-        API.createMenu(self.attachmentMenu, {x: pos.left, y: pos.top});
+        var pos = DOM.$position(ev.target);
+        Menu.create(self.attachmentMenu, {x: pos.left, y: pos.top});
       }
     };
 
@@ -99,22 +101,22 @@
     this._find('Menubar').on('select', menuEvent);
 
     return root;
-  };
+  }
 
-  ApplicationGmailMessageWindow.prototype._inited = function() {
-    Window.prototype._inited.apply(this, arguments);
+  _inited() {
+    super._inited(...arguments);
 
     if ( this.mailArgs.id && this._app ) {
       this._app.recieveMessage(this, this.mailArgs.id);
     }
-  };
+  }
 
-  ApplicationGmailMessageWindow.prototype.onPrepareReceive = function() {
+  onPrepareReceive() {
     this._toggleLoading(true);
     this._find('Statusbar').set('value', 'Preparing to receive email...');
-  };
+  }
 
-  ApplicationGmailMessageWindow.prototype.onEndReceive = function(parsed) {
+  onEndReceive(parsed) {
     var self = this;
 
     this._toggleLoading(false);
@@ -123,7 +125,9 @@
       this.mailArgs.onRecieved();
     }
 
-    if ( !parsed ) return;
+    if ( !parsed ) {
+      return;
+    }
 
     var l = parsed.attachments.length;
     var items = [];
@@ -143,14 +147,14 @@
     var text = 'Message downloaded (' + l + ' attachments)';
     this._find('Statusbar').set('value', text);
     this._find('Message').set('value', parsed.raw);
-  };
+  }
 
-  ApplicationGmailMessageWindow.prototype.onPrepareSend = function() {
+  onPrepareSend() {
     this._toggleLoading(true);
     this._find('Statusbar').set('value', 'Preparing to send email...');
-  };
+  }
 
-  ApplicationGmailMessageWindow.prototype.onEndSend = function(result, error) {
+  onEndSend(result, error) {
     this._toggleLoading(false);
 
     if ( result ) {
@@ -158,15 +162,5 @@
     } else {
       this._find('Statusbar').set('value', 'FAILED TO SEND MESSAGE: ' + error);
     }
-  };
-
-
-  /////////////////////////////////////////////////////////////////////////////
-  // EXPORTS
-  /////////////////////////////////////////////////////////////////////////////
-
-  OSjs.Applications = OSjs.Applications || {};
-  OSjs.Applications.ApplicationGmail = OSjs.Applications.ApplicationGmail || {};
-  OSjs.Applications.ApplicationGmail.MessageWindow = ApplicationGmailMessageWindow;
-
-})(OSjs.Core.Application, OSjs.Core.Window, OSjs.GUI, OSjs.Dialogs, OSjs.Utils, OSjs.API, OSjs.VFS);
+  }
+}

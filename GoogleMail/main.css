@@ -32,10 +32,13 @@
   position : absolute;
   bottom : 4px;
   right : 4px;
-  height : 20px;
+  height : 1em;
   width : 20%;
   line-height : 20px;
   z-index : 999999;
+}
+.ApplicationGmailWindow gui-progress-bar span {
+  display : none;
 }
 .ApplicationGmailWindow gui-list-view-row.unread {
    font-weight : bold;
