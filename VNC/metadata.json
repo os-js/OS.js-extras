@@ -1,25 +1,10 @@
 {
-  "className":  "ApplicationVNC",
-  "name":       "noVNC v0.5",
-  "mime":       null,
-  "icon":       "apps/preferences-desktop-remote-desktop.png",
-  "category":   "network",
-  "preload":    [
-    {"src": "vendor/noVNC/app/webutil.js", "type": "javascript"},
-    {"src": "vendor/noVNC/core/util.js", "type": "javascript"},
-    {"src": "vendor/noVNC/core/base64.js", "type": "javascript"},
-    {"src": "vendor/noVNC/core/des.js", "type": "javascript"},
-    {"src": "vendor/noVNC/core/display.js", "type": "javascript"},
-    {"src": "vendor/noVNC/core/inflator.js", "type": "javascript"},
-    {"src": "vendor/noVNC/core/rfb.js", "type": "javascript"},
-    {"src": "vendor/noVNC/core/websock.js", "type": "javascript"},
-
-    {"src": "vendor/noVNC/core/input/devices.js", "type": "javascript"},
-    {"src": "vendor/noVNC/core/input/keysym.js", "type": "javascript"},
-    {"src": "vendor/noVNC/core/input/keysymdef.js", "type": "javascript"},
-    {"src": "vendor/noVNC/core/input/util.js", "type": "javascript"},
-    {"src": "vendor/noVNC/core/input/xtscancodes.js", "type": "javascript"},
-    {"src": "scheme.html", "type": "scheme"},
+  "className": "ApplicationVNC",
+  "name": "noVNC v0.5",
+  "mime": null,
+  "icon": "apps/preferences-desktop-remote-desktop.png",
+  "category": "network",
+  "preload": [
     {"src": "main.js", "type": "javascript"},
     {"src": "main.css", "type": "stylesheet"}
   ]

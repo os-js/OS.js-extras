@@ -27,41 +27,36 @@
  * @author  Anders Evenrud <andersevenrud@gmail.com>
  * @licence Simplified BSD License
  */
-(function(Application, Window, Utils, API, VFS, GUI) {
-  'use strict';
+// TODO: Clipboard
+// TODO: Clip cursor
 
-  // TODO: Clipboard
-  // TODO: Clip cursor
+import RFB from './vendor/noVNC/core/rfb.js';
+const Window = OSjs.require('core/window');
+const Application = OSjs.require('core/application');
 
-  /////////////////////////////////////////////////////////////////////////////
-  // MAIN WINDOW
-  /////////////////////////////////////////////////////////////////////////////
-
-  function ApplicationVNCWindow(app, metadata, scheme) {
-    Window.apply(this, ['ApplicationVNCWindow', {
+class ApplicationVNCWindow extends Window {
+  constructor(app, metadata) {
+    super('ApplicationVNCWindow', {
       icon: metadata.icon,
       title: metadata.name,
       width: 640,
       height: 480,
       key_capture: true // IMPORTANT
-    }, app, scheme]);
+    }, app);
 
     this.connectionDialog = null;
     this.lastKeyboardinput = null;
     this.resizeTimeout = null;
   }
 
-  ApplicationVNCWindow.prototype = Object.create(Window.prototype);
-  ApplicationVNCWindow.constructor = Window.prototype;
-
-  ApplicationVNCWindow.prototype.init = function(wmRef, app, scheme) {
-    var root = Window.prototype.init.apply(this, arguments);
+  init(wmRef, app) {
+    var root = super.init(...arguments);
     var self = this;
 
     // Load and set up scheme (GUI) here
-    scheme.render(this, 'VNCWindow', root);
+    this._render('VNCWindow', require('osjs-scheme-loader!scheme.html'));
 
-    var canvas = scheme.find(this, 'Canvas').$element.children[0];
+    var canvas = this._find('Canvas').$element.children[0];
     var menuMap = {
       MenuConnect: function() {
         app.connect(self, canvas);
@@ -74,61 +69,32 @@
       }
     };
 
-    this._scheme.find(this, 'SubmenuFile').on('select', function(ev) {
+    this._find('SubmenuFile').on('select', function(ev) {
       if ( menuMap[ev.detail.id] ) {
         menuMap[ev.detail.id]();
       }
     });
 
+    this._on('blur', () => app.toggleFocus(false));
+    this._on('focus', () => app.toggleFocus(true));
+
     return root;
-  };
+  }
 
-  ApplicationVNCWindow.prototype.destroy = function() {
+  destroy() {
     this.resizeTimeout = clearTimeout(this.resizeTimeout);
+    return super.destroy(...arguments);
+  }
 
-    Window.prototype.destroy.apply(this, arguments);
-  };
-
-  ApplicationVNCWindow.prototype._focus = function() {
-    if ( Window.prototype._focus.apply(this, arguments) ) {
-      if ( this._app ) {
-        this._app.toggleFocus(true);
-      }
-      return true;
-    }
-    return false;
-  };
-
-  ApplicationVNCWindow.prototype._blur = function() {
-    if ( Window.prototype._blur.apply(this, arguments) ) {
-      if ( this._app ) {
-        this._app.toggleFocus(false);
-      }
-      return true;
-    }
-    return false;
-  };
-
-  ApplicationVNCWindow.prototype._blur = function() {
-    if ( Window.prototype._blur.apply(this, arguments) ) {
-      if ( this._app ) {
-        this._app.toggleFocus(false);
-      }
-      return true;
-    }
-    return false;
-  };
-
-  ApplicationVNCWindow.prototype._resize = function() {
-
-    if ( Window.prototype._resize.apply(this, arguments) ) {
-      if ( this._app && this._app.rfb && this._scheme ) {
+  _resize() {
+    if ( super._resize(...arguments) ) {
+      if ( this._app && this._app.rfb ) {
         var rfb = this._app.rfb;
         var display = rfb.get_display();
 
         if ( display ) {
           var scaletype = this._app.connectionSettings.scaling;
-          var canvas = this._scheme.find(this, 'Canvas').$element;
+          var canvas = this._find('Canvas').$element;
 
           var size = {
             w: canvas.offsetWidth,
@@ -155,29 +121,29 @@
       return true;
     }
     return false;
-  };
+  }
 
   /*
-  ApplicationVNCWindow.prototype._onKeyEvent = function(ev, type) {
+  _onKeyEvent(ev, type) {
     if ( this._app && type === 'keydown' ) {
       //this._app.sendKey(ev.keyCode || ev.which);
     }
   };
   */
 
-  ApplicationVNCWindow.prototype.setStatus = function(state, msg) {
+  setStatus(state, msg) {
     var value = state;
     if ( msg ) {
       value += ': ' + msg;
     }
 
-    var statusBar = this._scheme.find(this, 'Statusbar');
+    var statusBar = this._find('Statusbar');
     if ( statusBar ) {
       statusBar.set('value', value);
     }
-  };
+  }
 
-  ApplicationVNCWindow.prototype.openConnectionDialog = function(cb) {
+  openConnectionDialog(cb) {
     var self = this;
 
     if ( this.connectionDialog ) {
@@ -185,39 +151,35 @@
       return;
     }
 
-    var w = new ApplicationVNCDialog(this._app, this._app.__metadata, this._app.__scheme, function(btn, conn) {
+    var w = new ApplicationVNCDialog(this._app, this._app.__metadata, function(btn, conn) {
       self.connectionDialog = null;
       cb(conn);
     });
     this.connectionDialog = this._addChild(w, true, true);
-  };
+  }
 
-  /////////////////////////////////////////////////////////////////////////////
-  // CONNECTION WINDOW
-  /////////////////////////////////////////////////////////////////////////////
+}
 
-  function ApplicationVNCDialog(app, metadata, scheme, callback) {
-    Window.apply(this, ['ApplicationVNCDialog', {
+class ApplicationVNCDialog extends Window {
+  constructor(app, metadata, callback) {
+    super('ApplicationVNCDialog', {
       icon: metadata.icon,
       title: metadata.name,
       width: 450,
       height: 400,
       allow_resize: false,
       allow_maximize: false
-    }, app, scheme]);
+    }, app);
 
     this.callback = callback || function() {};
   }
 
-  ApplicationVNCDialog.prototype = Object.create(Window.prototype);
-  ApplicationVNCDialog.constructor = Window.prototype;
-
-  ApplicationVNCDialog.prototype.init = function(wmRef, app, scheme) {
-    var root = Window.prototype.init.apply(this, arguments);
+  init(wmRef, app) {
+    var root = super.init(...arguments);
     var self = this;
 
     // Load and set up scheme (GUI) here
-    scheme.render(this, 'VNCDialog', root);
+    this._render('VNCDialog', require('osjs-scheme-loader!scheme.html'));
 
     function getSettings() {
       return {
@@ -258,23 +220,18 @@
     });
 
     return root;
-  };
+  }
 
-  ApplicationVNCDialog.prototype.destroy = function() {
-    Window.prototype.destroy.apply(this, arguments);
-  };
-
-  ApplicationVNCDialog.prototype._close = function(button, result) {
+  _close(button, result) {
     this.callback(button, result);
-    return Window.prototype._close.apply(this, arguments);
-  };
+    return super._close(...arguments);
+  }
 
-  /////////////////////////////////////////////////////////////////////////////
-  // APPLICATION
-  /////////////////////////////////////////////////////////////////////////////
+}
 
-  function ApplicationVNC(args, metadata) {
-    Application.apply(this, ['ApplicationVNC', args, metadata]);
+class ApplicationVNC extends Application {
+  constructor(args, metadata) {
+    super('ApplicationVNC', args, metadata);
 
     this.rfb = null;
     this.connectionState = null;
@@ -294,17 +251,14 @@
     };
   }
 
-  ApplicationVNC.prototype = Object.create(Application.prototype);
-  ApplicationVNC.constructor = Application;
-
-  ApplicationVNC.prototype.destroy = function() {
+  destroy() {
     this.disconnect();
-    return Application.prototype.destroy.apply(this, arguments);
-  };
+    return super.destroy(...arguments);
+  }
 
-  ApplicationVNC.prototype.init = function(settings, metadata, scheme) {
+  init(settings, metadata) {
     var self = this;
-    Application.prototype.init.apply(this, arguments);
+    super.init(...arguments);
 
     if ( settings && typeof settings.lastConnection === 'object' ) {
       Object.keys(settings.lastConnection).forEach(function(k) {
@@ -312,10 +266,10 @@
       });
     }
 
-    this._addWindow(new ApplicationVNCWindow(this, metadata, scheme));
-  };
+    this._addWindow(new ApplicationVNCWindow(this, metadata));
+  }
 
-  ApplicationVNC.prototype.onUpdateState = function(rfb, state, oldstate, msg) {
+  onUpdateState(rfb, state, oldstate, msg) {
     this.connectionState = state;
     var win = this._getMainWindow();
     if ( !win ) {
@@ -324,37 +278,37 @@
 
     win.setStatus(state, msg);
     win._focus(true);
-  };
+  }
 
-  ApplicationVNC.prototype.onXvpInit = function(ver) {
-  };
+  onXvpInit(ver) {
+  }
 
-  ApplicationVNC.prototype.onClipboard = function(rfb, text) {
-  };
+  onClipboard(rfb, text) {
+  }
 
-  ApplicationVNC.prototype.onFBUComplete = function() {
+  onFBUComplete() {
     this.rfb.set_onFBUComplete(function() { });
-  };
+  }
 
-  ApplicationVNC.prototype.onFBResize = function(rfb, width, height) {
+  onFBResize(rfb, width, height) {
     var win = this._getMainWindow();
     if ( win ) {
       win._resize(width + 40, height + 80, true); // FIXME
     }
-  };
+  }
 
-  ApplicationVNC.prototype.onDesktopName = function(rfb, name) {
+  onDesktopName(rfb, name) {
     var win = this._getMainWindow();
     if ( win ) {
       win._setTitle(name, true);
     }
-  };
+  }
 
-  ApplicationVNC.prototype.connect = function(win, canvas) {
+  connect(win, canvas) {
     var self = this;
 
     function initRFB() {
-      self.rfb = new window.RFB({
+      self.rfb = new RFB({
         target: canvas,
         onUpdateState: function() {
           self.onUpdateState.apply(self, arguments);
@@ -392,7 +346,7 @@
           });
 
           self.rfb.set_encrypt(conn.encrypt);
-          self.rfb.set_true_color(conn.truecolor);
+          //self.rfb.set_true_color(conn.truecolor);
           self.rfb.set_local_cursor(conn.localcursor);
           self.rfb.set_shared(conn.shared);
           self.rfb.set_view_only(conn.viewonly);
@@ -402,35 +356,29 @@
         }
       }
     });
-  };
+  }
 
-  ApplicationVNC.prototype.disconnect = function(win) {
+  disconnect(win) {
     if ( this.rfb ) {
       this.rfb.disconnect();
       this.rfb.set_onFBUComplete(this.FBUComplete);
     }
     this.rfb = null;
-  };
+  }
 
-  ApplicationVNC.prototype.toggleFocus = function(focus) {
+  toggleFocus(focus) {
     if ( this.rfb ) {
       this.rfb.get_keyboard().set_focused(focus);
       this.rfb.get_mouse().set_focused(focus);
     }
-  };
+  }
 
-  ApplicationVNC.prototype.sendKey = function(key) {
+  sendKey(key) {
     if ( this.rfb ) {
       this.rfb.sendKey(key);
     }
-  };
+  }
 
-  /////////////////////////////////////////////////////////////////////////////
-  // EXPORTS
-  /////////////////////////////////////////////////////////////////////////////
+}
 
-  OSjs.Applications = OSjs.Applications || {};
-  OSjs.Applications.ApplicationVNC = OSjs.Applications.ApplicationVNC || {};
-  OSjs.Applications.ApplicationVNC.Class = ApplicationVNC;
-
-})(OSjs.Core.Application, OSjs.Core.Window, OSjs.Utils, OSjs.API, OSjs.VFS, OSjs.GUI);
+OSjs.Applications.ApplicationVNC = ApplicationVNC;
