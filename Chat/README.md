@@ -1,24 +1,8 @@
 # Setup
 
-Make sure you cloned this repository with submodules!
+You'll need https://github.com/twonds/punjab/blob/master/INSTALL.txt
 
-Then:
-```
-# Install system deps
-sudo apt-get install python-twisted python-openssl make openjdk-6-jre
-
-# Build and install deps
-cd Chat/vendor/punjab
-python setup.py build
-sudo python setup.py install
-
-# If you use apache as frontend, you'll need to enable the proxy module
-sudo a2enmod proxy_http
-sudo service apache2 restart
-
-# Start service
-sudo twistd punjab
-```
+And then make sure the proxy is reachable by OS.js server.
 
 # Notes
 

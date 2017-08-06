@@ -27,43 +27,53 @@
  * @author  Anders Evenrud <andersevenrud@gmail.com>
  * @licence Simplified BSD License
  */
-(function(Application, Window, Utils, API, VFS, GUI) {
-  'use strict';
+import {Strophe, $pres, $msg, $iq} from 'strophe.js';
 
-  // https://code.google.com/p/aap-etsiit-ugr/source/browse/trunk/2011/chat_xmpp/scripts/presencia.strophe.js?r=3008
-  // http://strophe.im/strophejs/doc/
+const ExtendedDate = OSjs.require('helpers/date');
+const Utils = OSjs.require('utils/misc');
+const Theme = OSjs.require('core/theme');
+const Dialog = OSjs.require('core/dialog');
+const Window = OSjs.require('core/window');
+const Application = OSjs.require('core/application');
+const Notification = OSjs.require('gui/notification');
 
-  var iconMap = {
-    'busy': 'status/user-busy.png',
-    'away': 'status/user-busy.png',
-    'chat': 'status/user-available.png',
-    'online': 'status/user-available.png',
-    'offline': 'status/user-offline.png',
-    'invisible': 'status/user-invisible.png'
-  };
+// https://code.google.com/p/aap-etsiit-ugr/source/browse/trunk/2011/chat_xmpp/scripts/presencia.strophe.js?r=3008
+// http://strophe.im/strophejs/doc/
 
-  function getDisplayName(contact) {
-    if ( contact.vcard && contact.vcard.name ) {
-      return contact.vcard.name + ' (' + contact.username + ')';
-    }
-    return contact.username;
+var iconMap = {
+  'busy': 'status/user-busy.png',
+  'away': 'status/user-busy.png',
+  'chat': 'status/user-available.png',
+  'online': 'status/user-available.png',
+  'offline': 'status/user-offline.png',
+  'invisible': 'status/user-invisible.png'
+};
+
+function getDisplayName(contact) {
+  if ( contact.vcard && contact.vcard.name ) {
+    return contact.vcard.name + ' (' + contact.username + ')';
+  }
+  return contact.username;
+}
+
+function getVcardImage(app, vcard) {
+  vcard = vcard || {};
+  if ( vcard.photo && vcard.photo.type && vcard.photo.data ) {
+    return Utils.format('data:{0};base64,{1}', vcard.photo.type, vcard.photo.data);
   }
 
-  function getVcardImage(vcard) {
-    vcard = vcard || {};
-    if ( vcard.photo && vcard.photo.type && vcard.photo.data ) {
-      return Utils.format('data:{0};base64,{1}', vcard.photo.type, vcard.photo.data);
-    }
+  var url = app._getResource('user.png');
+  return url;
+}
 
-    var url = API.getApplicationResource('ApplicationChat', 'user.png');
-    return url;
-  };
+/////////////////////////////////////////////////////////////////////////////
+// CLASSES
+/////////////////////////////////////////////////////////////////////////////
 
-  /////////////////////////////////////////////////////////////////////////////
-  // CONNECTION MANAGER
-  /////////////////////////////////////////////////////////////////////////////
+class StropheConnection {
 
-  function StropheConnection(app) {
+  constructor(app) {
+    this.presenseTimeout = null;
     this.app = app;
     this.bindings = {};
     this.contacts = {};
@@ -84,7 +94,9 @@
     var _vctimeout;
     var self = this;
     this.on('contacts', function(contacts, vcard) {
-      if ( vcard ) return;
+      if ( vcard ) {
+        return;
+      }
 
       Object.keys(self.contacts).forEach(function(i) {
         var c = self.contacts[i];
@@ -98,20 +110,21 @@
       });
     });
   }
-  StropheConnection.prototype.destroy = function() {
+
+  destroy() {
     this.disconnect();
     this.connection = null;
     this.app = null;
-  };
+  }
 
-  StropheConnection.prototype.on = function(k, f) {
+  on(k, f) {
     if ( typeof this.bindings[k] === 'undefined' ) {
       this.bindings[k] = [];
     }
     this.bindings[k].push(f);
-  };
+  }
 
-  StropheConnection.prototype._trigger = function(k) {
+  _trigger(k) {
     var self = this;
     var args = Array.prototype.slice.call(arguments, 1);
 
@@ -119,9 +132,9 @@
     (this.bindings[k] || []).forEach(function(f) {
       f.apply(self, args);
     });
-  };
+  }
 
-  StropheConnection.prototype.setStatus = function(s, text) {
+  setStatus(s, text) {
     var pres = $pres({
       from: this.user.id
     });
@@ -134,9 +147,9 @@
 
     console.log('StropheConnection::setStatus()', s, text, pres);
     this.connection.send(pres.tree());
-  };
+  }
 
-  StropheConnection.prototype.disconnect = function() {
+  disconnect() {
     console.log('StropheConnection::disconnect()');
 
     if ( this.connected ) {
@@ -148,9 +161,9 @@
     this.user.vcard = null;
 
     this._trigger('disconnected');
-  };
+  }
 
-  StropheConnection.prototype.connect = function() {
+  connect() {
     console.log('StropheConnection::connect()');
 
     var self = this;
@@ -228,7 +241,7 @@
     var settings = this.app._getSetting('account') || {};
     if ( !settings.username || !settings.password ) {
       this.disconnect();
-      API.createDialog('Error', {
+      Dialog.create('Error', {
         title: 'Chat Error',
         error: 'Cannot connect without username or password'
       }, function() {}, this.app);
@@ -242,19 +255,19 @@
       console.warn('reconnecting instead');
       this.connection.connect(settings.username, settings.password, _connect);
     }
-  };
+  }
 
-  StropheConnection.prototype.send = function(msg) {
+  send(msg) {
     console.log('StropheConnection::send()', msg);
 
     var reply = $msg({to: msg.jid, from: this.user.id, type: 'chat'})
-                  .cnode(Strophe.xmlElement('body', msg.message)).up()
-                  .c('active', {xmlns: "http://jabber.org/protocol/chatstates"});
+      .cnode(Strophe.xmlElement('body', msg.message)).up()
+      .c('active', {xmlns: 'http://jabber.org/protocol/chatstates'});
 
     this.connection.send(reply.tree());
-  };
+  }
 
-  StropheConnection.prototype.vcard = function(jid, callback) {
+  vcard(jid, callback) {
     callback = callback || function() {};
 
     console.log('StropheConnection::vcard()', jid);
@@ -266,14 +279,14 @@
 
     var self = this;
     var iq = $iq({type: 'get', to: jid, id: this.connection.getUniqueId('vCard')})
-                .c('vCard', {xmlns: 'vcard-temp'}).tree();
+      .c('vCard', {xmlns: 'vcard-temp'}).tree();
 
-    this.connection.sendIQ(iq, function (response) {
+    this.connection.sendIQ(iq, function(response) {
       console.log('StropheConnection::vcard()', '=>', response);
 
       var item = null;
       try {
-        var elem = response.getElementsByTagName("vCard");
+        var elem = response.getElementsByTagName('vCard');
 
         if ( elem.length ) {
           var fn    = Strophe.getText(elem[0].getElementsByTagName('FN')[0]);
@@ -290,9 +303,9 @@
           }
 
           item = {
-            name:   fn,
-            url:    url,
-            photo:  photo
+            name: fn,
+            url: url,
+            photo: photo
           };
 
           if ( self.contacts[username] ) {
@@ -305,21 +318,21 @@
 
       callback(item);
     });
-  };
+  }
 
-  StropheConnection.prototype._onConnectionFail = function() {
+  _onConnectionFail() {
     this._trigger('connfail');
-  };
+  }
 
-  StropheConnection.prototype._onAuthFail = function() {
+  _onAuthFail() {
     this._trigger('authfail');
-  };
+  }
 
-  StropheConnection.prototype._onConnecting = function() {
+  _onConnecting() {
     this._trigger('connecting');
-  };
+  }
 
-  StropheConnection.prototype._onConnected = function() {
+  _onConnected() {
     var self = this;
 
     this.connected = true;
@@ -335,7 +348,7 @@
 
     this.connection.addHandler(function(x) {
       return true;
-    }, "jabber:iq:roster", "iq", "set");
+    }, 'jabber:iq:roster', 'iq', 'set');
 
     this.connection.send($pres().tree());
 
@@ -346,20 +359,21 @@
     });
 
     this._trigger('status', 'chat');
-  };
+  }
 
-  StropheConnection.prototype._onDisconnecting = function() {
+  _onDisconnecting() {
     this._trigger('disconnecting');
-  };
+  }
 
-  StropheConnection.prototype._onDisconnected = function() {
+  _onDisconnected() {
     this.connected = false;
     this.disconnect();
-  };
+  }
 
-  StropheConnection.prototype._onPresence = (function() {
+  _onPresence(pres) {
+    var self = this;
 
-    function parsePresence(pres, self) {
+    function parsePresence(pres) {
       var from = pres.getAttribute('from') || '';
       var error = pres.querySelector('error');
       if ( error ) {
@@ -368,22 +382,22 @@
       }
 
       var contact = {
-        id:           from,
-        vcard:        null,
-        group:        null,
-        photo:        null,
-        username:     from.split('/')[0], // Contact
-        account:      pres.getAttribute('to'), // Myself
-        type:         pres.getAttribute('type'),
-        state:        'offline',
+        id: from,
+        vcard: null,
+        group: null,
+        photo: null,
+        username: from.split('/')[0], // Contact
+        account: pres.getAttribute('to'), // Myself
+        type: pres.getAttribute('type'),
+        state: 'offline',
         subscription: 'unavailable'
       };
 
       if ( contact.account ) {
         var elems, test;
 
-        var showEl = pres.querySelector('show');
-        var text = showEl ? Strophe.getText(showEl) : null;
+        //var showEl = pres.querySelector('show');
+        //var text = showEl ? Strophe.getText(showEl) : null;
 
         elems = pres.getElementsByTagName('show');
         test  = elems.length ? Strophe.getText(elems[0]) : '';
@@ -398,50 +412,44 @@
       return null;
     }
 
-    var _timeout;
+    this._trigger('presence', pres);
 
-    return function(pres) {
-      var self = this;
+    // This makes sure we collect all contacts before rendering etc.
+    clearTimeout(this.presenseTimeout);
 
-      this._trigger('presence', pres);
-
-      // This makes sure we collect all contacts before rendering etc.
-      clearTimeout(_timeout);
-
-      try {
-        var c = parsePresence(pres, self);
-        if ( c ) {
-          if ( this.contacts[c.username] ) {
-            Object.keys(c).forEach(function(k) {
-              if ( !self.contacts[c.username][k] ) {
-                self.contacts[c.username][k] = c[k];
-              }
-            });
-          } else {
-            this.contacts[c.username] = c;
-          }
+    try {
+      var c = parsePresence(pres);
+      if ( c ) {
+        if ( this.contacts[c.username] ) {
+          Object.keys(c).forEach(function(k) {
+            if ( !self.contacts[c.username][k] ) {
+              self.contacts[c.username][k] = c[k];
+            }
+          });
+        } else {
+          this.contacts[c.username] = c;
         }
-      } catch ( e ) {
-        console.warn(e, e.stack);
       }
+    } catch ( e ) {
+      console.warn(e, e.stack);
+    }
 
-      _timeout = setTimeout(function() {
-        self._trigger('contacts', self.contacts);
-      }, 2000);
+    this.presenseTimeout = setTimeout(function() {
+      self._trigger('contacts', self.contacts);
+    }, 2000);
 
-      return true;
-    };
-  })();
+    return true;
+  }
 
-  StropheConnection.prototype._onMessage = function(msg) {
+  _onMessage(msg) {
     var self = this;
 
     try {
       var elems = msg.getElementsByTagName('body');
-      var to    = msg.getAttribute('to') || '';
-      var from  = msg.getAttribute('from') || '';
-      var type  = msg.getAttribute('type') || '';
-      var jid   = from.split('/')[0];
+      //var to = msg.getAttribute('to') || '';
+      var from = msg.getAttribute('from') || '';
+      //var type = msg.getAttribute('type') || '';
+      var jid = from.split('/')[0];
 
       console.log('StropheConnection::_onMessage()', from, jid, msg);
 
@@ -472,33 +480,28 @@
     }
 
     return true;
-  };
+  }
+}
 
+class ApplicationSettingsWindow extends Window {
 
-  /////////////////////////////////////////////////////////////////////////////
-  // SETTINGS WINDOW
-  /////////////////////////////////////////////////////////////////////////////
-
-  function ApplicationSettingsWindow(app, metadata, scheme) {
-    Window.apply(this, ['ApplicationChatSettingsWindow', {
+  constructor(app, metadata) {
+    super('ApplicationChatSettingsWindow', {
       icon: metadata.icon,
       title: metadata.name,
       allow_resize: false,
       allow_maximize: false,
       width: 500,
       height: 300
-    }, app, scheme]);
+    }, app);
   }
 
-  ApplicationSettingsWindow.prototype = Object.create(Window.prototype);
-  ApplicationSettingsWindow.constructor = Window.prototype;
-
-  ApplicationSettingsWindow.prototype.init = function(wmRef, app, scheme) {
-    var root = Window.prototype.init.apply(this, arguments);
+  init(wmRef, app) {
+    var root = super.init(...arguments);
     var self = this;
 
     // Load and set up scheme (GUI) here
-    scheme.render(this, 'SettingsWindow', root);
+    this._render('SettingsWindow', require('osjs-scheme-loader!scheme.html'));
 
     var acc = app._getSetting('account') || {};
     var username = this._find('Username').set('value', acc.username || '');
@@ -520,38 +523,30 @@
     });
 
     return root;
-  };
+  }
+}
 
-  ApplicationSettingsWindow.prototype.destroy = function() {
-    Window.prototype.destroy.apply(this, arguments);
-  };
+class ApplicationConversationWindow extends Window {
 
-  /////////////////////////////////////////////////////////////////////////////
-  // CHAT WINDOW
-  /////////////////////////////////////////////////////////////////////////////
-
-  function ApplicationConversationWindow(id, app, metadata, scheme) {
-    Window.apply(this, ['ApplicationConversationWindow_' + String(id), {
+  constructor(id, app, metadata) {
+    super('ApplicationConversationWindow_' + String(id), {
       tag: 'ApplicationConversationWindow',
       icon: metadata.icon,
       title: metadata.name,
       width: 400,
       height: 400
-    }, app, scheme]);
+    }, app);
 
     this._id = id;
     this._timeout =  null;
   }
 
-  ApplicationConversationWindow.prototype = Object.create(Window.prototype);
-  ApplicationConversationWindow.constructor = Window.prototype;
-
-  ApplicationConversationWindow.prototype.init = function(wmRef, app, scheme) {
-    var root = Window.prototype.init.apply(this, arguments);
+  init(wmRef, app) {
+    var root = super.init(...arguments);
     var self = this;
 
     // Load and set up scheme (GUI) here
-    scheme.render(this, 'ConversationWindow', root);
+    this._render('ConversationWindow', require('osjs-scheme-loader!scheme.html'));
 
     this._find('Input').on('enter', function(ev) {
       var msg = {
@@ -564,12 +559,12 @@
     });
 
     return root;
-  };
+  }
 
-  ApplicationConversationWindow.prototype.message = function(msg, jid, myself) {
+  message(msg, jid, myself) {
     var username = (jid || '').split('/')[0];
     var contact = jid ? this._app.connection.contacts[username] : null;
-    var now = new OSjs.Helpers.Date();
+    var now = new ExtendedDate();
     var text = msg.message;
 
     var root = this._find('Conversation');
@@ -580,7 +575,7 @@
     var vcard = myself ? this._app.connection.vcard : contact.vcard;
     image.width = 32;
     image.height = 32;
-    image.src = getVcardImage(vcard);
+    image.src = getVcardImage(this._app, vcard);
 
     var name = vcard.name || username || jid;
     var stamp = (myself ? 'me' : name) + ' | ' + now.format('isoTime');
@@ -608,9 +603,9 @@
         input.set('value', '');
       }, 10);
     }
-  };
+  }
 
-  ApplicationConversationWindow.prototype.compose = function(cmp, jid) {
+  compose(cmp, jid) {
     var statusbar = this._find('Statusbar');
 
     this._timeout = clearTimeout(this._timeout);
@@ -623,36 +618,32 @@
     } else {
       statusbar.set('value', cmp.jid + ' stopped typing...');
     }
-  };
+  }
 
-  ApplicationConversationWindow.prototype.destroy = function() {
+  destroy() {
     this._timeout = clearTimeout(this._timeout);
 
-    Window.prototype.destroy.apply(this, arguments);
-  };
+    return super.destroy(...arguments);
+  }
+}
 
-  /////////////////////////////////////////////////////////////////////////////
-  // MAIN WINDOW
-  /////////////////////////////////////////////////////////////////////////////
+class ApplicationChatWindow extends Window {
 
-  function ApplicationChatWindow(app, metadata, scheme) {
-    Window.apply(this, ['ApplicationChatWindow', {
+  constructor(app, metadata) {
+    super('ApplicationChatWindow', {
       icon: metadata.icon,
       title: metadata.name + ' v0.1',
       width: 300,
       height: 500
-    }, app, scheme]);
+    }, app);
   }
 
-  ApplicationChatWindow.prototype = Object.create(Window.prototype);
-  ApplicationChatWindow.constructor = Window.prototype;
-
-  ApplicationChatWindow.prototype.init = function(wmRef, app, scheme) {
-    var root = Window.prototype.init.apply(this, arguments);
+  init(wmRef, app) {
+    var root = super.init(...arguments);
     var self = this;
 
     // Load and set up scheme (GUI) here
-    this._render('ChatWindow');
+    this._render('ChatWindow', require('osjs-scheme-loader!scheme.html'));
 
     var statusMenu = this._find('SubmenuStatus');
 
@@ -686,7 +677,7 @@
       },
       StatusExtendedAway: function() {
         self._toggleDisabled(true);
-        API.createDialog('Input', {message: 'Away message'}, function(ev, button, result) {
+        Dialog.create('Input', {message: 'Away message'}, function(ev, button, result) {
           self._toggleDisabled(false);
           if ( button === 'ok' && result ) {
             app.connection.setStatus('xa', result);
@@ -725,7 +716,7 @@
         }
 
         entries.push({
-          icon: API.getIcon(iconMap[iter.state]),
+          icon: Theme.getIcon(iconMap[iter.state]),
           label: getDisplayName(iter),
           value: iter
         });
@@ -794,17 +785,17 @@
 
     app.connection.on('status', function(s) {
       var map = {
-        'online' : 'Online',
-        'chat'   : 'Online',
-        'away'   : 'Away',
-        'busy'   : 'Busy',
-        'xa'     : 'ExtendedAway'
+        'online': 'Online',
+        'chat': 'Online',
+        'away': 'Away',
+        'busy': 'Busy',
+        'xa': 'ExtendedAway'
       };
 
       statusMenu.set('checked', 'Status' + map[s], true);
 
       if ( app.notification ) {
-        app.notification.setImage(API.getIcon(iconMap[s]));
+        app.notification.setImage(Theme.getIcon(iconMap[s]));
       }
     });
 
@@ -816,39 +807,27 @@
     setConnected(false);
 
     return root;
-  };
+  }
 
-  ApplicationChatWindow.prototype._close = function(doit) {
+  _close(doit) {
     if ( !doit ) {
       this._minimize();
       return false;
     }
-    Window.prototype._close.apply(this, arguments);
-  };
+    return super._close(...arguments);
+  }
+}
 
-  ApplicationChatWindow.prototype.destroy = function() {
-    Window.prototype.destroy.apply(this, arguments);
-  };
-
-  /////////////////////////////////////////////////////////////////////////////
-  // APPLICATION
-  /////////////////////////////////////////////////////////////////////////////
-
-  function ApplicationChat(args, metadata) {
-    Application.apply(this, ['ApplicationChat', args, metadata]);
+class ApplicationChat extends Application {
+  constructor(args, metadata) {
+    super('ApplicationChat', args, metadata);
 
     this.notification = null;
     this.connection = new StropheConnection(this);
   }
 
-  ApplicationChat.prototype = Object.create(Application.prototype);
-  ApplicationChat.constructor = Application;
-
-  ApplicationChat.prototype.destroy = function() {
-    var wm = OSjs.Core.getWindowManager();
-    if ( wm ) {
-      wm.removeNotificationIcon('ApplicationChatNotificationIcon');
-    }
+  destroy() {
+    Notification.destroyIcon('ApplicationChatNotificationIcon');
 
     if ( this.connection ) {
       this.connection.destroy();
@@ -861,11 +840,11 @@
     this.notification = null;
     this.connection = null;
 
-    return Application.prototype.destroy.apply(this, arguments);
-  };
+    return super.destroy(...arguments);
+  }
 
-  ApplicationChat.prototype.init = function(settings, metadata, scheme) {
-    Application.prototype.init.apply(this, arguments);
+  init(settings, metadata) {
+    super.init(...arguments);
 
     var self = this;
     var mainWindow = null;
@@ -876,8 +855,8 @@
         var message = (msg.message || '').substr(0, 100);
         self.openChatWindow(username, function(w) {
           if ( !w._state.focused ) {
-            API.createNotification({
-              icon: API.getIcon('status/user-available.png'),
+            Notification.create({
+              icon: Theme.getIcon('status/user-available.png'),
               title: username,
               message: message,
               onClick: function() {
@@ -905,29 +884,26 @@
       }
     });
 
-    var wm = OSjs.Core.getWindowManager();
-    if ( wm ) {
-      this.notification = wm.createNotificationIcon('ApplicationChatNotificationIcon', {
-        image: API.getIcon('status/user-invisible.png'),
-        className: 'ApplicationChatNotificationIcon',
-        tooltip: '',
-        onDestroy: function() {
-          self.notification = null;
-        },
-        onClick: function(ev) {
-          if ( mainWindow ) {
-            mainWindow._restore();
-          }
-        },
-        onContextMenu: function(ev) {
-          if ( mainWindow ) {
-            mainWindow._restore();
-          }
+    this.notification = Notification.createIcon('ApplicationChatNotificationIcon', {
+      image: Theme.getIcon('status/user-invisible.png'),
+      className: 'ApplicationChatNotificationIcon',
+      tooltip: '',
+      onDestroy: function() {
+        self.notification = null;
+      },
+      onClick: function(ev) {
+        if ( mainWindow ) {
+          mainWindow._restore();
         }
-      });
-    }
+      },
+      onContextMenu: function(ev) {
+        if ( mainWindow ) {
+          mainWindow._restore();
+        }
+      }
+    });
 
-    mainWindow = this._addWindow(new ApplicationChatWindow(this, metadata, scheme));
+    mainWindow = this._addWindow(new ApplicationChatWindow(this, metadata));
 
     var acc = this._getSetting('account') || {};
     if ( acc.username && acc.password ) {
@@ -935,15 +911,14 @@
     } else {
       this.openSettingsWindow();
     }
-  };
+  }
 
-  ApplicationChat.prototype.openChatWindow = function(id, cb, check) {
+  openChatWindow(id, cb, check) {
     cb = cb || function() {};
 
-    var self = this;
     var win = this._getWindowByName('ApplicationConversationWindow_' + String(id));
     if ( !win && !check ) {
-      win = this._addWindow(new ApplicationConversationWindow(id, this, this.__metadata, this.__scheme));
+      win = this._addWindow(new ApplicationConversationWindow(id, this, this.__metadata));
     }
 
     this.connection.vcard(id, function(vc) {
@@ -952,24 +927,20 @@
       }
       cb(win);
     });
-  };
+  }
 
-  ApplicationChat.prototype.openSettingsWindow = function() {
+  openSettingsWindow() {
     var win = this._getWindowByName('ApplicationChatSettingsWindow');
     if ( win ) {
       win._restore();
     } else {
-      win = this._addWindow(new ApplicationSettingsWindow(this, this.__metadata, this.__scheme));
+      win = this._addWindow(new ApplicationSettingsWindow(this, this.__metadata));
     }
+  }
+}
 
-  };
+/////////////////////////////////////////////////////////////////////////////
+// EXPORTS
+/////////////////////////////////////////////////////////////////////////////
 
-  /////////////////////////////////////////////////////////////////////////////
-  // EXPORTS
-  /////////////////////////////////////////////////////////////////////////////
-
-  OSjs.Applications = OSjs.Applications || {};
-  OSjs.Applications.ApplicationChat = OSjs.Applications.ApplicationChat || {};
-  OSjs.Applications.ApplicationChat.Class = ApplicationChat;
-
-})(OSjs.Core.Application, OSjs.Core.Window, OSjs.Utils, OSjs.API, OSjs.VFS, OSjs.GUI);
+OSjs.Applications.ApplicationChat = ApplicationChat;

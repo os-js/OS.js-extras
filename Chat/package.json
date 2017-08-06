@@ -1,0 +1,7 @@
+{
+  "name": "osjs-chat",
+  "dependencies": {
+    "strophe.js": "^1.2.14",
+    "webpack": "^3.4.1"
+  }
+}

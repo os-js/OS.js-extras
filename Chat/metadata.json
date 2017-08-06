@@ -9,17 +9,10 @@
   "splash":     true,
   "build":      {
     "copy": [
-      "metadata.json",
-      "scheme.html",
-      "user.png",
-      "main.css",
-      "main.js",
-      "vendor/strophejs/strophe.js"
+      "user.png"
     ]
   },
   "preload":    [
-    {"src": "vendor/strophejs/strophe.js", "type": "javascript"},
-    {"src": "scheme.html", "type": "scheme"},
     {"src": "main.js", "type": "javascript"},
     {"src": "main.css", "type": "stylesheet"}
   ]

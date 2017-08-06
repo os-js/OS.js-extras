@@ -1,9 +1,3 @@
-[submodule "Chat/vendor/punjab"]
-	path = Chat/vendor/punjab
-	url = https://github.com/twonds/punjab.git
-[submodule "Chat/vendor/strophejs"]
-	path = Chat/vendor/strophejs
-	url = https://github.com/strophe/strophejs.git
 [submodule "VNC/vendor/noVNC"]
 	path = VNC/vendor/noVNC
 	url = https://github.com/kanaka/noVNC.git
