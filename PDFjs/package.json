@@ -1,0 +1,7 @@
+{
+  "name": "osjs-pdfjs",
+  "dependencies": {
+    "pdfjs-dist": "^1.8.609",
+    "webpack": "^3.4.1"
+  }
+}

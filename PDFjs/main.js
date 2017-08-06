@@ -27,23 +27,25 @@
  * @author  Anders Evenrud <andersevenrud@gmail.com>
  * @licence Simplified BSD License
  */
-(function(DefaultApplication, DefaultApplicationWindow, Application, Window, Utils, API, VFS, GUI) {
+import {PDFJS} from 'pdfjs-dist';
+const DOM = OSjs.require('utils/dom');
+const Utils = OSjs.require('utils/misc');
+const DefaultApplication = OSjs.require('helpers/default-application');
+const DefaultApplicationWindow = OSjs.require('helpers/default-application-window');
 
-  /////////////////////////////////////////////////////////////////////////////
-  // WINDOWS
-  /////////////////////////////////////////////////////////////////////////////
+class ApplicationPDFjsWindow extends DefaultApplicationWindow {
 
   /**
    * Main Window Constructor
    */
-  function ApplicationPDFjsWindow(app, metadata, scheme, file) {
-    DefaultApplicationWindow.apply(this, ['ApplicationPDFjsWindow', {
+  constructor(app, metadata, file) {
+    super('ApplicationPDFjsWindow', {
       allow_drop: true,
       icon: metadata.icon,
       title: metadata.name,
       width: 500,
       height: 400
-    }, app, scheme, file]);
+    }, app, file);
 
     this.pageCount = 0;
     this.pageIndex = 0;
@@ -51,15 +53,12 @@
     this.currentScale = 1.5;
   }
 
-  ApplicationPDFjsWindow.prototype = Object.create(DefaultApplicationWindow.prototype);
-  ApplicationPDFjsWindow.constructor = DefaultApplicationWindow.prototype;
-
-  ApplicationPDFjsWindow.prototype.init = function(wmRef, app, scheme) {
-    var root = DefaultApplicationWindow.prototype.init.apply(this, arguments);
+  init(wmRef, app) {
+    var root = super.init(...arguments);
     var self = this;
 
     // Load and set up scheme (GUI) here
-    scheme.render(this, 'PDFWindow', root);
+    this._render('PDFWindow', require('osjs-scheme-loader!scheme.html'));
 
     this._find('Prev').on('click', function() {
       self.prevPage();
@@ -75,17 +74,17 @@
     });
 
     return root;
-  };
+  }
 
-  ApplicationPDFjsWindow.prototype.destroy = function() {
-    DefaultApplicationWindow.prototype.destroy.apply(this, arguments);
+  destroy() {
     this.pdf = null;
-  };
+    return super.destroy(...arguments);
+  }
 
-  ApplicationPDFjsWindow.prototype.open = function(file, url) {
-  };
+  open(file, url) {
+  }
 
-  ApplicationPDFjsWindow.prototype.page = function(pageNum) {
+  page(pageNum) {
     var self = this;
 
     if ( this.pageCount <= 0 || pageNum <= 0 || pageNum > this.pageCount ) {
@@ -93,11 +92,11 @@
     }
 
     var container = this._find('Content').$element;
-    Utils.$empty(container);
+    DOM.$empty(container);
 
     this.pageIndex = pageNum;
 
-    var statustext = Utils.format('Page {0}/{1} - {2}%', this.pageIndex, this.pageCount, this.currentScale*100);
+    var statustext = Utils.format('Page {0}/{1} - {2}%', this.pageIndex, this.pageCount, this.currentScale * 100);
     this._find('Statusbar').set('value', statustext);
 
     this.pdf.getPage(this.pageIndex).then(function getPageHelloWorld(page) {
@@ -116,33 +115,33 @@
       };
       page.render(renderContext);
     });
-  };
+  }
 
-  ApplicationPDFjsWindow.prototype.prevPage = function() {
-    this.page(this.pageIndex-1);
-  };
+  prevPage() {
+    this.page(this.pageIndex - 1);
+  }
 
-  ApplicationPDFjsWindow.prototype.nextPage = function() {
-    this.page(this.pageIndex+1);
-  };
+  nextPage() {
+    this.page(this.pageIndex + 1);
+  }
 
-  ApplicationPDFjsWindow.prototype.zoomIn = function() {
+  zoomIn() {
     this.currentScale += 0.5;
     this.page(this.pageIndex);
-  };
+  }
 
-  ApplicationPDFjsWindow.prototype.zoomOut = function() {
+  zoomOut() {
     if ( this.currentScale > 0.5 ) {
       this.currentScale -= 0.5;
     }
     this.page(this.pageIndex);
-  };
+  }
 
-  ApplicationPDFjsWindow.prototype.showFile = function(file, result) {
+  showFile(file, result) {
     var self = this;
     var container = this._find('Content').$element;
 
-    Utils.$empty(container);
+    DOM.$empty(container);
 
     this.pageCount = 0;
     this.pageIndex = 0;
@@ -153,38 +152,25 @@
       self.page(1);
     });
 
-    DefaultApplicationWindow.prototype.showFile.apply(this, arguments);
-  };
+    return super.showFile(...arguments);
+  }
+}
 
-  /////////////////////////////////////////////////////////////////////////////
-  // APPLICATION
-  /////////////////////////////////////////////////////////////////////////////
-
-  function ApplicationPDFjs(args, metadata) {
-    DefaultApplication.apply(this, ['ApplicationPDFjs', args, metadata, {
+class ApplicationPDFjs extends DefaultApplication {
+  constructor(args, metadata) {
+    super('ApplicationPDFjs', args, metadata, {
       readData: false
-    }]);
+    });
 
-    window.PDFJS = window.PDFJS || {};
-    var src = API.getApplicationResource(this, 'vendor/pdf.js/src/worker_loader.js');
-    PDFJS.workerSrc = src;
+    PDFJS.workerSrc = this._getResource('pdf.worker.js');
   }
 
-  ApplicationPDFjs.prototype = Object.create(DefaultApplication.prototype);
-  ApplicationPDFjs.constructor = DefaultApplication;
-
-  ApplicationPDFjs.prototype.init = function(settings, metadata, scheme) {
-    DefaultApplication.prototype.init.call(this, settings, metadata, scheme);
+  init(settings, metadata) {
+    super.init(...arguments);
     var file = this._getArgument('file');
-    this._addWindow(new ApplicationPDFjsWindow(this, metadata, scheme, file));
-  };
+    this._addWindow(new ApplicationPDFjsWindow(this, metadata, file));
+  }
+}
 
-  /////////////////////////////////////////////////////////////////////////////
-  // EXPORTS
-  /////////////////////////////////////////////////////////////////////////////
+OSjs.Applications.ApplicationPDFjs = ApplicationPDFjs;
 
-  OSjs.Applications = OSjs.Applications || {};
-  OSjs.Applications.ApplicationPDFjs = OSjs.Applications.ApplicationPDFjs || {};
-  OSjs.Applications.ApplicationPDFjs.Class = ApplicationPDFjs;
-
-})(OSjs.Helpers.DefaultApplication, OSjs.Helpers.DefaultApplicationWindow, OSjs.Core.Application, OSjs.Core.Window, OSjs.Utils, OSjs.API, OSjs.VFS, OSjs.GUI);
