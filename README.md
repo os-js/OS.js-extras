@@ -2,8 +2,6 @@
 
 This repository contains Extra packages for [OS.js](https://github.com/os-js/OS.js).
 
-Follow [the official instructions](https://os-js.org/doc/manuals/man-package-manager.html) on how to add this repository.
-
 [![Gitter](https://img.shields.io/gitter/room/nwjs/nw.js.svg)](https://gitter.im/os-js/OS.js?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge)
 [![Tips](https://img.shields.io/gratipay/os-js.svg)](https://gratipay.com/os-js/)
 [![Donate](https://img.shields.io/badge/paypal-donate-yellow.svg)](https://www.paypal.com/cgi-bin/webscr?cmd=_donations&business=andersevenrud%40gmail%2ecom&lc=NO&currency_code=USD&bn=PP%2dDonationsBF%3abtn_donate_SM%2egif%3aNonHosted)
@@ -12,14 +10,6 @@ Follow [the official instructions](https://os-js.org/doc/manuals/man-package-man
 ```
 ./bin/add-package-repo.sh extras https://github.com/os-js/OS.js-extras.git
 ```
-
-## Archiver
-
-ZIP Archive manipulation with zip.js
-
-![ScreenShot](https://raw.githubusercontent.com/os-js/OS.js-extras/master/doc/archiver.png)
-
-How to set up zip support: https://os-js.org/doc/manuals/man-zip.html
 
 ## Terminal
 
@@ -37,7 +27,7 @@ Google Mail and Contacts clients
 
 *Will be moved to OS.js master branch when done*
 
-How to set up: https://os-js.org/doc/manuals/man-google-api.html
+You need to add your Google Client API ID. For more information look at [this article](https://manual.os-js.org/configuration/vfs) (Guide says VFS, but it relates to this as well).
 
 ## PDFjs
 
