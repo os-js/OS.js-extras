@@ -1,6 +1,6 @@
 # OS.js Extra Packages
 
-This repository contains Extra packages for [OS.js](https://github.com/os-js/OS.js).
+This repository contains *some* Extra packages for [OS.js](https://github.com/os-js/OS.js).
 
 [![Gitter](https://img.shields.io/gitter/room/nwjs/nw.js.svg)](https://gitter.im/os-js/OS.js?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge)
 [![Tips](https://img.shields.io/gratipay/os-js.svg)](https://gratipay.com/os-js/)
@@ -10,14 +10,6 @@ This repository contains Extra packages for [OS.js](https://github.com/os-js/OS.
 ```
 ./bin/add-package-repo.sh extras https://github.com/os-js/OS.js-extras.git
 ```
-
-## Terminal
-
-A Terminal Emulator with SSH support.
-
-![ScreenShot](https://raw.githubusercontent.com/os-js/OS.js-extras/master/doc/terminal.png)
-
-How to set up: https://github.com/os-js/OS.js-extras/blob/master/Terminal/README.md
 
 ## GoogleMail and GoogleContacts
 
