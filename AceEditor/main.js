@@ -33,8 +33,6 @@ const DefaultApplication = OSjs.require('helpers/default-application');
 const DefaultApplicationWindow = OSjs.require('helpers/default-application-window');
 const Utils = OSjs.require('utils/misc');
 
-var globalCounter = 0;
-
 class ApplicationAceEditorWindow extends DefaultApplicationWindow {
   constructor(app, metadata, file) {
     super('ApplicationAceEditorWindow', {
@@ -65,6 +63,10 @@ class ApplicationAceEditorWindow extends DefaultApplicationWindow {
   }
 
   init(wmRef, app) {
+    if ( typeof window.__aceEditorCount === 'undefined' ) {
+      window.__aceEditorCount = 0;
+    }
+
     const root = super.init(...arguments);
 
     // Load and set up scheme (GUI) here
@@ -73,7 +75,7 @@ class ApplicationAceEditorWindow extends DefaultApplicationWindow {
     var editor;
     var statusbar = this._find('Statusbar');
     var container = this._find('AceContainer').$element;
-    var id = 'AceEditor' + globalCounter.toString();
+    var id = 'AceEditor' + window.__aceEditorCount.toString();
 
     container.id = id;
 
@@ -92,7 +94,7 @@ class ApplicationAceEditorWindow extends DefaultApplicationWindow {
     });
     updateStatusbar();
 
-    globalCounter++;
+    window.__aceEditorCount++;
 
     return root;
   }
